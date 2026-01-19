@@ -23,6 +23,7 @@ export class ContentService {
 
   async findAll(slug: string, query: any = {}) {
     const model = this.getModel(slug);
+    const config = this.discovery.getCollection(slug); // Get config for hooks
     
     // Simple pagination logic
     const page = Number(query.page) || 1;
@@ -30,10 +31,19 @@ export class ContentService {
     const skip = (page - 1) * limit;
 
     const [docs, total] = await Promise.all([
-      model.find().limit(limit).skip(skip).exec(),
+      model.find().limit(limit).skip(skip).lean().exec(),
       model.countDocuments().exec()
     ]);
 
+    if (config?.hooks?.afterRead) {
+      // Run hook for every document in parallel
+      const processedDocs = await Promise.all(
+        docs.map(doc => config.hooks!.afterRead!({ doc }))
+      );
+      return { docs: processedDocs, totalDocs: total, page, totalPages: Math.ceil(total / limit) };
+    }
+
+    // EXECUTE HOOK: afterRead
     return {
       docs,
       totalDocs: total,
@@ -44,24 +54,45 @@ export class ContentService {
 
   async findOne(slug: string, id: string) {
     const model = this.getModel(slug);
+    const config = this.discovery.getCollection(slug); // Get config for hooks
+
     const doc = await model.findById(id).exec();
+    
+    if(config?.hooks?.afterRead) {
+      return config.hooks.afterRead({ doc });
+    }
+    
     if (!doc) throw new NotFoundException();
     return doc;
   }
 
   async create(slug: string, data: any) {
     const model = this.getModel(slug);
+    const config = this.discovery.getCollection(slug); // Get config for hooks
+
     // Sanitize before creating
-    const cleanData = this.removeEmptyStrings(data);
+    let cleanData = this.removeEmptyStrings(data);
     
+    // EXECUTE HOOK: beforeChange
+    if (config?.hooks?.beforeChange) {
+      cleanData = await config.hooks.beforeChange({ data: cleanData, operation: 'create' });
+    }
+
     const created = new model(cleanData);
     return created.save();
   }
 
   async update(slug: string, id: string, data: any) {
     const model = this.getModel(slug);
+    const config = this.discovery.getCollection(slug); // Get config for hooks
+
     // Sanitize before updating
-    const cleanData = this.removeEmptyStrings(data);
+    let cleanData = this.removeEmptyStrings(data);
+    
+    // EXECUTE HOOK: beforeChange
+    if (config?.hooks?.beforeChange) {
+      cleanData = await config.hooks.beforeChange({ data: cleanData, operation: 'update' });
+    }
 
     const updated = await model.findByIdAndUpdate(id, cleanData, { new: true }).exec();
     if (!updated) throw new NotFoundException();

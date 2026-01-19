@@ -5,6 +5,10 @@ import { MongooseSchemaFactory } from './schema/mongoose-schema.factory';
 import { ContentService } from './services/content.service';
 import { ConfigController } from './api/config.controller';
 import { ContentController } from './api/content.controller';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthService } from './auth/auth.service';
+import { AuthController } from './auth/auth.controller';
+import { JwtStrategy } from './auth/jwt.strategy';
 
 export interface VertexCoreOptions {
   mongoUri: string;
@@ -13,14 +17,23 @@ export interface VertexCoreOptions {
 
 @Global() // Make it global so we don't have to import it everywhere
 @Module({
+    imports: [
+      JwtModule.register({
+        secret: process.env.JWT_SECRET,
+        signOptions: { expiresIn: '1d' },
+      }),
+    ],
     providers: [
         SchemaDiscoveryService,
         MongooseSchemaFactory,
         ContentService,
+        AuthService,
+        JwtStrategy,
     ],
     controllers: [
         ConfigController,
-        ContentController
+        ContentController,
+        AuthController
     ],
     exports: [
         SchemaDiscoveryService

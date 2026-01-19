@@ -1,5 +1,13 @@
 import { FieldType } from '../constants/field-types';
 
+export interface CollectionHooks {
+  // Runs before data is saved to DB. Useful for hashing passwords or validation.
+  beforeChange?: (args: { data: any; operation: 'create' | 'update' }) => Promise<any> | any;
+  
+  // Runs after data is fetched. Useful for sanitizing (removing passwords).
+  afterRead?: (args: { doc: any }) => Promise<any> | any;
+}
+
 /**
  * Options passed to the @Field() decorator
  */
@@ -33,6 +41,7 @@ export interface CollectionOptions {
   singularName?: string;
   pluralName?: string;
   timestamps?: boolean; // auto-add createdAt/updatedAt
+  hooks?: CollectionHooks;
   
   // Access Control (Simple RBAC for now)
   access?: {
