@@ -13,7 +13,7 @@ import { map, switchMap } from 'rxjs/operators';
     <div class="bg-white rounded-lg shadow p-6">
       <header class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold capitalize">{{ currentSlug() }}</h1>
-        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        <button [routerLink]="['./create']" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
           Create New
         </button>
       </header>
@@ -34,7 +34,7 @@ import { map, switchMap } from 'rxjs/operators';
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           @for (doc of data()?.docs; track doc._id) {
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-gray-50" [routerLink]="['./', doc._id]">
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
                 {{ doc._id | slice:0:6 }}...
               </td>

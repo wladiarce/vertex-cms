@@ -36,8 +36,16 @@ export class VertexClientService {
     });
   }
 
+  findOne(slug: string, id: string) {
+    return this.http.get<any>(`${this.apiUrl}/content/${slug}/${id}`);
+  }
+
   create(slug: string, data: any) {
     return this.http.post(`${this.apiUrl}/content/${slug}`, data);
+  }
+
+  update(slug: string, id: string, data: any) {
+    return this.http.patch(`${this.apiUrl}/content/${slug}/${id}`, data);
   }
 
   delete(slug: string, id: string) {

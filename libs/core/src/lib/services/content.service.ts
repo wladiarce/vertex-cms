@@ -51,13 +51,19 @@ export class ContentService {
 
   async create(slug: string, data: any) {
     const model = this.getModel(slug);
-    const created = new model(data);
+    // Sanitize before creating
+    const cleanData = this.removeEmptyStrings(data);
+    
+    const created = new model(cleanData);
     return created.save();
   }
 
   async update(slug: string, id: string, data: any) {
     const model = this.getModel(slug);
-    const updated = await model.findByIdAndUpdate(id, data, { new: true }).exec();
+    // Sanitize before updating
+    const cleanData = this.removeEmptyStrings(data);
+
+    const updated = await model.findByIdAndUpdate(id, cleanData, { new: true }).exec();
     if (!updated) throw new NotFoundException();
     return updated;
   }
@@ -67,5 +73,15 @@ export class ContentService {
     const deleted = await model.findByIdAndDelete(id).exec();
     if (!deleted) throw new NotFoundException();
     return { id: deleted._id, status: 'deleted' };
+  }
+
+  private removeEmptyStrings(data: any) {
+    const output = { ...data };
+    Object.keys(output).forEach(key => {
+      if (output[key] === '') {
+        delete output[key];
+      }
+    });
+    return output;
   }
 }

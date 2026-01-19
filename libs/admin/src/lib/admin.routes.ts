@@ -3,6 +3,7 @@ import { AdminLayoutComponent } from './components/layout/admin-layout.component
 import { CollectionListComponent } from './pages/collection-list/collection-list.component';
 import { inject } from '@angular/core';
 import { VertexClientService } from './services/vertex-client.service';
+import { CollectionEditComponent } from './pages/collection-edit/collection-edit.component';
 
 export const adminRoutes: Route[] = [
   {
@@ -26,6 +27,16 @@ export const adminRoutes: Route[] = [
         // The Magic Dynamic Route
         path: 'collections/:slug',
         component: CollectionListComponent
+      },
+      {
+        // The Magic Dynamic Route
+        path: 'collections/:slug/create',
+        component: CollectionEditComponent
+      },
+      {
+        // The Magic Dynamic Route
+        path: 'collections/:slug/:id',
+        component: CollectionEditComponent
       }
     ]
   }
