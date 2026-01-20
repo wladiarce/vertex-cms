@@ -5,7 +5,13 @@ import { TextBlock } from '../blocks/text.block';
 @Collection({
   slug: 'pages',
   singularName: 'Page',
-  timestamps: true
+  timestamps: true,
+  access: {
+    read: ['public'],
+    create: ['admin'],
+    update: ['admin'],
+    delete: ['admin']
+  }
 })
 export class Page {
   @Field({ type: FieldType.Text, required: true })

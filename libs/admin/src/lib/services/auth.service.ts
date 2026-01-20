@@ -1,16 +1,18 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, map, tap } from 'rxjs/operators';
 import { lastValueFrom, Observable, of } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
   
   // Track login state reactively
-  isAuthenticated = signal<boolean>(false); // TODO: check if token is valid
+  isAuthenticated = signal<boolean>(isPlatformBrowser(this.platformId) ? this.hasToken() : false);
 
   private get apiUrl() { return '/api/vertex/auth'; }
 
@@ -27,7 +29,7 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem('vertex_token');
+    if(isPlatformBrowser(this.platformId)) localStorage.removeItem('vertex_token');
     this.isAuthenticated.set(false);
     this.router.navigate(['/admin/login']);
   }
@@ -74,15 +76,15 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('vertex_token');
+    return isPlatformBrowser(this.platformId) ? localStorage.getItem('vertex_token') : null;
   }
 
   private setToken(token: string) {
-    localStorage.setItem('vertex_token', token);
+    if(isPlatformBrowser(this.platformId)) localStorage.setItem('vertex_token', token);
   }
 
   private hasToken(): boolean {
-    return !!localStorage.getItem('vertex_token');
+    return isPlatformBrowser(this.platformId) ? !!localStorage.getItem('vertex_token') : false;
   }
 }
 

@@ -1,30 +1,47 @@
-import { ApplicationConfig, inject, provideAppInitializer } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  provideAppInitializer,
+} from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withFetch,
+  withInterceptors,
+} from '@angular/common/http';
 import { adminRoutes, authInterceptor } from '@vertex/admin';
-import { AuthService, initializeAuth } from 'libs/admin/src/lib/services/auth.service';
+import {
+  AuthService,
+  initializeAuth,
+} from 'libs/admin/src/lib/services/auth.service';
 import { VertexRegistryService } from '@vertex/public';
 
 import { HeroComponent } from './components/hero/hero.component';
 import { TextComponent } from './components/text/text.component';
 import { PublicPageComponent } from './pages/public-page/public-page.component';
+import {
+  provideClientHydration,
+  withEventReplay,
+} from '@angular/platform-browser';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(
-      withFetch(),
-      withInterceptors([authInterceptor])
+    provideClientHydration(withEventReplay()),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    provideRouter(
+      [
+        {
+          path: 'admin',
+          children: adminRoutes, // loads @vertex/admin library
+        },
+        {
+          // Catch-All for public pages
+          path: '**',
+          component: PublicPageComponent,
+        },
+      ],
+      withComponentInputBinding(),
     ),
-    provideRouter([
-      {
-        path: 'admin',
-        children: adminRoutes // loads @vertex/admin library
-      },
-      {
-        // Catch-All for public pages
-        path: '**', component: PublicPageComponent
-      }
-    ], withComponentInputBinding()),
     provideAppInitializer(() => {
       const authService = inject(AuthService);
       return initializeAuth(authService);
@@ -34,6 +51,6 @@ export const appConfig: ApplicationConfig = {
       registryService.register('hero', HeroComponent);
       registryService.register('text-simple', TextComponent);
       return;
-    })
+    }),
   ],
 };

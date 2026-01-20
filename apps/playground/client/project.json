@@ -23,7 +23,12 @@
         "styles": [
           "apps/playground/client/src/styles.scss",
           "node_modules/tailwindcss/index.css"
-        ]
+        ],
+        "server": "apps/playground/client/src/main.server.ts",
+        "ssr": {
+          "entry": "apps/playground/client/src/server.ts"
+        },
+        "outputMode": "server"
       },
       "configurations": {
         "production": {

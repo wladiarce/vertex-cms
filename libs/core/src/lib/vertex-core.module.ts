@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth/auth.service';
 import { AuthController } from './auth/auth.controller';
 import { JwtStrategy } from './auth/jwt.strategy';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
 export interface VertexCoreOptions {
   mongoUri: string;
@@ -29,6 +30,7 @@ export interface VertexCoreOptions {
         ContentService,
         AuthService,
         JwtStrategy,
+        JwtAuthGuard
     ],
     controllers: [
         ConfigController,
