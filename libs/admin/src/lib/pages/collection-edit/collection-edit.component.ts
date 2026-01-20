@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { VertexClientService } from '../../services/vertex-client.service';
 import { FieldRendererComponent } from '../../components/form/field-renderer.component';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { BlockMetadata } from '@vertex/common';
 
 @Component({
   selector: 'vertex-collection-edit',
@@ -81,11 +82,18 @@ export class CollectionEditComponent {
     const group: any = {};
     
     col.fields.forEach(field => {
-      const validators = [];
-      if (field.required) validators.push(Validators.required);
-      // Add more validators here later (min, max, email pattern)
-      
-      group[field.name] = [field.defaultValue || '', validators];
+      if (field.type === 'blocks') {
+        // Initialize as an empty array. 
+        // The BlocksFieldComponent's ngOnInit will handle population 
+        // when the data arrives via patchValue/input binding.
+        group[field.name] = this.fb.array([]);
+      } else {
+        const validators = [];
+        if (field.required) validators.push(Validators.required);
+        // Add more validators here later (min, max, email pattern)
+        
+        group[field.name] = [field.defaultValue || '', validators];
+      }
     });
 
     this.form = this.fb.group(group);
@@ -95,10 +103,45 @@ export class CollectionEditComponent {
     this.loading.set(true);
     this.cms.findOne(this.slug(), this.id()!).subscribe({
       next: (data) => {
+        // 1. We must manually reconstruct FormArrays before patching!
+        // Because standard patchValue won't create the controls for us.
+        this.rebuildFormArrays(data);
+        
+        // 2. Now patch
         this.form.patchValue(data);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
+    });
+  }
+
+  private rebuildFormArrays(data: any) {
+    const col = this.collection();
+    if (!col) return;
+
+    col.fields.forEach(field => {
+      if (field.type === 'blocks' && Array.isArray(data[field.name])) {
+        // We found a block field with data!
+        const formArray = this.form.get(field.name) as any; // Cast to FormArray
+        formArray.clear(); // Clear initial empty state
+
+        // For each item in data, push a new FormGroup
+        data[field.name].forEach((item: any) => {
+          // Find the block definition to know its fields
+          const blockMeta = (field.blocks as BlockMetadata[])?.find(b=> {return b.slug === item.blockType});
+          if (blockMeta) {
+             // Create the group (We duplicate the logic from BlocksFieldComponent here? 
+             // Ideally we shouldn't duplicate logic.
+             // But for now, let's keep it simple: Just push a group with the right controls)
+             
+             const group: any = { blockType: [item.blockType] };
+             blockMeta.fields.forEach(f => {
+               group[f.name] = ['']; // We don't need value here, patchValue will fill it
+             });
+             formArray.push(this.fb.group(group));
+          }
+        });
+      }
     });
   }
 

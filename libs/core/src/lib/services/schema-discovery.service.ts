@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
-import { COLLECTION_METADATA_KEY, CollectionMetadata, FIELD_METADATA_KEY } from '@vertex/common';
+import { COLLECTION_METADATA_KEY, CollectionMetadata, FIELD_METADATA_KEY, BLOCK_METADATA_KEY, BlockMetadata } from '@vertex/common';
 import { MongooseSchemaFactory } from '../schema/mongoose-schema.factory';
 
 @Injectable()
@@ -29,11 +29,22 @@ export class SchemaDiscoveryService implements OnModuleInit {
         continue;
       }
 
+      // Process fields to resolve Block Classes into JSON Metadata
+      const processedFields = fields.map((field: any) => {
+        if (field.type === 'blocks' && Array.isArray(field.blocks)) {
+          return {
+            ...field,
+            blocks: field.blocks.map((blockClass: Function) => this.extractBlockMetadata(blockClass))
+          };
+        }
+        return field;
+      });
+
       // 2. Combine them into a full definition
       const fullMeta: CollectionMetadata = {
         ...collectionMeta,
         name: entity.name,
-        fields: fields
+        fields: processedFields
       };
 
       // 3. Store for internal use (API generation)
@@ -57,6 +68,32 @@ export class SchemaDiscoveryService implements OnModuleInit {
 
   getAllCollections(): CollectionMetadata[] {
     return Array.from(this.collections.values());
+  }
+
+  /**
+   * Helper to extract metadata from a Block Class
+   */
+  private extractBlockMetadata(blockClass: Function): BlockMetadata {
+    const blockOptions = Reflect.getMetadata(BLOCK_METADATA_KEY, blockClass);
+    const fields = Reflect.getMetadata(FIELD_METADATA_KEY, blockClass) || [];
+
+    if (!blockOptions) {
+      throw new Error(`Class ${blockClass.name} is missing @Block decorator`);
+    }
+
+    return {
+      slug: blockOptions.slug,
+      label: blockOptions.label || blockOptions.slug,
+      fields: fields.map((f: any) => {
+        // Recursive: If a block contains other blocks, we'd process them here.
+        // For now, let's keep it 1-level deep for simplicity.
+        if (f.type === 'blocks' && f.blocks) {
+           // We need to resolve the classes to metadata for the API
+           f.blocks = f.blocks.map((b: Function) => this.extractBlockMetadata(b));
+        }
+        return f;
+      })
+    };
   }
 
   // Not used yet, but required by OnModuleInit interface

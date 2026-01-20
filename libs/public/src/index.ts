@@ -1,1 +1,2 @@
-export * from './lib/public/public';
+export * from './lib/components/block-renderer/block-renderer.component';
+export * from './lib/services/vertex-registry.service';

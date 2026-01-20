@@ -3,6 +3,11 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { adminRoutes, authInterceptor } from '@vertex/admin';
 import { AuthService, initializeAuth } from 'libs/admin/src/lib/services/auth.service';
+import { VertexRegistryService } from '@vertex/public';
+
+import { HeroComponent } from './components/hero/hero.component';
+import { TextComponent } from './components/text/text.component';
+import { PublicPageComponent } from './pages/public-page/public-page.component';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,14 +21,19 @@ export const appConfig: ApplicationConfig = {
         children: adminRoutes // loads @vertex/admin library
       },
       {
-        path: '',
-        redirectTo: 'admin',
-        pathMatch: 'full'
+        // Catch-All for public pages
+        path: '**', component: PublicPageComponent
       }
     ], withComponentInputBinding()),
     provideAppInitializer(() => {
       const authService = inject(AuthService);
       return initializeAuth(authService);
+    }),
+    provideAppInitializer(() => {
+      const registryService = inject(VertexRegistryService);
+      registryService.register('hero', HeroComponent);
+      registryService.register('text-simple', TextComponent);
+      return;
     })
   ],
 };

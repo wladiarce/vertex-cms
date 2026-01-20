@@ -30,9 +30,25 @@ export class ContentService {
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    const filter: any = {};
+    if (query.where) {
+      // query.forEach((value: any, key: string) => {
+      //   filter[key] = value;
+      // });
+       // Simple parser for demonstration. 
+       // In a real app, use 'qs' or a robust query parser.
+       // For now, let's assume query.slug passed directly works for simple cases:
+       // ?slug=home
+    }
+    
+    // Quick Fix: Allow direct matching for top-level fields
+    // If query contains 'slug=home', we use it.
+    const { page: _p, limit: _l, ...rest } = query;
+    Object.assign(filter, rest);
+
     const [docs, total] = await Promise.all([
-      model.find().limit(limit).skip(skip).lean().exec(),
-      model.countDocuments().exec()
+      model.find(filter).limit(limit).skip(skip).lean().exec(),
+      model.countDocuments(filter).exec()
     ]);
 
     if (config?.hooks?.afterRead) {

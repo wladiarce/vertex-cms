@@ -52,6 +52,14 @@ export class MongooseSchemaFactory {
           ref: field.relationTo // We will ensure this string matches the Mongoose model name
         };
 
+      case FieldType.Blocks:
+        // We store blocks as a generic array of objects.
+        // Structure: [ { blockType: 'hero', ...fields }, { blockType: 'text', ...fields } ]
+        return { 
+          ...base, 
+          type: [Schema.Types.Mixed] // Array of Mixed
+        };
+
       default:
         return { ...base, type: Schema.Types.Mixed };
     }

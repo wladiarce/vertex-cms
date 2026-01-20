@@ -31,6 +31,9 @@ export interface FieldOptions {
   // Validation
   minLength?: number;
   maxLength?: number;
+
+  // For 'blocks' type
+  blocks?: Function[]; // Array of Classes (e.g., [HeroBlock, TextBlock])
 }
 
 /**
@@ -58,5 +61,18 @@ export interface CollectionOptions {
  */
 export interface CollectionMetadata extends CollectionOptions {
   name: string; // The class name
-  fields: (FieldOptions & { name: string })[]; // Field name is inferred from property key
+  // fields: (FieldOptions & { name: string })[]; // Field name is inferred from property key
+  fields: (FieldOptions & { name: string;  blocks?: BlockMetadata[] | undefined; })[]; // Field name is inferred from property key
 }
+
+// We also need a metadata interface for the API response
+export interface BlockMetadata {
+  slug: string;
+  label: string;
+  // fields: (FieldOptions & { name: string })[];
+  fields: (FieldOptions & { name: string; blocks?: BlockMetadata[] | undefined; })[];
+}
+
+// Update CollectionMetadata to include available blocks (optional but helpful)
+// Actually, the FieldOptions in the collection already carries the block data, 
+// but we need to resolve the Class Constructors into JSON Metadata for the frontend.
