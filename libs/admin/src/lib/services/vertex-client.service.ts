@@ -51,4 +51,12 @@ export class VertexClientService {
   delete(slug: string, id: string) {
     return this.http.delete(`${this.apiUrl}/content/${slug}/${id}`);
   }
+
+  /**
+   * 3. Upload Methods
+   */
+  upload(formData: any) {
+    return this.http.post<any>(`${this.apiUrl}/vertex/upload`, formData);
+    // return this.http.post<any>(`http://localhost:3000/api/vertex/upload`, formData);
+  }
 }

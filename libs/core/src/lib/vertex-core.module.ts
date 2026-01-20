@@ -10,10 +10,14 @@ import { AuthService } from './auth/auth.service';
 import { AuthController } from './auth/auth.controller';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { StorageAdapter } from '@vertex/common';
+import { LocalStorageAdapter } from './storage/local-storage.adapter';
+import { UploadController } from './api/upload.controller';
 
 export interface VertexCoreOptions {
   mongoUri: string;
   collections: Function[]; // The classes the user created
+  storageAdapter?: new (...args: any[]) => StorageAdapter;
 }
 
 @Global() // Make it global so we don't have to import it everywhere
@@ -35,7 +39,8 @@ export interface VertexCoreOptions {
     controllers: [
         ConfigController,
         ContentController,
-        AuthController
+        AuthController,
+        UploadController
     ],
     exports: [
         SchemaDiscoveryService
@@ -43,6 +48,10 @@ export interface VertexCoreOptions {
 })
 export class VertexCoreModule {
   static forRoot(options: VertexCoreOptions): DynamicModule {
+
+    // Default to LocalStorage if none provided
+    const AdapterClass = options.storageAdapter || LocalStorageAdapter;
+    
     return {
       module: VertexCoreModule,
       imports: [
@@ -50,6 +59,10 @@ export class VertexCoreModule {
         MongooseModule.forRoot(options.mongoUri),
       ],
       providers: [
+        {
+          provide: StorageAdapter,
+          useClass: AdapterClass 
+        },
         {
           provide: 'VERTEX_OPTIONS',
           useValue: options
@@ -62,6 +75,10 @@ export class VertexCoreModule {
           },
           inject: [SchemaDiscoveryService]
         }
+      ],
+      exports: [
+        SchemaDiscoveryService,
+        StorageAdapter,
       ]
     };
   }

@@ -1,6 +1,7 @@
 import { Collection, Field, FieldType } from '@vertex/common';
 import { HeroBlock } from '../blocks/hero.block';
 import { TextBlock } from '../blocks/text.block';
+import { ImageBlock } from '../blocks/image.block';
 
 @Collection({
   slug: 'pages',
@@ -22,7 +23,7 @@ export class Page {
 
   @Field({ 
     type: FieldType.Blocks, 
-    blocks: [HeroBlock, TextBlock]
+    blocks: [HeroBlock, TextBlock, ImageBlock]
   })
   layout: any[];
 }

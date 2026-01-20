@@ -23,6 +23,7 @@ import {
   provideClientHydration,
   withEventReplay,
 } from '@angular/platform-browser';
+import { ImageComponent } from './components/image/image.component';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -50,6 +51,7 @@ export const appConfig: ApplicationConfig = {
       const registryService = inject(VertexRegistryService);
       registryService.register('hero', HeroComponent);
       registryService.register('text-simple', TextComponent);
+      registryService.register('image', ImageComponent);
       return;
     }),
   ],

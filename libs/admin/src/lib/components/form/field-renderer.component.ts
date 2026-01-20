@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BlockMetadata, FieldOptions, FieldType } from '@vertex/common';
 import { InputFieldComponent } from '../fields/input-field.component';
+import { UploadFieldComponent } from '../fields/upload-field.component';
 
 @Component({
   selector: 'vertex-field-renderer',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputFieldComponent],
+  imports: [CommonModule, ReactiveFormsModule, InputFieldComponent, UploadFieldComponent],
   template: `
     @switch (field.type) {
       @case ('text') {
@@ -23,6 +24,9 @@ import { InputFieldComponent } from '../fields/input-field.component';
         @if (blocksComponent(); as Comp) {
           <ng-container *ngComponentOutlet="Comp; inputs: { field: field, group: group }" />
         }
+      }
+      @case ('upload') {
+        <vertex-upload-field [field]="field" [group]="group" />
       }
       @default {
         <div class="p-4 bg-yellow-50 text-yellow-700 text-sm rounded">
