@@ -1,96 +1,109 @@
-# VertexCms
+# Vertex CMS
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+> **ATTENTION: THIS IS STILL A WORK IN PROGRESS**
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## The native code-first CMS for the Angular and NestJS ecosystem.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+VertexCMS is a modern, block-based content management system designed specifically for developers who have chosen the Angular + NestJS stack. It bridges the gap between "Headless" flexibility and "Visual" page building, without forcing you to leave the ecosystem you love.
 
-## Run tasks
+## 🎯 Motivation: Why Another CMS?
+There are incredible Headless CMS options out there — Payload, Strapi, Prismic, Contentful. They are powerful tools, but I felt that they often treat **Angular** and **NestJS** as second-class citizens. Their documentation, SDKs, and starter kits heavily favor the React/Next.js ecosystem.
 
-To run tasks with Nx use:
+As developers, we often face a choice: adapt our workflow to a tool built for a different stack, or build something custom.
 
-```sh
-npx nx <target> <project-name>
+**VertexCMS exists to fill that void.**
+
+### Built for Our Stack
+I am not a software developer by profession; time is my most valuable resource. Maintaining proficiency in React, Vue, Next.js, and Svelte just to use a CMS is inefficient. I chose Angular and NestJS years ago for their robustness, strict typing, and shared architectural patterns (Modules, Decorators, Dependency Injection).
+
+Since then, I have been keeping up to date on it and using this technology stack in my personal and professional projects. I am not saying that the other frameworks are not good, but at this moment I just needed a tool that fitted quickly in my workflow, and because I couldn't find one, I decided to build it.
+
+VertexCMS allows you to stay within that single mental model:
+- Backend: Define schemas using NestJS Decorators (@Collection, @Field).
+- Frontend: Render content using Angular Components and Signals.
+- Language: One unified TypeScript codebase, from database to DOM.
+
+No context switching. No "React-wrapper". Just pure Angular + NestJS.
+
+## ✨ What Makes It Different?
+### 1. The "Code-First" Experience
+In VertexCMS, your code is the source of truth.
+
+```typescript
+// defined in your NestJS backend
+@Collection({ slug: 'articles', access: { read: ['public'] } })
+export class Article {
+  @Field({ type: FieldType.Text, required: true })
+  title: string;
+
+  @Field({ type: FieldType.Blocks, blocks: [HeroBlock, TextBlock] })
+  content: any[];
+}
 ```
 
-For example:
+### 2. Block-Driven Design
 
+VertexCMS is built around Blocks.
+
+- Define a HeroBlock in your backend.
+- Create a matching HeroComponent in your frontend.
+- The system automatically maps JSON data to the correct Angular component at runtime.
+
+### 3. Native Angular SSR Support
+
+> WIP
+
+## 🚀 Key Features
+- **Dynamic admin UI**: an Angular-based Admin panel that generates itself at runtime based on your backend schemas.
+- **Polymorphic forms**: manage complex, nested block structures with a clean UI.
+- **Rich text editor**: integrated Tiptap WYSIWYG editor for formatted content.
+- **Database agnostic**: support for multiple database systems (PostgreSQL, MySQL, MongoDB, etc.) though adapters (*WIP; for the moment only MongoDB is implemented*).
+- **Media management**: storage-agnostic upload system (Local filesystem implemented, extensible to S3/GCS or any custom adapter).
+- **Built-in auth**: secure JWT authentication with Role-Based Access Control (RBAC). More authentication methods will be added in the future.
+- **Type safety**: shared interfaces between frontend and backend ensure your CMS data matches your UI components.
+
+## 🛠 Architecture
+VertexCMS is built as a set of modular libraries within an Nx Monorepo (another must have for the Angular + NestJS stack):
+
+- ``@vertex/core``: the NestJS engine. Handles database (MongoDB through mongoose, more planned), schema discovery, and the generic REST API.
+- ``@vertex/admin``: the admin interface. A dynamic Angular app that consumes the Core API.
+- ``@vertex/public``: the frontend SDK. A lightweight Angular library for rendering CMS blocks.
+- ``@vertex/common``: shared decorators and interfaces.
+
+🏁 Quick Start (Local Playground)
+To see the system in action, run the included Playground app:
+
+1. **Install dependencies:**
 ```sh
-npx nx build myproject
+npm install
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-To install a new plugin you can use the `nx add` command. Here's an example of adding the React plugin:
+2. **Start the backend (port 3000, default for NestJS):**
 ```sh
-npx nx add @nx/react
+npx nx serve playground-api
 ```
 
-Use the plugin's generator to create new projects. For example, to create a new React app or library:
-
+3. **Start the frontend (port 4200, default for Angular):**
 ```sh
-# Generate an app
-npx nx g @nx/react:app demo
-
-# Generate a library
-npx nx g @nx/react:lib some-lib
+npx nx serve playground-client
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+4. **Access:**
+- Admin Panel: http://localhost:4200/admin
+- Public Site: http://localhost:4200
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 🔮 Roadmap and planned next steps
 
-## Set up CI!
-
-### Step 1
-
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
-```
-
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [ ] **Packaging**: publishing core libraries to NPM for easy consumption.
+- [ ] **CLI**: ``create-vertex-app`` for instant project scaffolding.
+- [ ] **Storage adapters**: support for AWS S3, Google Cloud Storage and more.
+- [ ] **Database adapters**: support for PostgreSQL, MySQL and more.
+- [ ] **i18n**: native multi-language support.
+- [ ] **Email support**: sending emails through NestJS and an email adapter.
+- [ ] **SEO**: SEO support through Angular SSR and meta tags.
+- [ ] **UI/UX**: improve the admin panel UI/UX.
+- [ ] **Testing**: add tests for the core libraries.
+- [ ] **Documentation**: write documentation for the core libraries.
+- [ ] **Examples**: add examples of how to use the core libraries.
+- [ ] **Plugins**: allow for extensibility of the system through plugins, moving the DB and Storage adapters to plugins.
+- [ ] **Project website**: create a website for the project using, obiously, VertexCMS 😁.
