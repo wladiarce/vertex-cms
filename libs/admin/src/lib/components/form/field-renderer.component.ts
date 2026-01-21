@@ -4,11 +4,12 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BlockMetadata, FieldOptions, FieldType } from '@vertex/common';
 import { InputFieldComponent } from '../fields/input-field.component';
 import { UploadFieldComponent } from '../fields/upload-field.component';
+import { RichTextFieldComponent } from '../fields/rich-text-field.component';
 
 @Component({
   selector: 'vertex-field-renderer',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputFieldComponent, UploadFieldComponent],
+  imports: [CommonModule, ReactiveFormsModule, InputFieldComponent, UploadFieldComponent, RichTextFieldComponent],
   template: `
     @switch (field.type) {
       @case ('text') {
@@ -27,6 +28,9 @@ import { UploadFieldComponent } from '../fields/upload-field.component';
       }
       @case ('upload') {
         <vertex-upload-field [field]="field" [group]="group" />
+      }
+      @case ('rich-text') {
+        <vertex-rich-text-field [field]="field" [group]="group" />
       }
       @default {
         <div class="p-4 bg-yellow-50 text-yellow-700 text-sm rounded">

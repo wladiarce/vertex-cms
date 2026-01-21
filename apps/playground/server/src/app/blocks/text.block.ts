@@ -1,8 +1,8 @@
 import { Block, Field, FieldType } from '@vertex/common';
 
 @Block({
-  slug: 'text-simple',
-  label: 'Simple Text'
+  slug: 'text-rich',
+  label: 'Rich text'
 })
 export class TextBlock {
   @Field({ type: FieldType.RichText, label: 'Content' })
