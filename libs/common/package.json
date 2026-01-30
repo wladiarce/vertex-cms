@@ -1,10 +1,13 @@
 {
   "name": "@vertex/common",
   "version": "0.0.1",
-  "private": true,
+  "private": false,
   "type": "commonjs",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
+  "peerDependencies": {
+    "reflect-metadata": "^0.2.2"
+  },
   "dependencies": {
     "tslib": "^2.3.0"
   }

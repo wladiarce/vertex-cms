@@ -1,0 +1,44 @@
+# STAGE 1: Build the NestJS backend
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+# Copy package files and install dependencies
+COPY package*.json ./
+COPY pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+# Copy the source code
+COPY . .
+
+# Build the NestJS backend
+RUN npx nx run playground-api:build:production
+
+# STAGE 2: Run the NestJS server
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3001
+
+# Create upload directory
+RUN mkdir -p /app/uploads && chown node:node /app/uploads
+
+# Copy built artifacts from builder
+COPY --from=builder /app/dist/apps/playground/server ./dist
+COPY --from=builder /app/node_modules ./node_modules
+
+# Expose the port
+EXPOSE 3001
+
+# Use non-root user for security
+USER node
+
+# Start the NestJS server
+CMD ["node", "dist/main.js"]

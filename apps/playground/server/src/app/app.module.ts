@@ -8,14 +8,13 @@ import { join } from 'path';
 
 @Module({
   imports: [
-    // 1. Keep this for Local Development / LocalStorage
+    // Serve Uploads (Volume Mount)
     ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads'),
-      serveRoot: '/uploads', 
+      rootPath: process.env.UPLOAD_PATH || join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
     }),
-    
     VertexCoreModule.forRoot({
-      // Make sure you have a local mongo running or use a cloud URI -> Use mongodb atlas for a free cluster :)
+      // Make sure you have a local mongo running (as included in the docker-compose)or use a cloud URI -> Use mongodb atlas for a free cluster :)
       mongoUri: process.env.MONGO_URI,
       collections: [
         Movie,

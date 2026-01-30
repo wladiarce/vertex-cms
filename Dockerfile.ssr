@@ -1,0 +1,42 @@
+# STAGE 1: Build the Angular SSR app
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+# Copy package files and install dependencies
+COPY package*.json ./
+COPY pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+# Copy the source code
+COPY . .
+
+# Build the Angular Client with SSR
+RUN npx nx run playground-client:build:production
+
+# STAGE 2: Run the Angular SSR server
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=4000
+
+# Copy SSR server files from builder
+COPY --from=builder /app/dist/apps/playground/client/server ./server
+COPY --from=builder /app/dist/apps/playground/client/browser ./browser
+COPY --from=builder /app/node_modules ./node_modules
+
+# Expose the port
+EXPOSE 4000
+
+# Use non-root user for security
+USER node
+
+# Start the Angular SSR server
+CMD ["node", "server/server.mjs"]

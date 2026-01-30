@@ -1,7 +1,7 @@
 {
   "name": "admin",
-  "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "admin/src",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/admin/src",
   "prefix": "lib",
   "projectType": "library",
   "tags": [],
@@ -10,12 +10,12 @@
       "executor": "@nx/angular:ng-packagr-lite",
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "options": {
-        "project": "admin/ng-package.json",
-        "tsConfig": "admin/tsconfig.lib.json"
+        "project": "libs/admin/ng-package.json",
+        "tsConfig": "libs/admin/tsconfig.lib.json"
       },
       "configurations": {
         "production": {
-          "tsConfig": "admin/tsconfig.lib.prod.json"
+          "tsConfig": "libs/admin/tsconfig.lib.prod.json"
         },
         "development": {}
       },

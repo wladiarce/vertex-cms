@@ -1,0 +1,65 @@
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:8.2.3
+    container_name: vertex-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - vertex-net
+    restart: unless-stopped
+
+  # NestJS Backend API
+  vertex-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: vertex-api
+    environment:
+      - PORT=3001
+      - MONGO_URI=mongodb://mongo:27017/vertex-playground
+      - UPLOAD_PATH=/app/uploads
+      - JWT_SECRET=P27S9GZ2J5PAH95S
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - mongo
+    networks:
+      - vertex-net
+    restart: unless-stopped
+
+  # Angular SSR Server
+  vertex-ssr:
+    build:
+      context: .
+      dockerfile: Dockerfile.ssr
+    container_name: vertex-ssr
+    environment:
+      - PORT=4000
+    networks:
+      - vertex-net
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: vertex-nginx
+    ports:
+      - "3000:80"
+    depends_on:
+      - vertex-api
+      - vertex-ssr
+    networks:
+      - vertex-net
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
+
+networks:
+  vertex-net:
+    driver: bridge

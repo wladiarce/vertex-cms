@@ -92,6 +92,9 @@ importers:
       mongoose:
         specifier: ^9.1.4
         version: 9.1.4(socks@2.8.7)
+      multer:
+        specifier: ^2.0.2
+        version: 2.0.2
       ngx-tiptap:
         specifier: ^14.0.1
         version: 14.0.1(925a7ffa95e4185b0c256ae7241b565b)

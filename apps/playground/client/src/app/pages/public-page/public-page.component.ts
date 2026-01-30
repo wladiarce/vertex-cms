@@ -34,7 +34,7 @@ export class PublicPageComponent implements OnInit {
 
   loadPage(slug: string) {
     // 2. Query the API
-    this.cmsFetch.get<any>('http://localhost:3000/api/content/pages', { slug }) // Note: absolute URL needed for SSR!
+    this.cmsFetch.get<any>('/api/content/pages', { slug })
       .pipe(map(res => res.docs[0]))
       .subscribe(page => {
         if (page) {

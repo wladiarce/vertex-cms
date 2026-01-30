@@ -13,7 +13,7 @@ As developers, we often face a choice: adapt our workflow to a tool built for a 
 
 **VertexCMS exists to fill that void.**
 
-### Built for Our Stack
+### Built for our stack
 I am not a software developer by profession; time is my most valuable resource. Maintaining proficiency in React, Vue, Next.js, and Svelte just to use a CMS is inefficient. I chose Angular and NestJS years ago for their robustness, strict typing, and shared architectural patterns (Modules, Decorators, Dependency Injection).
 
 Since then, I have been keeping up to date on it and using this technology stack in my personal and professional projects. I am not saying that the other frameworks are not good, but at this moment I just needed a tool that fitted quickly in my workflow, and because I couldn't find one, I decided to build it.
@@ -25,8 +25,8 @@ VertexCMS allows you to stay within that single mental model:
 
 No context switching. No "React-wrapper". Just pure Angular + NestJS.
 
-## ✨ What Makes It Different?
-### 1. The "Code-First" Experience
+## ✨ What makes it different?
+### 1. The "Code-First" experience
 In VertexCMS, your code is the source of truth.
 
 ```typescript
@@ -41,7 +41,7 @@ export class Article {
 }
 ```
 
-### 2. Block-Driven Design
+### 2. Block-Driven design
 
 VertexCMS is built around Blocks.
 
@@ -49,11 +49,11 @@ VertexCMS is built around Blocks.
 - Create a matching HeroComponent in your frontend.
 - The system automatically maps JSON data to the correct Angular component at runtime.
 
-### 3. Native Angular SSR Support
+### 3. Native Angular SSR support
 
 > WIP
 
-## 🚀 Key Features
+## 🚀 Key features
 - **Dynamic admin UI**: an Angular-based Admin panel that generates itself at runtime based on your backend schemas.
 - **Polymorphic forms**: manage complex, nested block structures with a clean UI.
 - **Rich text editor**: integrated Tiptap WYSIWYG editor for formatted content.
