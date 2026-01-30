@@ -21,7 +21,7 @@ services:
       - PORT=3001
       - MONGO_URI=mongodb://mongo:27017/vertex-playground
       - UPLOAD_PATH=/app/uploads
-      - JWT_SECRET=P27S9GZ2J5PAH95S
+      - JWT_SECRET=YOUR_SECRET_KEY
     volumes:
       - ./uploads:/app/uploads
     depends_on:
