@@ -51,7 +51,8 @@ VertexCMS is built around Blocks.
 
 ### 3. Native Angular SSR support
 
-> WIP
+Built-in support for Angular Server-Side Rendering with proper state transfer.
+
 
 ## 🚀 Key features
 - **Dynamic admin UI**: an Angular-based Admin panel that generates itself at runtime based on your backend schemas.
@@ -94,7 +95,7 @@ npx nx serve playground-client
 
 ## 🔮 Roadmap and planned next steps
 
-- [ ] **Packaging**: publishing core libraries to NPM for easy consumption.
+- [WIP] **Packaging**: publishing core libraries to NPM for easy consumption.
 - [ ] **CLI**: ``create-vertex-app`` for instant project scaffolding.
 - [ ] **Storage adapters**: support for AWS S3, Google Cloud Storage and more.
 - [ ] **Database adapters**: support for PostgreSQL, MySQL and more.
@@ -103,7 +104,7 @@ npx nx serve playground-client
 - [ ] **SEO**: SEO support through Angular SSR and meta tags.
 - [ ] **UI/UX**: improve the admin panel UI/UX.
 - [ ] **Testing**: add tests for the core libraries.
-- [ ] **Documentation**: write documentation for the core libraries.
-- [ ] **Examples**: add examples of how to use the core libraries.
+- [WIP] **Documentation**: write documentation for the core libraries (see [ARCHITECTURE.md](ARCHITECTURE.md)).
+- [WIP] **Examples**: add examples of how to use the core libraries (see [ARCHITECTURE.md](ARCHITECTURE.md)).
 - [ ] **Plugins**: allow for extensibility of the system through plugins, moving the DB and Storage adapters to plugins.
 - [ ] **Project website**: create a website for the project using, obiously, VertexCMS 😁.

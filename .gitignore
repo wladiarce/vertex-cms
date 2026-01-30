@@ -19,6 +19,7 @@ uploads
 .project
 .classpath
 .c9/
+.ai
 *.launch
 .settings/
 *.sublime-workspace
