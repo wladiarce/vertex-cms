@@ -37,7 +37,10 @@ export class VertexClientService {
   }
 
   findOne(slug: string, id: string) {
-    return this.http.get<any>(`${this.apiUrl}/content/${slug}/${id}`);
+    // Admin needs raw locale objects, not transformed strings
+    return this.http.get<any>(`${this.apiUrl}/content/${slug}/${id}`, {
+      params: { raw: 'true' }
+    });
   }
 
   create(slug: string, data: any) {

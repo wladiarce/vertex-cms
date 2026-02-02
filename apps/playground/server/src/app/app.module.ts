@@ -16,11 +16,21 @@ import { join } from 'path';
     VertexCoreModule.forRoot({
       // Make sure you have a local mongo running (as included in the docker-compose)or use a cloud URI -> Use mongodb atlas for a free cluster :)
       mongoUri: process.env.MONGO_URI,
-      collections: [
+      entities: [
         Movie,
         User,
         Page
       ],
+      // Configure locales for your application
+      locales: {
+        default: 'en',
+        supported: ['en', 'es', 'pt'],
+        names: {
+          en: 'English',
+          es: 'Español',
+          pt: 'Português'
+        }
+      }
       // storageAdapter: S3Adapter or GCSAdapter (Future) <--- This is how to swap adapters
     })
   ],

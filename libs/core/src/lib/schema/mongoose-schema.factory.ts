@@ -22,6 +22,11 @@ export class MongooseSchemaFactory {
   private mapFieldToMongoose(field: FieldOptions) {
     const base: any = { required: field.required || false };
 
+    // If field is localized, store as Mixed object to support { en: "value", es: "valor" } structure
+    if (field.localized) {
+      return { ...base, type: Schema.Types.Mixed };
+    }
+
     switch (field.type) {
       case FieldType.Text:
       case FieldType.Email:

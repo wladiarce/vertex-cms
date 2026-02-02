@@ -13,8 +13,13 @@ export class ContentController {
   }
 
   @Get(':slug/:id')
-  async findOne(@Param('slug') slug: string, @Param('id') id: string) {
-    return this.contentService.findOne(slug, id);
+  async findOne(
+    @Param('slug') slug: string, 
+    @Param('id') id: string,
+    @Query('locale') locale?: string,
+    @Query('raw') raw?: string  // If 'true', skip locale transformation for admin
+  ) {
+    return this.contentService.findOne(slug, id, locale, raw === 'true');
   }
 
   @Post(':slug')

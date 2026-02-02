@@ -15,7 +15,7 @@ import { ImageBlock } from '../blocks/image.block';
   }
 })
 export class Page {
-  @Field({ type: FieldType.Text, required: true })
+  @Field({ type: FieldType.Text, required: true, localized: true })
   title: string;
 
   @Field({ type: FieldType.Text, required: true, unique: true })

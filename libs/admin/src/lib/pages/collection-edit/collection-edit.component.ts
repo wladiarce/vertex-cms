@@ -4,8 +4,8 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { VertexClientService } from '../../services/vertex-client.service';
 import { FieldRendererComponent } from '../../components/form/field-renderer.component';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { BlockMetadata } from '@vertex/common';
+import { LocaleService } from '../../services/locale.service';
 
 @Component({
   selector: 'vertex-collection-edit',
@@ -46,6 +46,7 @@ export class CollectionEditComponent {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private cms = inject(VertexClientService);
+  private localeService = inject(LocaleService);
 
   // State
   slug = signal('');
@@ -73,6 +74,29 @@ export class CollectionEditComponent {
         this.loadData();
       }
     });
+
+    // 4. Watch for locale config changes and update localized field controls
+    effect(() => {
+      const supportedLocales = this.localeService.getSupportedLocales()();
+      const col = this.collection();
+      
+      if (!col || supportedLocales.length <= 1) return; // Skip if config not loaded
+      
+      // Update localized field controls when locale config loads
+      col.fields.forEach(field => {
+        if (field.localized) {
+          const localeGroup = this.form.get(field.name) as FormGroup;
+          if (localeGroup) {
+            // Add missing locale controls
+            supportedLocales.forEach(locale => {
+              if (!localeGroup.get(locale)) {
+                localeGroup.addControl(locale, this.fb.control(''));
+              }
+            });
+          }
+        }
+      });
+    });
   }
 
   private initForm() {
@@ -87,6 +111,19 @@ export class CollectionEditComponent {
         // The BlocksFieldComponent's ngOnInit will handle population 
         // when the data arrives via patchValue/input binding.
         group[field.name] = this.fb.array([]);
+      } else if (field.localized) {
+        // For localized fields, create a FormGroup with controls for each locale
+        const localeControls: any = {};
+        // Get supported locales from LocaleService
+        const supportedLocales = this.localeService.getSupportedLocales()();
+        supportedLocales.forEach(locale => {
+          localeControls[locale] = [''];
+        });
+        
+        const validators = [];
+        if (field.required) validators.push(Validators.required);
+        
+        group[field.name] = this.fb.group(localeControls, { validators });
       } else {
         const validators = [];
         if (field.required) validators.push(Validators.required);
@@ -120,6 +157,7 @@ export class CollectionEditComponent {
     if (!col) return;
 
     col.fields.forEach(field => {
+      // Handle blocks fields (FormArrays)
       if (field.type === 'blocks' && Array.isArray(data[field.name])) {
         // We found a block field with data!
         const formArray = this.form.get(field.name) as any; // Cast to FormArray
@@ -136,11 +174,27 @@ export class CollectionEditComponent {
              
              const group: any = { blockType: [item.blockType] };
              blockMeta.fields.forEach(f => {
-               group[f.name] = ['']; // We don't need value here, patchValue will fill it
+               group[f.name] = [''];  // We don't need value here, patchValue will fill it
              });
              formArray.push(this.fb.group(group));
           }
         });
+      }
+      
+      // Handle localized fields (FormGroups with locale keys)
+      if (field.localized && data[field.name] && typeof data[field.name] === 'object') {
+        const localeGroup = this.form.get(field.name) as FormGroup;
+        
+        if (localeGroup) {
+          // Patch each locale control individually
+          const localeData = data[field.name];
+          Object.keys(localeData).forEach(locale => {
+            const control = localeGroup.get(locale);
+            if (control) {
+              control.setValue(localeData[locale] || '');
+            }
+          });
+        }
       }
     });
   }

@@ -10,15 +10,12 @@ import { AuthService } from './auth/auth.service';
 import { AuthController } from './auth/auth.controller';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { StorageAdapter } from '@vertex/common';
+import { StorageAdapter, VertexCoreOptions, DEFAULT_LOCALE_CONFIG } from '@vertex/common';
 import { LocalStorageAdapter } from './storage/local-storage.adapter';
 import { UploadController } from './api/upload.controller';
+import { LocaleConfigProvider } from './providers/locale-config.provider';
 
-export interface VertexCoreOptions {
-  mongoUri: string;
-  collections: Function[]; // The classes the user created
-  storageAdapter?: new (...args: any[]) => StorageAdapter;
-}
+
 
 @Global() // Make it global so we don't have to import it everywhere
 @Module({
@@ -34,7 +31,8 @@ export interface VertexCoreOptions {
         ContentService,
         AuthService,
         JwtStrategy,
-        JwtAuthGuard
+        JwtAuthGuard,
+        LocaleConfigProvider
     ],
     controllers: [
         ConfigController,
@@ -43,7 +41,8 @@ export interface VertexCoreOptions {
         UploadController
     ],
     exports: [
-        SchemaDiscoveryService
+        SchemaDiscoveryService,
+        LocaleConfigProvider
 ]
 })
 export class VertexCoreModule {
@@ -64,6 +63,10 @@ export class VertexCoreModule {
           useClass: AdapterClass 
         },
         {
+          provide: 'LOCALE_CONFIG',
+          useValue: options.locales || DEFAULT_LOCALE_CONFIG
+        },
+        {
           provide: 'VERTEX_OPTIONS',
           useValue: options
         },
@@ -71,7 +74,7 @@ export class VertexCoreModule {
         {
           provide: 'VERTEX_BOOTSTRAP',
           useFactory: async (discovery: SchemaDiscoveryService) => {
-             await discovery.registerCollections(options.collections);
+             await discovery.registerCollections(options.entities);
           },
           inject: [SchemaDiscoveryService]
         }

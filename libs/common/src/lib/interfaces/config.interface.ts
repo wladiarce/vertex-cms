@@ -1,5 +1,24 @@
 import { FieldType } from '../constants/field-types';
 
+/**
+ * Locale configuration for i18n support
+ */
+export interface LocaleConfiguration {
+  default: string;
+  supported: string[];
+  names?: Record<string, string>;
+}
+
+/**
+ * Options for initializing VertexCoreModule
+ */
+export interface VertexCoreOptions {
+  mongoUri: string;
+  entities: Function[];
+  locales?: LocaleConfiguration;
+  storageAdapter?: any; // new (...args: any[]) => StorageAdapter - avoiding circular dependency
+}
+
 export interface CollectionHooks {
   // Runs before data is saved to DB. Useful for hashing passwords or validation.
   beforeChange?: (args: { data: any; operation: 'create' | 'update' }) => Promise<any> | any;
@@ -18,6 +37,7 @@ export interface FieldOptions {
   unique?: boolean;
   hidden?: boolean; // If true, hidden from API response by default
   defaultValue?: any;
+  localized?: boolean; // If true, field supports multiple languages (stored as { en: "value", es: "valor" })
 
   // For 'number' type
   min?: number;

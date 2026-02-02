@@ -2,12 +2,15 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
 import { SchemaDiscoveryService } from './schema-discovery.service';
+import { getLocalizedValue } from '../utils/locale.utils';
+import { LocaleConfigProvider } from '../providers/locale-config.provider';
 
 @Injectable()
 export class ContentService {
   constructor(
     @InjectConnection() private readonly connection: Connection,
-    private readonly discovery: SchemaDiscoveryService
+    private readonly discovery: SchemaDiscoveryService,
+    private readonly localeConfig: LocaleConfigProvider
   ) {}
 
   private getModel(slug: string): Model<any> {
@@ -24,6 +27,9 @@ export class ContentService {
   async findAll(slug: string, query: any = {}) {
     const model = this.getModel(slug);
     const config = this.discovery.getCollection(slug); // Get config for hooks
+    
+    // Extract locale from query
+    const locale = query.locale || this.localeConfig.getDefaultLocale();
     
     // Simple pagination logic
     const page = Number(query.page) || 1;
@@ -43,7 +49,7 @@ export class ContentService {
     
     // Quick Fix: Allow direct matching for top-level fields
     // If query contains 'slug=home', we use it.
-    const { page: _p, limit: _l, ...rest } = query;
+    const { page: _p, limit: _l, locale: _loc, ...rest } = query;
     Object.assign(filter, rest);
 
     const [docs, total] = await Promise.all([
@@ -51,35 +57,46 @@ export class ContentService {
       model.countDocuments(filter).exec()
     ]);
 
+    // Transform localized fields
+    let processedDocs = docs.map(doc => this.transformLocalizedFields(doc, locale, slug));
+
     if (config?.hooks?.afterRead) {
       // Run hook for every document in parallel
-      const processedDocs = await Promise.all(
-        docs.map(doc => config.hooks!.afterRead!({ doc }))
+      processedDocs = await Promise.all(
+        processedDocs.map(doc => config.hooks!.afterRead!({ doc }))
       );
-      return { docs: processedDocs, totalDocs: total, page, totalPages: Math.ceil(total / limit) };
     }
 
     // EXECUTE HOOK: afterRead
     return {
-      docs,
+      docs: processedDocs,
       totalDocs: total,
       page,
       totalPages: Math.ceil(total / limit)
     };
   }
 
-  async findOne(slug: string, id: string) {
+  async findOne(slug: string, id: string, locale?: string, raw: boolean = false) {
     const model = this.getModel(slug);
     const config = this.discovery.getCollection(slug); // Get config for hooks
 
     const doc = await model.findById(id).exec();
     
-    if(config?.hooks?.afterRead) {
-      return config.hooks.afterRead({ doc });
+    if (!doc) throw new NotFoundException();
+
+    let result = doc.toObject();
+    
+    // Only transform localized fields if NOT requesting raw data (admin needs raw)
+    if (!raw) {
+      const requestedLocale = locale || this.localeConfig.getDefaultLocale();
+      result = this.transformLocalizedFields(result, requestedLocale, slug);
     }
     
-    if (!doc) throw new NotFoundException();
-    return doc;
+    if(config?.hooks?.afterRead) {
+      return config.hooks.afterRead({ doc: result });
+    }
+    
+    return result;
   }
 
   async create(slug: string, data: any) {
@@ -120,6 +137,31 @@ export class ContentService {
     const deleted = await model.findByIdAndDelete(id).exec();
     if (!deleted) throw new NotFoundException();
     return { id: deleted._id, status: 'deleted' };
+  }
+
+  /**
+   * Transform localized fields in a document based on requested locale
+   * For localized fields, replaces the locale object with a single value
+   */
+  private transformLocalizedFields(doc: any, locale: string, collectionSlug: string): any {
+    const config = this.discovery.getCollection(collectionSlug);
+    if (!config) return doc;
+
+    const transformed = { ...doc };
+
+    // Iterate through collection fields to find localized ones
+    config.fields.forEach(field => {
+      if (field.localized && transformed[field.name] !== undefined) {
+        // Apply locale transformation with fallback
+        transformed[field.name] = getLocalizedValue(
+          transformed[field.name],
+          locale,
+          this.localeConfig.getDefaultLocale()
+        );
+      }
+    });
+
+    return transformed;
   }
 
   private removeEmptyStrings(data: any) {
