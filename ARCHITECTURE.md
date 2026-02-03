@@ -211,6 +211,461 @@ VertexCMS is organized as an **Nx monorepo** with four core libraries:
 
 ---
 
+## Draft & publish system
+
+### Overview
+VertexCMS includes a comprehensive draft and publish system with automatic document versioning. Collections can enable or disable this feature as needed.
+
+### Status field
+**Automatic schema enhancement**
+- When `drafts !== false` (enabled by default), collections automatically get:
+  - `status` field: `'draft' | 'published' | 'archived'`
+  - `publishedAt` field: Timestamp of publication
+
+**Example:**
+```typescript
+@Collection({
+  slug: 'blog-posts',
+  drafts: true, // Default, can be omitted
+  maxVersions: 10 // Keep last 10 versions (default: 5)
+})
+export class BlogPost {
+  @Field({ type: 'text' })
+  title!: string;
+  // status and publishedAt added automatically
+}
+```
+
+### Document versioning
+**Version storage**
+- Versions stored in internal `_versions` collection
+- Each version contains:
+  - `collectionSlug`: Source collection
+  - `documentId`: Document being versioned
+  - `data`: JSON snapshot of document
+  - `versionNumber`: Sequential version number
+  - `createdBy`: User who created the version
+  - `createdAt`: Timestamp
+
+**Versioning strategy**
+- Versions created **only** when:
+  1. Publishing a document for the first time
+  2. Updating an already published document
+- Draft updates do NOT create versions
+- Configurable version limit per collection (default: 5)
+- Old versions automatically deleted when limit exceeded
+
+### API Endpoints
+
+#### Status management
+```typescript
+// Publish a draft
+PATCH /api/content/:slug/:id/publish
+
+// Unpublish (revert to draft)
+PATCH /api/content/:slug/:id/unpublish
+```
+
+#### Version management
+```typescript
+// Get all versions for a document
+GET /api/content/:slug/:id/versions
+
+// Restore a specific version
+POST /api/content/:slug/:id/restore/:versionId
+```
+
+#### Filtering
+```typescript
+// Default: returns only published documents
+GET /api/content/:slug
+
+// Get drafts only
+GET /api/content/:slug?status=draft
+
+// Get all documents regardless of status
+GET /api/content/:slug?status=all
+```
+
+### Admin UI features
+
+**Collection EDIT page**
+- Status badges (Draft/Published/Archived)
+- Separate "Save as Draft" and "Publish" buttons
+- "📜 History" button to view version history
+- Version history sidebar with:
+  - List of all versions
+  - Version number, timestamp, author
+  - Restore button with confirmation
+
+**Collection LIST page**
+- Status filter dropdown (Published/Draft/All)
+- Status badge column in table
+- Only visible when collection has drafts enabled
+
+### Configuration
+
+**Enable/disable drafts**
+```typescript
+// Drafts enabled (default)
+@Collection({ slug: 'pages' })
+
+// Drafts disabled
+@Collection({ slug: 'users', drafts: false })
+```
+
+**Version Limit**
+```typescript
+@Collection({ 
+  slug: 'articles',
+  maxVersions: 20 // Keep last 20 versions
+})
+```
+
+---
+
+## Internationalization (i18n) system
+
+### Overview
+VertexCMS includes a flexible internationalization system that allows content to be managed in multiple languages. The system supports module-level configuration, field-level localization, and automatic locale fallbacks.
+
+### Configuration
+
+**Module-based locale configuration**
+Locales are configured when initializing `VertexCoreModule.forRoot()`:
+
+```typescript
+// apps/your-app/server/src/app/app.module.ts
+VertexCoreModule.forRoot({
+  mongoUri: process.env.MONGO_URI,
+  entities: [Page, Post, Product],
+  locales: {
+    default: 'en',
+    supported: ['en', 'es', 'fr', 'pt'],
+    names: {
+      en: 'English',
+      es: 'Español',
+      fr: 'Français',
+      pt: 'Português'
+    }
+  }
+})
+```
+
+**Configuration properties**
+- `default`: Default locale code (fallback when no locale specified)
+- `supported`: Array of supported locale codes
+- `names`: Display names for each locale (used in admin UI)
+
+**Default configuration**
+If no locale configuration is provided, the system uses:
+```typescript
+{
+  default: 'en',
+  supported: ['en'],
+  names: { en: 'English' }
+}
+```
+
+### Localized fields
+
+**Field-level localization**
+Any field can be marked as localizable using the `localized` property:
+
+```typescript
+@Collection({ slug: 'articles' })
+export class Article {
+  @Field({ 
+    type: FieldType.Text,
+    localized: true  // ← Enable localization for this field
+  })
+  title: string;
+
+  @Field({ 
+    type: FieldType.RichText,
+    localized: true
+  })
+  content: string;
+
+  @Field({ 
+    type: FieldType.Email,
+    // localized: false (email addresses are language-agnostic)
+  })
+  authorEmail: string;
+}
+```
+
+**Database storage**
+Localized fields are stored as objects with locale keys:
+
+```json
+{
+  "_id": "...",
+  "title": {
+    "en": "Welcome to VertexCMS",
+    "es": "Bienvenido a VertexCMS",
+    "fr": "Bienvenue à VertexCMS"
+  },
+  "authorEmail": "admin@example.com"
+}
+```
+
+**Mongoose schema**
+The `MongooseSchemaFactory` automatically converts localized fields to `Schema.Types.Mixed`:
+
+```typescript
+// Automatically generated:
+{
+  title: { type: Schema.Types.Mixed },  // Stores { en: "...", es: "..." }
+  authorEmail: { type: String }         // Normal field
+}
+```
+
+### API endpoints
+
+#### Configuration endpoint
+```typescript
+// Get current locale configuration
+GET /api/vertex/config/locales
+
+// Response:
+{
+  "default": "en",
+  "supported": ["en", "es", "fr"],
+  "names": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français"
+  }
+}
+```
+
+#### Content retrieval with locale
+
+**Public API (locale transformation)**
+```typescript
+// Default locale
+GET /api/content/articles/123
+// Returns: { title: "Welcome", ... } (using default locale)
+
+// Specific locale
+GET /api/content/articles/123?locale=es
+// Returns: { title: "Bienvenido", ... }
+
+// Fallback behavior: If Spanish translation missing, returns English
+```
+
+**Admin API (raw data)**
+```typescript
+// Admin needs full locale objects for editing
+GET /api/content/articles/123?raw=true
+// Returns: { title: { en: "Welcome", es: "Bienvenido" }, ... }
+```
+
+### Backend implementation
+
+**LocaleConfigProvider**
+Injectable service that manages locale configuration:
+
+```typescript
+@Injectable()
+export class LocaleConfigProvider {
+  constructor(
+    @Optional() @Inject('LOCALE_CONFIG') config?: LocaleConfiguration
+  ) {
+    this.config = config || DEFAULT_LOCALE_CONFIG;
+  }
+
+  getDefaultLocale(): string { /* ... */ }
+  getSupportedLocales(): string[] { /* ... */ }
+  getConfig(): LocaleConfiguration { /* ... */ }
+}
+```
+
+**Locale transformation**
+The `ContentService.transformLocalizedFields()` method extracts locale-specific values:
+
+```typescript
+// Input (from DB):
+{
+  title: { en: "Hello", es: "Hola" },
+  content: { en: "Content", es: "Contenido" }
+}
+
+// Output (with locale='es'):
+{
+  title: "Hola",
+  content: "Contenido"
+}
+```
+
+**Fallback logic**
+```typescript
+function getLocalizedValue(field: any, locale: string, defaultLocale: string) {
+  if (field[locale]) return field[locale];        // 1. Use requested locale
+  if (field[defaultLocale]) return field[defaultLocale];  // 2. Fall back to default
+  return field[Object.keys(field)[0]] || '';      // 3. Use first available or empty
+}
+```
+
+### Admin UI features
+
+**Locale service**
+Frontend service that fetches locale configuration from API:
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class LocaleService {
+  private config = signal<LocaleConfiguration | null>(null);
+  private currentLocale = signal<string>('en');
+
+  constructor() {
+    // Fetch config from backend on init
+    this.http.get<LocaleConfiguration>('/api/vertex/config/locales')
+      .subscribe(config => this.config.set(config));
+  }
+
+  getSupportedLocales() {
+    return computed(() => this.config()?.supported || ['en']);
+  }
+}
+```
+
+**Localized field component**
+Multi-tab interface for editing translations:
+
+```html
+<!-- Admin edit form -->
+<vertex-localized-field [field]="titleField" [group]="form" />
+
+<!-- Renders as: -->
+<div>
+  <label>Title *</label>
+  
+  <!-- Locale tabs -->
+  <div class="locale-tabs">
+    <button [class.active]="currentLocale === 'en'">English</button>
+    <button [class.active]="currentLocale === 'es'">Español</button>
+    <button [class.active]="currentLocale === 'fr'">Français</button>
+  </div>
+  
+  <!-- Input for current locale -->
+  <input [(ngModel)]="form.value.title[currentLocale]" />
+  
+  <!-- Visual indicator for missing translations -->
+  <span class="missing-indicator" *ngIf="!form.value.title[locale]">⚠️</span>
+</div>
+```
+
+**Form structure**
+Localized fields use nested FormGroups:
+
+```typescript
+// Non-localized field
+form = {
+  email: FormControl('admin@example.com')
+}
+
+// Localized field
+form = {
+  title: FormGroup({
+    en: FormControl('Welcome'),
+    es: FormControl('Bienvenido'),
+    fr: FormControl('')  // Empty = missing translation
+  })
+}
+```
+
+**Dynamic form initialization**
+The `collection-edit component` uses an Angular `effect` to add locale controls when configuration loads:
+
+```typescript
+effect(() => {
+  const supportedLocales = this.localeService.getSupportedLocales()();
+  
+  // Add missing locale controls dynamically
+  localizedFields.forEach(field => {
+    const localeGroup = this.form.get(field.name) as FormGroup;
+    supportedLocales.forEach(locale => {
+      if (!localeGroup.get(locale)) {
+        localeGroup.addControl(locale, this.fb.control(''));
+      }
+    });
+  });
+});
+```
+
+### Frontend integration
+
+**Public site locale fetching**
+```typescript
+// Fetch content in specific language
+this.cmsFetch.get('/api/content/pages', { 
+  slug: 'home',
+  locale: 'es'  // Spanish version
+}).subscribe(page => {
+  // page.title = "Inicio" (not { en: "Home", es: "Inicio" })
+});
+```
+
+**Language switcher example**
+```typescript
+@Component({
+  template: `
+    <select [(ngModel)]="selectedLocale" (change)="switchLanguage()">
+      @for (locale of supportedLocales(); track locale) {
+        <option [value]="locale">{{ getLocaleName(locale) }}</option>
+      }
+    </select>
+  `
+})
+export class LanguageSwitcherComponent {
+  localeService = inject(LocaleService);
+  router = inject(Router);
+
+  supportedLocales = this.localeService.getSupportedLocales();
+  selectedLocale = this.localeService.getCurrentLocale();
+
+  switchLanguage() {
+    this.router.navigate([], {
+      queryParams: { locale: this.selectedLocale() },
+      queryParamsHandling: 'merge'
+    });
+  }
+}
+```
+
+### Best practices
+
+**When to localize**
+- ✅ Localize: Titles, descriptions, body content, labels, metadata
+- ❌ Don't localize: Email addresses, URLs, numeric IDs, timestamps, status codes
+
+**Missing translations**
+- Admin UI shows visual indicators (⚠️ or yellow dot) for missing translations
+- Public API falls back to default locale automatically
+- Empty strings are treated as missing
+
+**SEO considerations**
+```typescript
+// Locale-specific URLs
+/en/blog/welcome-to-vertexcms
+/es/blog/bienvenido-a-vertexcms
+
+// Or query parameter
+/blog/welcome-to-vertexcms?locale=es
+```
+
+### Future enhancements
+
+See [future-locale-db-enhancement.md](./future-locale-db-enhancement.md) for planned features:
+- Database-driven locale management
+- Admin UI for adding/removing locales at runtime
+- Locale-specific validation rules
+- Translation workflow management
+
+---
+
 ### 2. `@vertex/core`
 
 **Purpose**: NestJS backend engine.
