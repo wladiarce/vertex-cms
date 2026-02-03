@@ -5,6 +5,7 @@ import * as bcrypt from 'bcryptjs';
   slug: 'users',
   singularName: 'User',
   timestamps: true,
+  drafts: false,
   hooks: {
     // 1. Hash password before saving
     beforeChange: async ({ data, operation }) => {

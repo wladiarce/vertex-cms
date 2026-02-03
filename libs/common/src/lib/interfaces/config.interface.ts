@@ -1,6 +1,15 @@
 import { FieldType } from '../constants/field-types';
 
 /**
+ * Document status for draft/publish system
+ */
+export enum DocumentStatus {
+  Draft = 'draft',
+  Published = 'published',
+  Archived = 'archived'
+}
+
+/**
  * Locale configuration for i18n support
  */
 export interface LocaleConfiguration {
@@ -64,6 +73,8 @@ export interface CollectionOptions {
   singularName?: string;
   pluralName?: string;
   timestamps?: boolean; // auto-add createdAt/updatedAt
+  drafts?: boolean; // Enable draft/publish system (default: true)
+  maxVersions?: number; // Maximum versions to keep (default: 5)
   hooks?: CollectionHooks;
   
   // Access Control (Simple RBAC for now)

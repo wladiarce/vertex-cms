@@ -30,10 +30,12 @@ export class VertexClientService {
   /**
    * 2. Generic CRUD Methods
    */
-  getAll(slug: string, page = 1, limit = 10) {
-    return this.http.get<any>(`${this.apiUrl}/content/${slug}`, {
-      params: { page, limit }
-    });
+  getAll(slug: string, page = 1, limit = 10, status?: string) {
+    const params: any = { page, limit };
+    if (status) {
+      params.status = status;
+    }
+    return this.http.get<any>(`${this.apiUrl}/content/${slug}`, { params });
   }
 
   findOne(slug: string, id: string) {
@@ -61,5 +63,24 @@ export class VertexClientService {
   upload(formData: any) {
     return this.http.post<any>(`${this.apiUrl}/vertex/upload`, formData);
     // return this.http.post<any>(`http://localhost:3000/api/vertex/upload`, formData);
+  }
+
+  /**
+   * 4. Draft/Publish Methods
+   */
+  publish(slug: string, id: string) {
+    return this.http.patch(`${this.apiUrl}/content/${slug}/${id}/publish`, {});
+  }
+
+  unpublish(slug: string, id: string) {
+    return this.http.patch(`${this.apiUrl}/content/${slug}/${id}/unpublish`, {});
+  }
+
+  getVersions(slug: string, id: string) {
+    return this.http.get<any[]>(`${this.apiUrl}/content/${slug}/${id}/versions`);
+  }
+
+  restoreVersion(slug: string, id: string, versionId: string) {
+    return this.http.post(`${this.apiUrl}/content/${slug}/${id}/restore/${versionId}`, {});
   }
 }

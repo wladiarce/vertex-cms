@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { SchemaDiscoveryService } from './services/schema-discovery.service';
 import { MongooseSchemaFactory } from './schema/mongoose-schema.factory';
 import { ContentService } from './services/content.service';
+import { VersionService } from './services/version.service';
 import { ConfigController } from './api/config.controller';
 import { ContentController } from './api/content.controller';
 import { JwtModule } from '@nestjs/jwt';
@@ -14,7 +15,7 @@ import { StorageAdapter, VertexCoreOptions, DEFAULT_LOCALE_CONFIG } from '@verte
 import { LocalStorageAdapter } from './storage/local-storage.adapter';
 import { UploadController } from './api/upload.controller';
 import { LocaleConfigProvider } from './providers/locale-config.provider';
-
+import { Version } from './collections/version.collection';
 
 
 @Global() // Make it global so we don't have to import it everywhere
@@ -29,6 +30,7 @@ import { LocaleConfigProvider } from './providers/locale-config.provider';
         SchemaDiscoveryService,
         MongooseSchemaFactory,
         ContentService,
+        VersionService,
         AuthService,
         JwtStrategy,
         JwtAuthGuard,
@@ -74,7 +76,8 @@ export class VertexCoreModule {
         {
           provide: 'VERTEX_BOOTSTRAP',
           useFactory: async (discovery: SchemaDiscoveryService) => {
-             await discovery.registerCollections(options.entities);
+             // Register Version collection first, then user collections
+             await discovery.registerCollections([Version, ...options.entities]);
           },
           inject: [SchemaDiscoveryService]
         }

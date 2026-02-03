@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Schema } from 'mongoose';
-import { CollectionMetadata, FieldType, FieldOptions } from '@vertex/common';
+import { CollectionMetadata, FieldType, FieldOptions, DocumentStatus } from '@vertex/common';
 
 @Injectable()
 export class MongooseSchemaFactory {
@@ -11,6 +11,20 @@ export class MongooseSchemaFactory {
     metadata.fields.forEach((field) => {
       schemaDefinition[field.name] = this.mapFieldToMongoose(field);
     });
+
+    // Add draft system fields if enabled (default: true)
+    const draftsEnabled = metadata.drafts !== false; // Default to true
+    if (draftsEnabled) {
+      schemaDefinition['status'] = {
+        type: String,
+        enum: [DocumentStatus.Draft, DocumentStatus.Published, DocumentStatus.Archived],
+        default: DocumentStatus.Draft
+      };
+      schemaDefinition['publishedAt'] = {
+        type: Date,
+        required: false
+      };
+    }
 
     const schema = new Schema(schemaDefinition, { 
       timestamps: metadata.timestamps || false 

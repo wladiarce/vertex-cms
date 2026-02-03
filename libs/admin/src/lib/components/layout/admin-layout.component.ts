@@ -23,7 +23,7 @@ import { VertexClientService } from '../../services/vertex-client.service';
             <a [routerLink]="['/admin/collections', col.slug]"
                routerLinkActive="bg-gray-800 text-blue-400"
                class="block px-4 py-2 rounded transition-colors hover:bg-gray-800">
-               {{ col.pluralName || col.slug }}
+               {{ col.pluralName || col.singularName || col.slug }}
             </a>
           }
         </nav>

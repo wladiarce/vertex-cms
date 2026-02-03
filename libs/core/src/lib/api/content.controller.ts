@@ -36,4 +36,28 @@ export class ContentController {
   async delete(@Param('slug') slug: string, @Param('id') id: string) {
     return this.contentService.delete(slug, id);
   }
+
+  @Patch(':slug/:id/publish')
+  async publish(@Param('slug') slug: string, @Param('id') id: string) {
+    return this.contentService.publish(slug, id);
+  }
+
+  @Patch(':slug/:id/unpublish')
+  async unpublish(@Param('slug') slug: string, @Param('id') id: string) {
+    return this.contentService.unpublish(slug, id);
+  }
+
+  @Get(':slug/:id/versions')
+  async getVersions(@Param('slug') slug: string, @Param('id') id: string) {
+    return this.contentService.getVersions(slug, id);
+  }
+
+  @Post(':slug/:id/restore/:versionId')
+  async restoreVersion(
+    @Param('slug') slug: string,
+    @Param('id') id: string,
+    @Param('versionId') versionId: string
+  ) {
+    return this.contentService.restoreVersion(slug, id, versionId);
+  }
 }

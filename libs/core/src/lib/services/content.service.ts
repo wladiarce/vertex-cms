@@ -2,15 +2,18 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
 import { SchemaDiscoveryService } from './schema-discovery.service';
+import { VersionService } from './version.service';
 import { getLocalizedValue } from '../utils/locale.utils';
 import { LocaleConfigProvider } from '../providers/locale-config.provider';
+import { DocumentStatus } from '@vertex/common';
 
 @Injectable()
 export class ContentService {
   constructor(
     @InjectConnection() private readonly connection: Connection,
     private readonly discovery: SchemaDiscoveryService,
-    private readonly localeConfig: LocaleConfigProvider
+    private readonly localeConfig: LocaleConfigProvider,
+    private readonly versionService: VersionService
   ) {}
 
   private getModel(slug: string): Model<any> {
@@ -37,6 +40,16 @@ export class ContentService {
     const skip = (page - 1) * limit;
 
     const filter: any = {};
+    
+    // Add draft filtering if collection has drafts enabled (default: true)
+    const draftsEnabled = config?.drafts !== false;
+    if (draftsEnabled) {
+      const status = query.status || DocumentStatus.Published; // Default to published only
+      if (status !== 'all') {
+        filter.status = status;
+      }
+    }
+    
     if (query.where) {
       // query.forEach((value: any, key: string) => {
       //   filter[key] = value;
@@ -49,7 +62,7 @@ export class ContentService {
     
     // Quick Fix: Allow direct matching for top-level fields
     // If query contains 'slug=home', we use it.
-    const { page: _p, limit: _l, locale: _loc, ...rest } = query;
+    const { page: _p, limit: _l, locale: _loc, status: _s, ...rest } = query;
     Object.assign(filter, rest);
 
     const [docs, total] = await Promise.all([
@@ -127,8 +140,22 @@ export class ContentService {
       cleanData = await config.hooks.beforeChange({ data: cleanData, operation: 'update' });
     }
 
+    // Get the current document to check if it's published
+    const currentDoc = await model.findById(id).exec();
+    if (!currentDoc) throw new NotFoundException();
+
     const updated = await model.findByIdAndUpdate(id, cleanData, { new: true }).exec();
     if (!updated) throw new NotFoundException();
+    
+    // Create version if:
+    // 1. Collection has drafts enabled (default: true)
+    // 2. Document is currently published
+    // 3. Document will remain published after update
+    const draftsEnabled = config?.drafts !== false;
+    if (draftsEnabled && currentDoc.status === DocumentStatus.Published && updated.status === DocumentStatus.Published) {
+      await this.versionService.createVersion(slug, id, updated.toObject(), currentDoc.createdBy);
+    }
+    
     return updated;
   }
 
@@ -172,5 +199,70 @@ export class ContentService {
       }
     });
     return output;
+  }
+
+  /**
+   * Publish a draft document
+   * Creates a version when publishing
+   */
+  async publish(slug: string, id: string) {
+    const model = this.getModel(slug);
+    const config = this.discovery.getCollection(slug);
+    
+    const draftsEnabled = config?.drafts !== false;
+    if (!draftsEnabled) {
+      throw new BadRequestException('Collection does not support drafts');
+    }
+
+    const updated = await model.findByIdAndUpdate(
+      id,
+      { status: DocumentStatus.Published, publishedAt: new Date() },
+      { new: true }
+    ).exec();
+    
+    if (!updated) throw new NotFoundException();
+    
+    // Create version on publish
+    await this.versionService.createVersion(slug, id, updated.toObject(), updated.createdBy);
+    
+    return updated;
+  }
+
+  /**
+   * Unpublish a document (change status to draft)
+   */
+  async unpublish(slug: string, id: string) {
+    const model = this.getModel(slug);
+    const config = this.discovery.getCollection(slug);
+    
+    const draftsEnabled = config?.drafts !== false;
+    if (!draftsEnabled) {
+      throw new BadRequestException('Collection does not support drafts');
+    }
+
+    const updated = await model.findByIdAndUpdate(
+      id,
+      { status: DocumentStatus.Draft },
+      { new: true }
+    ).exec();
+    
+    if (!updated) throw new NotFoundException();
+    return updated;
+  }
+
+  /**
+   * Get all versions for a document
+   */
+  async getVersions(slug: string, id: string) {
+    return this.versionService.getVersions(slug, id);
+  }
+
+  /**
+   * Restore a document to a previous version
+   */
+  async restoreVersion(slug: string, id: string, versionId: string) {
+    const restoredData = await this.versionService.restoreVersion(slug, versionId);
+    // Update the document with restored data
+    return this.update(slug, id, restoredData);
   }
 }
