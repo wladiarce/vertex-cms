@@ -1,0 +1,56 @@
+/* --- DESIGN TOKENS (CSS Variables) --- */
+
+:root {
+  /* Theme: Light (Warm Concrete) */
+  --bg-app: #F2F1EE;
+  --bg-surface: #FFFFFF;
+  --bg-subtle: #E8E6E1;
+  --bg-input: #F9F8F6;
+  
+  --text-main: #1A1C1E;
+  --text-muted: #6B6B6B;
+  --text-code: #C93C00; /* Burnt Orange for code snippets */
+
+  --primary: #FF4F00; /* International Orange */
+  --primary-fg: #FFFFFF;
+  
+  --border: #1A1C1E;
+  --border-dim: #D4D4D4;
+
+  --success: #2E7D32;
+  --warning: #F59E0B;
+  --error: #DC2626;
+  
+  /* Typography */
+  --font-ui: 'General Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Spacing & Shape */
+  --border-width: 1px;
+  --radius: 2px; /* Sharp, technical */
+  
+  /* The "Hard" Shadow */
+  --shadow-depth: 4px 4px 0px var(--border);
+  --shadow-hover: 6px 6px 0px var(--border);
+  --shadow-active: 0px 0px 0px var(--border);
+  --shadow-sm: 2px 2px 0px var(--border);
+}
+
+/* Theme: Dark (Deep Lacquer) */
+[data-theme="dark"] {
+  --bg-app: #121212;
+  --bg-surface: #1E1E1E;
+  --bg-subtle: #2A2A2A;
+  --bg-input: #121212;
+
+  --text-main: #E0E0E0;
+  --text-muted: #9E9E9E;
+  --text-code: #FF8F6B;
+
+  --border: #555555;
+  --border-dim: #333333;
+
+  --shadow-depth: 4px 4px 0px #000000;
+  --shadow-hover: 6px 6px 0px #000000;
+  --shadow-sm: 2px 2px 0px #000000;
+}

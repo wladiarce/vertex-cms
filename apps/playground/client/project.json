@@ -22,6 +22,7 @@
         ],
         "styles": [
           "apps/playground/client/src/styles.scss",
+          "libs/admin/src/lib/styles/vertex-theme.scss",
           "node_modules/tailwindcss/index.css"
         ],
         "server": "apps/playground/client/src/main.server.ts",

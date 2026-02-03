@@ -92,6 +92,16 @@ export class AuthService {
     return localStorage.getItem('vertex_token');
   }
 
+  getUserInfo(): any {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+    
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload;
+  }
+
   private setToken(token: string) {
     localStorage.setItem('vertex_token', token);
   }

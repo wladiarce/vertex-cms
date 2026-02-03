@@ -1,0 +1,51 @@
+<div class="min-h-screen bg-[var(--bg-app)] bg-grid-pattern flex items-center justify-center p-4">
+  <vertex-card [padding]="false" class="w-full max-w-md">
+    <!-- Logo and Title -->
+    <div class="p-8 pb-6 text-center border-b border-[var(--border-dim)]">
+      <div class="flex justify-center mb-4">
+        <vertex-logo [size]="'md'"></vertex-logo>
+      </div>
+      <p class="text-[var(--text-muted)] text-sm font-mono">Sign in to manage your content</p>
+    </div>
+
+    <!-- Login Form -->
+    <form [formGroup]="form" (ngSubmit)="submit()" class="p-8">
+      <div class="mb-4">
+        <vertex-input
+          [label]="'Email'"
+          [type]="'email'"
+          [placeholder]="'admin@example.com'"
+          formControlName="email"
+        ></vertex-input>
+      </div>
+      
+      <div class="mb-6">
+        <vertex-input
+          [label]="'Password'"
+          [type]="'password'"
+          [placeholder]="'••••••••'"
+          formControlName="password"
+        ></vertex-input>
+      </div>
+      <div class="w-full text-center">
+        <vertex-button
+          [variant]="'primary'"
+          [type]="'submit'"
+          [disabled]="form.invalid || loading()"
+          [fluid]
+          class="w-full"
+        >
+          {{ loading() ? 'Signing in...' : 'Sign In' }}
+        </vertex-button>
+      </div>
+      
+      
+      @if (error()) {
+        <div class="mt-4 flex items-center gap-2 text-sm">
+          <i data-lucide="alert-circle" class="w-4 h-4 text-[var(--primary)]"></i>
+          <span class="text-[var(--text-code)] font-mono text-xs">{{ error() }}</span>
+        </div>
+      }
+    </form>
+  </vertex-card>
+</div>

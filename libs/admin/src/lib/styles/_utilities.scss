@@ -1,0 +1,22 @@
+/* --- UTILITY CLASSES --- */
+
+/* Grid Texture Background for "Canvas" feel */
+.bg-grid-pattern {
+  background-image: radial-gradient(var(--border-dim) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Font utilities */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Code snippet styling */
+.code-snippet {
+  font-family: var(--font-mono);
+  color: var(--text-code);
+  background: var(--bg-subtle);
+  padding: 0.1rem 0.3rem;
+  border-radius: 2px;
+  font-size: 0.85em;
+}

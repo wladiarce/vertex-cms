@@ -27,18 +27,18 @@ VertexCMS aims to become the **premier content management system for the Angular
 > **Job to be done**: As a content editor, I need to manage content in multiple languages so that I can support global reach.
 
 ##### Internationalization (i18n)
-- [ ] **Backend**: Update Schema Engine to support `localized: true` on field definitions
-- [ ] **DB**: Store localized fields as objects: `{ en: "Value", es: "Valor", fr: "Valeur" }`
-- [ ] **API**: Add locale query parameter (e.g., `?locale=es`) to fetch content in specific language
-- [ ] **UI**: Add "Locale Switcher" in Admin Form that toggles visible field values
-- [ ] **Fallback logic**: If translation missing, fall back to default locale
+- [x] **Backend**: Update Schema Engine to support `localized: true` on field definitions
+- [x] **DB**: Store localized fields as objects: `{ en: "Value", es: "Valor", fr: "Valeur" }`
+- [x] **API**: Add locale query parameter (e.g., `?locale=es`) to fetch content in specific language
+- [x] **UI**: Add "Locale Switcher" in Admin Form that toggles visible field values
+- [x] **Fallback logic**: If translation missing, fall back to default locale
 
 ##### Draft & publish system
-- [ ] **Versions collection**: Create a generic `_versions` collection to store document history
-- [ ] **Status Field**: Add `status: 'draft' | 'published' | 'archived'` to all collections
-- [ ] **UI**: Add "Save as Draft" vs "Publish" buttons in edit forms
-- [ ] **API**: Update `find()` to default to `{ status: 'published' }`, with `?draft=true` accessible only via auth
-- [ ] **Scheduled publishing**: (Optional) Support `publishedAt` date field for future publishing
+- [x] **Versions collection**: Create a generic `_versions` collection to store document history
+- [x] **Status Field**: Add `status: 'draft' | 'published' | 'archived'` to all collections
+- [x] **UI**: Add "Save as Draft" vs "Publish" buttons in edit forms
+- [x] **API**: Update `find()` to default to `{ status: 'published' }`, with `?draft=true` accessible only via auth
+- [x] **Scheduled publishing**: (Optional) Support `publishedAt` date field for future publishing
 
 ---
 
