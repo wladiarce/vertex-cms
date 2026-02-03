@@ -15,92 +15,90 @@ declare const lucide: any;
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, VertexButtonComponent, VertexBadgeComponent, VertexCardComponent],
   template: `
-    <div class="p-6 md:p-8">
-      <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <div>
-          <h1 class="text-3xl font-bold">{{ collection()?.pluralName }}</h1>
-          <p class="text-[var(--text-muted)] text-sm font-mono mt-1">Manage your {{ collection()?.pluralName?.toLowerCase() || collection()?.singularName?.toLowerCase() + 's' }}</p>
-        </div>
-        <div class="flex gap-2">
-          @if (draftsEnabled()) {
-            <select [(ngModel)]="selectedStatus" (change)="loadData()" 
-                    class="v-input px-3 py-2 text-sm">
-              <option value="published">Published Only</option>
-              <option value="draft">Drafts Only</option>
-              <option value="all">All</option>
-            </select>
-          }
-          <a [routerLink]="['create']">
-            <vertex-button [variant]="'primary'" [icon]="'plus'">
-              New {{ collection()?.singularName }}
-            </vertex-button>
-          </a>
-        </div>
-      </header>
-
-      <vertex-card [padding]="false">
-        <table class="v-table">
-          <thead>
-            <tr>
-              @if (draftsEnabled()) {
-                <th>Status</th>
-              }
-              <th>ID</th>
-              <th>Created</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (doc of documents(); track doc._id) {
-              <tr (click)="navigateToEdit(doc._id)">
-                @if (draftsEnabled()) {
-                  <td>
-                    @if (doc.status === 'draft') {
-                      <vertex-badge [status]="'draft'">DRAFT</vertex-badge>
-                    } @else if (doc.status === 'published') {
-                      <vertex-badge [status]="'published'">PUBLISHED</vertex-badge>
-                    } @else if (doc.status === 'archived') {
-                      <vertex-badge [status]="'archived'">ARCHIVED</vertex-badge>
-                    }
-                  </td>
-                }
-                <td class="font-mono text-xs">{{ doc._id }}</td>
-                <td class="text-[var(--text-muted)]">{{ doc.createdAt | date }}</td>
-                <td>
-                  <a [routerLink]="[doc._id]" class="text-[var(--primary)] hover:underline font-medium" (click)="$event.stopPropagation()">Edit</a>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-
-        @if (documents().length === 0) {
-          <div class="text-center py-12 text-[var(--text-muted)]">
-            No {{ collection()?.pluralName?.toLowerCase() }} found. Create your first one!
-          </div>
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div>
+        <h1 class="text-3xl font-bold">{{ collection()?.pluralName }}</h1>
+        <p class="text-[var(--text-muted)] text-sm font-mono mt-1">Manage your {{ collection()?.pluralName?.toLowerCase() || collection()?.singularName?.toLowerCase() + 's' }}</p>
+      </div>
+      <div class="flex gap-2">
+        @if (draftsEnabled()) {
+          <select [(ngModel)]="selectedStatus" (change)="loadData()" 
+                  class="v-input px-3 py-2 text-sm">
+            <option value="published">Published Only</option>
+            <option value="draft">Drafts Only</option>
+            <option value="all">All</option>
+          </select>
         }
-      </vertex-card>
+        <a [routerLink]="['create']">
+          <vertex-button [variant]="'primary'" [icon]="'plus'">
+            New {{ collection()?.singularName }}
+          </vertex-button>
+        </a>
+      </div>
+    </header>
 
-      <div class="mt-4 flex justify-between items-center">
-        <div class="text-sm text-[var(--text-muted)] font-mono">
-          Showing {{ documents().length }} of {{ totalDocs() }} {{ collection()?.pluralName?.toLowerCase() }}
+    <vertex-card [padding]="false">
+      <table class="v-table">
+        <thead>
+          <tr>
+            @if (draftsEnabled()) {
+              <th>Status</th>
+            }
+            <th>ID</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (doc of documents(); track doc._id) {
+            <tr (click)="navigateToEdit(doc._id)">
+              @if (draftsEnabled()) {
+                <td>
+                  @if (doc.status === 'draft') {
+                    <vertex-badge [status]="'draft'">DRAFT</vertex-badge>
+                  } @else if (doc.status === 'published') {
+                    <vertex-badge [status]="'published'">PUBLISHED</vertex-badge>
+                  } @else if (doc.status === 'archived') {
+                    <vertex-badge [status]="'archived'">ARCHIVED</vertex-badge>
+                  }
+                </td>
+              }
+              <td class="font-mono text-xs">{{ doc._id }}</td>
+              <td class="text-[var(--text-muted)]">{{ doc.createdAt | date }}</td>
+              <td>
+                <a [routerLink]="[doc._id]" class="text-[var(--primary)] hover:underline font-medium" (click)="$event.stopPropagation()">Edit</a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (documents().length === 0) {
+        <div class="text-center py-12 text-[var(--text-muted)]">
+          No {{ collection()?.pluralName?.toLowerCase() }} found. Create your first one!
         </div>
-        <div class="flex gap-2">
-          <vertex-button 
-            [disabled]="currentPage() === 1" 
-            (click)="previousPage()"
-            [size]="'sm'"
-          >
-            Previous
-          </vertex-button>
-          <vertex-button 
-            [disabled]="currentPage() >= totalPages()" 
-            (click)="nextPage()"
-            [size]="'sm'"
-          >
-            Next
-          </vertex-button>
-        </div>
+      }
+    </vertex-card>
+
+    <div class="mt-4 flex justify-between items-center">
+      <div class="text-sm text-[var(--text-muted)] font-mono">
+        Showing {{ documents().length }} of {{ totalDocs() }} {{ collection()?.pluralName?.toLowerCase() }}
+      </div>
+      <div class="flex gap-2">
+        <vertex-button 
+          [disabled]="currentPage() === 1" 
+          (click)="previousPage()"
+          [size]="'sm'"
+        >
+          Previous
+        </vertex-button>
+        <vertex-button 
+          [disabled]="currentPage() >= totalPages()" 
+          (click)="nextPage()"
+          [size]="'sm'"
+        >
+          Next
+        </vertex-button>
       </div>
     </div>
   `

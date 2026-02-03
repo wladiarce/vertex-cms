@@ -1,16 +1,16 @@
 /* Vertex CMS - Main Theme File */
 
 /* Import fonts */
-@import './fonts.css';
+@use './fonts.css';
 
 /* Import theme tokens */
-@import './tokens';
+@use './tokens';
 
 /* Import component styles */
-@import './components';
+@use './components';
 
 /* Import utilities */
-@import './utilities';
+@use './utilities';
 
 /* --- GLOBAL RESETS --- */
 body {

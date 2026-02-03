@@ -48,8 +48,6 @@ export class VertexButtonComponent {
       classes.push('w-full');
     }
     
-    console.log(this.fluid());
-    
     return classes.join(' ');
   }
 }

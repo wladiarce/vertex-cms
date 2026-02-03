@@ -4,13 +4,17 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { VertexClientService } from '../../services/vertex-client.service';
 import { VertexLogoComponent } from '../ui/vertex-logo.component';
 import { AuthService } from '../../services/auth.service';
+import { VertexThemeToggleComponent } from '../ui/vertex-theme-toggle.component';
+// import { VertexBreadcrumbComponent } from '../ui/vertex-breadcrumb.component';
 
 declare const lucide: any;
 
 @Component({
   selector: 'vertex-admin-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, VertexLogoComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, VertexLogoComponent, VertexThemeToggleComponent,
+    // VertexBreadcrumbComponent
+  ],
   templateUrl: './admin-layout.component.html',
   styleUrls: ['./admin-layout.component.scss']
 })

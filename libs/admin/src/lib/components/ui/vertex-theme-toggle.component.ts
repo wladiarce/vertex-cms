@@ -1,27 +1,32 @@
-import { Component, OnInit, AfterViewInit, inject, ElementRef, signal } from '@angular/core';
+import { Component, OnInit, inject, ElementRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { LucideAngularModule, MoonIcon, SunIcon, } from 'lucide-angular';
 
 declare const lucide: any;
 
 @Component({
   selector: 'vertex-theme-toggle',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   template: `
-    <button class="v-btn" (click)="toggleTheme()" type="button">
-      <i [attr.data-lucide]="currentTheme() === 'dark' ? 'sun' : 'moon'"></i>
+    <button class="v-btn w-full" (click)="toggleTheme()" type="button">
+      <i-lucide [img]="currentTheme() === 'dark' ? SunIcon : MoonIcon"></i-lucide>
       Toggle Theme
     </button>
   `,
   styles: [`
     :host {
       display: inline-block;
+      width: 100%;
     }
   `]
 })
-export class VertexThemeToggleComponent implements OnInit, AfterViewInit {
-  private elementRef = inject(ElementRef);
+export class VertexThemeToggleComponent implements OnInit {
   currentTheme = signal<'light' | 'dark'>('light');
+
+  readonly SunIcon = SunIcon;
+  readonly MoonIcon = MoonIcon;
+
 
   ngOnInit() {
     // Load theme from localStorage
@@ -32,18 +37,11 @@ export class VertexThemeToggleComponent implements OnInit, AfterViewInit {
     }
   }
 
-  ngAfterViewInit() {
-    this.initializeIcons();
-  }
-
   toggleTheme() {
     const newTheme = this.currentTheme() === 'dark' ? 'light' : 'dark';
     this.currentTheme.set(newTheme);
     this.applyTheme(newTheme);
     localStorage.setItem('vertex-theme', newTheme);
-    
-    // Re-initialize icons after theme change
-    setTimeout(() => this.initializeIcons(), 50);
   }
 
   private applyTheme(theme: 'light' | 'dark') {
@@ -51,16 +49,6 @@ export class VertexThemeToggleComponent implements OnInit, AfterViewInit {
       document.body.setAttribute('data-theme', 'dark');
     } else {
       document.body.removeAttribute('data-theme');
-    }
-  }
-
-  private initializeIcons() {
-    if (typeof lucide !== 'undefined') {
-      try {
-        lucide.createIcons({ nameAttr: 'data-lucide' });
-      } catch (e) {
-        console.warn('Lucide icons not initialized:', e);
-      }
     }
   }
 }
