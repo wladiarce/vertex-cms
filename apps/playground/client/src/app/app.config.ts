@@ -10,10 +10,6 @@ import {
   withInterceptors,
 } from '@angular/common/http';
 import { adminRoutes, authInterceptor } from '@vertex/admin';
-import {
-  AuthService,
-  initializeAuth,
-} from 'libs/admin/src/lib/services/auth.service';
 import { VertexRegistryService } from '@vertex/public';
 
 import { HeroComponent } from './components/hero/hero.component';
@@ -43,10 +39,6 @@ export const appConfig: ApplicationConfig = {
       ],
       withComponentInputBinding(),
     ),
-    provideAppInitializer(() => {
-      const authService = inject(AuthService);
-      return initializeAuth(authService);
-    }),
     provideAppInitializer(() => {
       const registryService = inject(VertexRegistryService);
       registryService.register('hero', HeroComponent);

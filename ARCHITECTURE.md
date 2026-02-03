@@ -655,15 +655,6 @@ export class LanguageSwitcherComponent {
 // Or query parameter
 /blog/welcome-to-vertexcms?locale=es
 ```
-
-### Future enhancements
-
-See [future-locale-db-enhancement.md](./future-locale-db-enhancement.md) for planned features:
-- Database-driven locale management
-- Admin UI for adding/removing locales at runtime
-- Locale-specific validation rules
-- Translation workflow management
-
 ---
 
 ### 2. `@vertex/core`

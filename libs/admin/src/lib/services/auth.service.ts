@@ -1,20 +1,37 @@
-import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, map, tap } from 'rxjs/operators';
-import { lastValueFrom, Observable, of } from 'rxjs';
-import { isPlatformBrowser } from '@angular/common';
+import { Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private platformId = inject(PLATFORM_ID);
   
-  // Track login state reactively
-  isAuthenticated = signal<boolean>(isPlatformBrowser(this.platformId) ? this.hasToken() : false);
+  // Simple: just check if token exists in localStorage
+  // No platform checks needed since admin is CSR-only
+  isAuthenticated = signal<boolean>(!!localStorage.getItem('vertex_token'));
 
   private get apiUrl() { return '/api/vertex/auth'; }
+  private validationStarted = false;
+
+  constructor() {}
+
+  /**
+   * Lazy validation - called by guard or manually
+   * Returns Observable that completes when validation is done
+   */
+  ensureValidated(): Observable<boolean> {
+    // If already validated or no token, return current state immediately
+    if (this.validationStarted || !this.hasToken()) {
+      return of(this.isAuthenticated());
+    }
+    
+    // Start validation
+    this.validationStarted = true;
+    return this.checkSession();
+  }
 
   login(credentials: { email: string; password: string }) {
     return this.http.post<{ access_token: string }>(`${this.apiUrl}/login`, credentials)
@@ -22,14 +39,13 @@ export class AuthService {
         tap(response => {
           this.setToken(response.access_token);
           this.isAuthenticated.set(true);
-          // Navigate to dashboard after login
           this.router.navigate(['/admin']);
         })
       );
   }
 
   logout() {
-    if(isPlatformBrowser(this.platformId)) localStorage.removeItem('vertex_token');
+    localStorage.removeItem('vertex_token');
     this.isAuthenticated.set(false);
     this.router.navigate(['/admin/login']);
   }
@@ -44,31 +60,28 @@ export class AuthService {
   }
 
   /**
-   * Called on App Start.
-   * Returns generic Observable so APP_INITIALIZER can wait for it.
+   * Validates the current token with the backend.
    */
   checkSession(): Observable<boolean> {
     const token = this.getToken();
     
-    // 1. If no token, we are definitely not logged in
     if (!token) {
       this.isAuthenticated.set(false);
       return of(false);
     }
 
-    // 2. Verify with backend
     return this.http.post<{ valid: boolean }>(`${this.apiUrl}/validate`, {token: this.getToken()}).pipe(
       map(response => {
         const isValid = response.valid;
         this.isAuthenticated.set(isValid);
         
         if (!isValid) {
-          this.logout(); // Clear invalid garbage from storage
+          this.logout();
         }
         return isValid;
       }),
-      catchError(() => {
-        // If the server is down or returns 401/500
+      catchError((error) => {
+        console.error('checkSession ERROR:', error);
         this.logout();
         return of(false);
       })
@@ -76,20 +89,14 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return isPlatformBrowser(this.platformId) ? localStorage.getItem('vertex_token') : null;
+    return localStorage.getItem('vertex_token');
   }
 
   private setToken(token: string) {
-    if(isPlatformBrowser(this.platformId)) localStorage.setItem('vertex_token', token);
+    localStorage.setItem('vertex_token', token);
   }
 
   private hasToken(): boolean {
-    return isPlatformBrowser(this.platformId) ? !!localStorage.getItem('vertex_token') : false;
+    return !!localStorage.getItem('vertex_token');
   }
-}
-
-export function initializeAuth(authService: AuthService) {
-  
-  console.log('initializing auth');
-  return lastValueFrom(authService.checkSession());
 }
