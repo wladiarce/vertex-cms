@@ -7,33 +7,34 @@ import { map } from 'rxjs';
 import { VertexButtonComponent } from '../../components/ui/vertex-button.component';
 import { VertexBadgeComponent } from '../../components/ui/vertex-badge.component';
 import { VertexCardComponent } from '../../components/ui/vertex-card.component';
+import { VertexSelectComponent } from '../../components/ui/vertex-select.component';
 
 declare const lucide: any;
 
 @Component({
   selector: 'vertex-collection-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, VertexButtonComponent, VertexBadgeComponent, VertexCardComponent],
+  imports: [CommonModule, RouterLink, FormsModule, VertexButtonComponent, VertexBadgeComponent, VertexCardComponent, VertexSelectComponent],
   template: `
-    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
       <div>
-        <h1 class="text-3xl font-bold">{{ collection()?.pluralName }}</h1>
+        <h1 class="text-3xl font-bold">{{ collection()?.pluralName || (collection()?.singularName + 's').toUpperCase() }}</h1>
         <p class="text-[var(--text-muted)] text-sm font-mono mt-1">Manage your {{ collection()?.pluralName?.toLowerCase() || collection()?.singularName?.toLowerCase() + 's' }}</p>
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-2 items-center">
         @if (draftsEnabled()) {
-          <select [(ngModel)]="selectedStatus" (change)="loadData()" 
-                  class="v-input px-3 py-2 text-sm">
+          <vertex-select [(ngModel)]="selectedStatus" (ngModelChange)="loadData()">
             <option value="published">Published Only</option>
             <option value="draft">Drafts Only</option>
             <option value="all">All</option>
-          </select>
+          </vertex-select>
         }
-        <a [routerLink]="['create']">
-          <vertex-button [variant]="'primary'" [icon]="'plus'">
-            New {{ collection()?.singularName }}
-          </vertex-button>
-        </a>
+        <vertex-button 
+          [variant]="'primary'" 
+          [icon]="'plus'" 
+          [routerLink]="['create']">
+          New {{ collection()?.singularName }}
+        </vertex-button>
       </div>
     </header>
 

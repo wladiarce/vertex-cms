@@ -6,104 +6,119 @@ import { VertexClientService } from '../../services/vertex-client.service';
 import { FieldRendererComponent } from '../../components/form/field-renderer.component';
 import { BlockMetadata } from '@vertex/common';
 import { LocaleService } from '../../services/locale.service';
+import { VertexCardComponent } from '../../components/ui/vertex-card.component';
+import { VertexButtonComponent } from '../../components/ui/vertex-button.component';
+import { VertexBadgeComponent } from '../../components/ui/vertex-badge.component';
 
 @Component({
   selector: 'vertex-collection-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, FieldRendererComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, FieldRendererComponent, VertexCardComponent, VertexButtonComponent, VertexBadgeComponent],
   template: `
-    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-8">
-      <header class="flex justify-between items-center mb-8 border-b pb-4">
-        <div>
-          <h1 class="text-2xl font-bold">
-            {{ isNew() ? 'Create' : 'Edit' }} {{ collection()?.singularName }}
-          </h1>
-          <p class="text-gray-500 text-sm mt-1">
-            {{ isNew() ? 'Add a new entry' : 'ID: ' + id() }}
-          </p>
-          @if (!isNew() && draftsEnabled()) {
-            <div class="flex gap-2 mt-2">
-              @if (documentStatus() === 'draft') {
-                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">Draft</span>
-              } @else if (documentStatus() === 'published') {
-                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Published</span>
-              } @else if (documentStatus() === 'archived') {
-                <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded">Archived</span>
+    <div class="max-w-5xl mx-auto">
+      <vertex-card>
+        <!-- Header -->
+        <header class="border-b border-[var(--border)] pb-6 mb-8">
+          <div class="flex justify-between items-start">
+            <div>
+              <h1 class="text-3xl font-bold uppercase tracking-tight">
+                {{ isNew() ? 'Create' : 'Edit' }} {{ collection()?.singularName }}
+              </h1>
+              <p class="font-mono text-xs text-[var(--text-muted)] mt-2 uppercase">
+                {{ isNew() ? 'Add a new entry' : 'ID: ' + id() }}
+              </p>
+              @if (!isNew() && draftsEnabled()) {
+                <div class="flex gap-2 mt-3">
+                  @if (documentStatus() === 'draft') {
+                    <vertex-badge [status]="'draft'">Draft</vertex-badge>
+                  } @else if (documentStatus() === 'published') {
+                    <vertex-badge [status]="'published'">Published</vertex-badge>
+                  } @else if (documentStatus() === 'archived') {
+                    <vertex-badge [status]="'archived'">Archived</vertex-badge>
+                  }
+                </div>
               }
             </div>
-          }
-        </div>
-        <div class="flex gap-3">
-          <a [routerLink]="['../']" class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-50">
-            Cancel
-          </a>
-          
-          @if (draftsEnabled() && !isNew()) {
-            <button type="button" (click)="toggleVersionHistory()" 
-                    class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
-              📜 History
-            </button>
-          }
-          @if (draftsEnabled()) {
-            <button (click)="saveAsDraft()" [disabled]="form.invalid || loading()" 
-                    class="px-4 py-2 border border-blue-600 text-blue-600 rounded hover:bg-blue-50 disabled:opacity-50">
-              {{ loading() && saveAction() === 'draft' ? 'Saving...' : 'Save as Draft' }}
-            </button>
-            <button (click)="publishDocument()" [disabled]="form.invalid || loading()" 
-                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">
-              {{ loading() && saveAction() === 'publish' ? 'Publishing...' : 'Publish' }}
-            </button>
-          } @else {
-            <button (click)="save()" [disabled]="form.invalid || loading()" 
-                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">
-              {{ loading() ? 'Saving...' : 'Save' }}
-            </button>
-          }
-        </div>
-      </header>
+            <div class="flex gap-2">
+              <a [routerLink]="['../']">
+                <vertex-button [icon]="'x'">Cancel</vertex-button>
+              </a>
+              
+              @if (draftsEnabled() && !isNew()) {
+                <vertex-button [icon]="'history'" (click)="toggleVersionHistory()">
+                  History
+                </vertex-button>
+              }
+              @if (draftsEnabled()) {
+                <vertex-button (click)="saveAsDraft()" 
+                               [disabled]="form.invalid || loading()"
+                               [icon]="'save'">
+                  {{ loading() && saveAction() === 'draft' ? 'Saving...' : 'Save as Draft' }}
+                </vertex-button>
+                <vertex-button (click)="publishDocument()" 
+                               [disabled]="form.invalid || loading()"
+                               [variant]="'primary'"
+                               [icon]="'check-circle'">
+                  {{ loading() && saveAction() === 'publish' ? 'Publishing...' : 'Publish' }}
+                </vertex-button>
+              } @else {
+                <vertex-button (click)="save()" 
+                               [disabled]="form.invalid || loading()"
+                               [variant]="'primary'"
+                               [icon]="'save'">
+                  {{ loading() ? 'Saving...' : 'Save' }}
+                </vertex-button>
+              }
+            </div>
+          </div>
+        </header>
 
-      <form [formGroup]="form" class="space-y-6">
-        @for (field of collection()?.fields; track field.name) {
-          <vertex-field-renderer [field]="field" [group]="form" />
-        }
-      </form>
+        <!-- Form -->
+        <form [formGroup]="form" class="space-y-6">
+          @for (field of collection()?.fields; track field.name) {
+            <vertex-field-renderer [field]="field" [group]="form" />
+          }
+        </form>
+      </vertex-card>
     </div>
 
     <!-- Version History Sidebar -->
     @if (showVersionHistory()) {
-      <div class="fixed inset-y-0 right-0 w-96 bg-white shadow-2xl border-l z-50 flex flex-col">
+      <div class="fixed inset-y-0 right-0 w-96 bg-[var(--bg-surface)] border-l-2 border-[var(--border)] shadow-[var(--shadow-depth)] z-50 flex flex-col">
         <!-- Header -->
-        <div class="p-4 border-b flex justify-between items-center">
-          <h2 class="text-lg font-semibold">Version History</h2>
-          <button (click)="toggleVersionHistory()" class="text-gray-400 hover:text-gray-600">
-            ✕
+        <div class="p-4 border-b-2 border-[var(--border)] bg-[var(--bg-subtle)] flex justify-between items-center">
+          <h2 class="font-bold text-sm uppercase tracking-wide">Version History</h2>
+          <button (click)="toggleVersionHistory()" class="text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
+            <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
 
         <!-- Version List -->
         <div class="flex-1 overflow-y-auto p-4">
           @if (loadingVersions()) {
-            <div class="text-center py-8 text-gray-500">Loading versions...</div>
+            <div class="text-center py-8 font-mono text-xs text-[var(--text-muted)] uppercase">Loading versions...</div>
           } @else if (versions().length === 0) {
-            <div class="text-center py-8 text-gray-500">
+            <div class="text-center py-8 font-mono text-xs text-[var(--text-muted)] uppercase">
               No version history available.
             </div>
           } @else {
             @for (version of versions(); track version._id) {
-              <div class="mb-4 p-4 border rounded hover:bg-gray-50">
-                <div class="flex justify-between items-start mb-2">
+              <div class="mb-4 p-4 v-card transition-all hover:shadow-[var(--shadow-hover)]">
+                <div class="flex justify-between items-start mb-3">
                   <div>
-                    <div class="font-semibold text-sm">Version {{ version.versionNumber }}</div>
-                    <div class="text-xs text-gray-500">{{ version.createdAt | date:'medium' }}</div>
+                    <div class="font-bold text-sm uppercase">Version {{ version.versionNumber }}</div>
+                    <div class="font-mono text-[10px] text-[var(--text-muted)] mt-1">{{ version.createdAt | date:'medium' }}</div>
                     @if (version.createdBy) {
-                      <div class="text-xs text-gray-500">By: {{ version.createdBy }}</div>
+                      <div class="font-mono text-[10px] text-[var(--text-muted)]">By: {{ version.createdBy }}</div>
                     }
                   </div>
-                  <button 
+                  <vertex-button 
                     (click)="restoreVersion(version._id)"
-                    class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+                    [size]="'sm'"
+                    [variant]="'primary'"
+                    [icon]="'rotate-ccw'">
                     Restore
-                  </button>
+                  </vertex-button>
                 </div>
               </div>
             }
@@ -112,7 +127,7 @@ import { LocaleService } from '../../services/locale.service';
       </div>
 
       <!-- Backdrop -->
-      <div class="fixed inset-0 bg-black opacity-50 z-40" (click)="toggleVersionHistory()"></div>
+      <div class="fixed inset-0 bg-[var(--text-main)] opacity-50 z-40" (click)="toggleVersionHistory()"></div>
     }
   `
 })
@@ -220,9 +235,24 @@ export class CollectionEditComponent {
   }
 
   private loadData() {
+    const col = this.collection();
+    if (!col) return;
+    
+    // Build populate string from all relationship fields
+    const relationshipFields = col.fields
+      .filter(f => f.type === 'relationship')
+      .map(f => f.name);
+    
+    const populate = relationshipFields.length > 0 ? relationshipFields.join(',') : undefined;
+    
     this.loading.set(true);
-    this.cms.findOne(this.slug(), this.id()!).subscribe({
+    this.cms.findOne(this.slug(), this.id()!, populate).subscribe({
       next: (data) => {
+        // Store document status
+        if (data._status) {
+          this.documentStatus.set(data._status);
+        }
+        
         // 1. We must manually reconstruct FormArrays before patching!
         // Because standard patchValue won't create the controls for us.
         this.rebuildFormArrays(data);

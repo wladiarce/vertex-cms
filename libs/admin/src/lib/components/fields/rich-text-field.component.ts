@@ -13,47 +13,69 @@ import { TiptapEditorDirective } from 'ngx-tiptap';
   providers: [TiptapEditorDirective],
   template: `
     <div [formGroup]="group" class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        {{ field.label || field.name }}
-      </label>
+      <div class="v-input-group">
+        <label>
+          {{ field.label || field.name }}
+          @if (field.required) {
+            <span class="text-[var(--primary)]">*</span>
+          }
+        </label>
+      </div>
 
-      <div class="border border-gray-300 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-        <div class="flex flex-wrap gap-1 p-2 bg-gray-50 border-b border-gray-200" *ngIf="editor">
+      <div class="border border-[var(--border)] overflow-hidden bg-[var(--bg-surface)] shadow-[var(--shadow-depth)] transition-shadow hover:shadow-[var(--shadow-hover)]">
+        <!-- Toolbar -->
+        <div class="flex flex-wrap gap-1 p-2 bg-[var(--bg-subtle)] border-b border-[var(--border-dim)]" *ngIf="editor">
           
-          <button type="button" (click)="toggleBold()" [class.bg-gray-200]="editor.isActive('bold')" 
-                  class="p-1 rounded hover:bg-gray-200" title="Bold">
-            <strong>B</strong>
+          <button type="button" (click)="toggleBold()" 
+                  [class.bg-[var(--primary)]]="editor.isActive('bold')"
+                  [class.text-white]="editor.isActive('bold')"
+                  class="px-2 py-1 font-mono text-xs font-bold border border-[var(--border-dim)] hover:bg-[var(--bg-input)] transition-colors" 
+                  title="Bold">
+            B
           </button>
           
-          <button type="button" (click)="toggleItalic()" [class.bg-gray-200]="editor.isActive('italic')" 
-                  class="p-1 rounded hover:bg-gray-200 italic" title="Italic">
+          <button type="button" (click)="toggleItalic()" 
+                  [class.bg-[var(--primary)]]="editor.isActive('italic')"
+                  [class.text-white]="editor.isActive('italic')"
+                  class="px-2 py-1 font-mono text-xs italic border border-[var(--border-dim)] hover:bg-[var(--bg-input)] transition-colors" 
+                  title="Italic">
             I
           </button>
 
-          <div class="w-px h-6 bg-gray-300 mx-1"></div>
+          <div class="w-px h-6 bg-[var(--border-dim)] mx-1"></div>
 
-          <button type="button" (click)="setHeading(2)" [class.bg-gray-200]="editor.isActive('heading', { level: 2 })" 
-                  class="p-1 rounded hover:bg-gray-200 font-bold" title="H2">
+          <button type="button" (click)="setHeading(2)" 
+                  [class.bg-[var(--primary)]]="editor.isActive('heading', { level: 2 })"
+                  [class.text-white]="editor.isActive('heading', { level: 2 })"
+                  class="px-2 py-1 font-mono text-xs font-bold border border-[var(--border-dim)] hover:bg-[var(--bg-input)] transition-colors" 
+                  title="H2">
             H2
           </button>
           
-          <button type="button" (click)="setHeading(3)" [class.bg-gray-200]="editor.isActive('heading', { level: 3 })" 
-                  class="p-1 rounded hover:bg-gray-200 font-bold text-sm" title="H3">
+          <button type="button" (click)="setHeading(3)" 
+                  [class.bg-[var(--primary)]]="editor.isActive('heading', { level: 3 })"
+                  [class.text-white]="editor.isActive('heading', { level: 3 })"
+                  class="px-2 py-1 font-mono text-xs font-bold border border-[var(--border-dim)] hover:bg-[var(--bg-input)] transition-colors" 
+                  title="H3">
             H3
           </button>
 
-          <div class="w-px h-6 bg-gray-300 mx-1"></div>
+          <div class="w-px h-6 bg-[var(--border-dim)] mx-1"></div>
 
-          <button type="button" (click)="toggleBulletList()" [class.bg-gray-200]="editor.isActive('bulletList')" 
-                  class="p-1 rounded hover:bg-gray-200" title="Bullet List">
+          <button type="button" (click)="toggleBulletList()" 
+                  [class.bg-[var(--primary)]]="editor.isActive('bulletList')"
+                  [class.text-white]="editor.isActive('bulletList')"
+                  class="px-2 py-1 font-mono text-xs border border-[var(--border-dim)] hover:bg-[var(--bg-input)] transition-colors" 
+                  title="Bullet List">
             • List
           </button>
         </div>
 
+        <!-- Editor -->
         <tiptap-editor [editor]="editor" 
                        [(ngModel)]="value" 
                        [ngModelOptions]="{standalone: true}"
-                       class="prose prose-sm max-w-none p-4 min-h-[150px] outline-none">
+                       class="prose prose-sm max-w-none min-h-[150px] outline-none bg-[var(--bg-input)]">
         </tiptap-editor>
       </div>
       
@@ -64,6 +86,11 @@ import { TiptapEditorDirective } from 'ngx-tiptap';
     :host ::ng-deep .ProseMirror {
       outline: none;
       min-height: 150px;
+      color: var(--text-main);
+      margin: 1.5rem;
+    }
+    :host ::ng-deep .ProseMirror:focus {
+      outline: none;
     }
   `]
 })

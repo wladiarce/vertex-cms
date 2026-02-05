@@ -292,3 +292,87 @@ textarea.v-input {
     height: 0.875rem;
   }
 }
+
+/* Autocomplete Component */
+.v-autocomplete {
+  position: relative;
+  
+  label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+  }
+}
+
+.v-autocomplete-input-wrapper {
+  position: relative;
+}
+
+.v-autocomplete-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.v-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  
+  .v-chip-remove {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.2rem;
+    line-height: 1;
+    
+    &:hover {
+      color: var(--text-main);
+    }
+  }
+}
+
+.v-autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-depth);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.v-autocomplete-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  
+  &:hover,
+  &.highlighted {
+    background: var(--bg-subtle);
+  }
+  
+  &.loading,
+  &.empty {
+    color: var(--text-muted);
+    cursor: default;
+    font-style: italic;
+  }
+}

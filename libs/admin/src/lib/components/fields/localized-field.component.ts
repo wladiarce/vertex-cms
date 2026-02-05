@@ -1,8 +1,9 @@
-import { Component, Input, signal, computed, inject } from '@angular/core';
+import { Component, Input, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FieldOptions, FieldType } from '@vertex/common';
 import { LocaleService } from '../../services/locale.service';
+import { VertexTabsComponent, VertexTab } from '../ui/vertex-tabs.component';
 
 /**
  * Component for rendering localized fields with locale tabs
@@ -11,75 +12,67 @@ import { LocaleService } from '../../services/locale.service';
 @Component({
   selector: 'vertex-localized-field',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, VertexTabsComponent],
   template: `
     <div class="mb-6">
       <!-- Field Label -->
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        {{ field.label || field.name }}
-        @if (field.required) {
-          <span class="text-red-500">*</span>
-        }
-      </label>
+      <div class="v-input-group mb-2">
+        <label>
+          {{ field.label || field.name }}
+          @if (field.required) {
+            <span class="text-[var(--primary)]">*</span>
+          }
+        </label>
+      </div>
 
       <!-- Locale Tabs -->
-      <div class="flex gap-2 mb-3 border-b border-gray-200">
-        @for (locale of supportedLocales(); track locale) {
-          <button
-            type="button"
-            (click)="currentLocale.set(locale)"
-            [class]="getTabClasses(locale)"
-            class="px-4 py-2 text-sm font-medium transition-colors relative"
-          >
-            {{ getLocaleName(locale) }}
-            
-            <!-- Indicator for missing translation -->
-            @if (!hasTranslation(locale)) {
-              <span class="absolute top-1 right-1 w-2 h-2 bg-yellow-400 rounded-full" 
-                    title="Translation missing"></span>
+      <vertex-tabs 
+        [tabs]="tabsConfig()" 
+        [activeTab]="currentLocale()"
+        (activeTabChange)="currentLocale.set($event)"
+      >
+        <!-- Field Input based on type -->
+        <div class="field-input">
+          @if (getLocaleControl(currentLocale()); as control) {
+            @switch (field.type) {
+              @case ('text') {
+                <input
+                  type="text"
+                  [formControl]="control"
+                  [placeholder]="field.label + ' (' + currentLocale() + ')'"
+                  class="v-input"
+                  (input)="onInputChange()"
+                />
+              }
+              @case ('rich-text') {
+                <textarea
+                  [formControl]="control"
+                  [placeholder]="field.label + ' (' + currentLocale() + ')'"
+                  rows="6"
+                  class="v-input"
+                  (input)="onInputChange()"
+                ></textarea>
+              }
+              @default {
+                <input
+                  type="text"
+                  [formControl]="control"
+                  [placeholder]="field.label + ' (' + currentLocale() + ')'"
+                  class="v-input"
+                  (input)="onInputChange()"
+                />
+              }
             }
-          </button>
-        }
-      </div>
-
-      <!-- Field Input based on type -->
-      <div class="field-input">
-        @if (getLocaleControl(currentLocale()); as control) {
-          @switch (field.type) {
-            @case ('text') {
-              <input
-                type="text"
-                [formControl]="control"
-                [placeholder]="field.label + ' (' + currentLocale() + ')'"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
-            }
-            @case ('rich-text') {
-              <textarea
-                [formControl]="control"
-                [placeholder]="field.label + ' (' + currentLocale() + ')'"
-                rows="6"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              ></textarea>
-            }
-            @default {
-              <input
-                type="text"
-                [formControl]="control"
-                [placeholder]="field.label + ' (' + currentLocale() + ')'"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
-            }
+          } @else {
+            <div class="font-mono text-xs text-[var(--primary)] p-2">
+              Form control not initialized for {{ currentLocale() }}
+            </div>
           }
-        } @else {
-          <div class="text-red-500 text-sm p-2">
-            Form control not initialized for {{ currentLocale() }}
-          </div>
-        }
-      </div>
+        </div>
+      </vertex-tabs>
 
       <!-- Helper text -->
-      <p class="mt-1 text-xs text-gray-500">
+      <p class="mt-2 font-mono text-[10px] text-[var(--text-muted)] uppercase">
         This field supports multiple languages. Switch tabs to add translations.
       </p>
     </div>
@@ -90,7 +83,7 @@ import { LocaleService } from '../../services/locale.service';
     }
   `]
 })
-export class LocalizedFieldComponent {
+export class LocalizedFieldComponent implements OnInit {
   @Input({ required: true }) field!: FieldOptions & { name: string };
   @Input({ required: true }) group!: FormGroup;
 
@@ -101,6 +94,41 @@ export class LocalizedFieldComponent {
 
   // Supported locales from service
   supportedLocales = this.localeService.getSupportedLocales();
+
+  // Track form values reactively - this will trigger computed to re-run
+  private formValuesVersion = signal<number>(0);
+
+  // Computed tabs configuration - now reactive to form changes
+  tabsConfig = computed<VertexTab[]>(() => {
+    // Access the version signal to make this computed reactive to form changes
+    this.formValuesVersion();
+    
+    return this.supportedLocales().map(locale => ({
+      id: locale,
+      label: this.getLocaleName(locale),
+      badge: this.hasTranslation(locale) ? undefined : '!'
+    }));
+  });
+
+  ngOnInit() {
+    // Subscribe to form value changes and bump the version signal
+    const localeGroup = this.group.get(this.field.name) as FormGroup;
+    if (localeGroup) {
+      localeGroup.valueChanges.subscribe(() => {
+        this.formValuesVersion.update(v => v + 1);
+      });
+      
+      // Trigger initial update in case form already has values
+      this.formValuesVersion.update(v => v + 1);
+    }
+  }
+
+  /**
+   * Called when input changes to trigger reactivity
+   */
+  onInputChange() {
+    this.formValuesVersion.update(v => v + 1);
+  }
 
   /**
    * Get the form control for a specific locale
@@ -134,19 +162,5 @@ export class LocalizedFieldComponent {
    */
   getLocaleName(locale: string): string {
     return this.localeService.getLocaleName(locale);
-  }
-
-  /**
-   * Get CSS classes for locale tab
-   */
-  getTabClasses(locale: string): string {
-    const isActive = this.currentLocale() === locale;
-    const baseClasses = 'border-b-2 ';
-    
-    if (isActive) {
-      return baseClasses + 'border-blue-500 text-blue-600';
-    }
-    
-    return baseClasses + 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300';
   }
 }

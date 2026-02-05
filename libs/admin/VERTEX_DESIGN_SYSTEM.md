@@ -86,6 +86,8 @@ The Vertex design system includes the following components:
 - `<vertex-button>` - Button with mechanical press effect
 - `<vertex-card>` - Card with optional title/icon header
 - `<vertex-input>` - Form input with label
+- `<vertex-select>` - Form select dropdown with custom styling
+- `<vertex-tabs>` - Tab navigation with badge support
 - `<vertex-badge>` - Status badges (draft/published/archived)
 - `<vertex-breadcrumb>` - Breadcrumb navigation
 - `<vertex-theme-toggle>` - Light/dark theme toggle

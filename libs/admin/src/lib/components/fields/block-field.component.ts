@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { FieldOptions, BlockMetadata } from '@vertex/common';
@@ -9,48 +9,79 @@ import { FieldRendererComponent } from '../form/field-renderer.component'; // Re
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FieldRendererComponent],
   template: `
-    <div class="mb-6 border border-gray-200 rounded-lg p-4 bg-gray-50">
-      <label class="block text-sm font-bold text-gray-700 mb-4">
-        {{ field.label || field.name }}
-      </label>
+    <div class="mb-6">
+      <div class="v-input-group mb-4">
+        <label>
+          {{ field.label || field.name }}
+          @if (field.required) {
+            <span class="text-[var(--primary)]">*</span>
+          }
+        </label>
+      </div>
 
       <div [formGroup]="parentForm">
         <div [formArrayName]="field.name" class="space-y-4">
           
           @for (control of formArray.controls; track control; let i = $index) {
-            <div [formGroupName]="i" class="bg-white border border-gray-300 rounded shadow-sm">
-              <div class="flex justify-between items-center px-4 py-2 bg-gray-100 border-b cursor-move">
-                <span class="font-semibold text-sm uppercase text-gray-600">
-                  {{ getBlockLabel(i) }}
-                </span>
-                <div class="flex gap-2 text-xs">
-                  <button type="button" (click)="moveBlock(i, -1)" [disabled]="i === 0" class="hover:text-blue-600 disabled:opacity-30">▲</button>
-                  <button type="button" (click)="moveBlock(i, 1)" [disabled]="i === formArray.length - 1" class="hover:text-blue-600 disabled:opacity-30">▼</button>
-                  <button type="button" (click)="removeBlock(i)" class="text-red-500 hover:text-red-700">Remove</button>
+            <div [formGroupName]="i" class="v-block" [class.active]="selectedBlock() === i">
+              <!-- Block Header -->
+              <div class="v-block-header" (click)="toggleBlock(i)">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="grip-vertical" class="w-4 h-4 text-[var(--text-muted)]"></i>
+                  <span class="font-bold text-sm uppercase">{{ getBlockLabel(i) }}</span>
+                  <span class="font-mono text-[10px] text-[var(--text-muted)] bg-[var(--border-dim)] px-1.5 py-0.5 rounded-sm">
+                    #{{ i }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button type="button" (click)="moveBlock(i, -1); $event.stopPropagation()" 
+                          [disabled]="i === 0" 
+                          class="font-mono text-xs hover:text-[var(--primary)] disabled:opacity-30 transition-colors"
+                          title="Move up">
+                    ▲
+                  </button>
+                  <button type="button" (click)="moveBlock(i, 1); $event.stopPropagation()" 
+                          [disabled]="i === formArray.length - 1" 
+                          class="font-mono text-xs hover:text-[var(--primary)] disabled:opacity-30 transition-colors"
+                          title="Move down">
+                    ▼
+                  </button>
+                  <button type="button" (click)="removeBlock(i); $event.stopPropagation()" 
+                          class="font-mono text-xs text-[var(--primary)] hover:text-[var(--text-main)] transition-colors"
+                          title="Remove">
+                    Remove
+                  </button>
+                  <i [attr.data-lucide]="isBlockExpanded(i) ? 'chevron-up' : 'chevron-down'" 
+                     class="w-4 h-4 text-[var(--text-muted)]"></i>
                 </div>
               </div>
 
-              <div class="p-4 space-y-4">
-                <input type="hidden" formControlName="blockType">
-                
-                @for (subField of getBlockFields(i); track subField.name) {
-                  <vertex-field-renderer [field]="subField" [group]="getAsGroup(control)" />
-                }
-              </div>
+              <!-- Block Content (Collapsible) -->
+              @if (isBlockExpanded(i)) {
+                <div class="p-4 space-y-4 bg-[var(--bg-surface)]">
+                  <input type="hidden" formControlName="blockType">
+                  
+                  @for (subField of getBlockFields(i); track subField.name) {
+                    <vertex-field-renderer [field]="subField" [group]="getAsGroup(control)" />
+                  }
+                </div>
+              }
             </div>
           }
 
         </div>
       </div>
 
-      <div class="mt-4">
-        <p class="text-xs text-gray-500 mb-2 font-medium">Add Block:</p>
+      <!-- Add Block Buttons -->
+      <div class="mt-4 p-4 border border-[var(--border-dim)] bg-[var(--bg-subtle)]">
+        <p class="font-mono text-[10px] text-[var(--text-muted)] uppercase mb-3 font-semibold">Add Block:</p>
         <div class="flex flex-wrap gap-2">
           @for (block of availableBlocks; track block.slug) {
             <button type="button" 
                     (click)="addBlock(block)"
-                    class="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 hover:border-blue-400 transition-colors">
-              + {{ block.label }}
+                    class="v-btn text-xs">
+              <i data-lucide="plus" class="w-3 h-3"></i>
+              {{ block.label }}
             </button>
           }
         </div>
@@ -63,6 +94,10 @@ export class BlocksFieldComponent implements OnInit {
   @Input({ required: true }) group!: FormGroup;
 
   private fb = inject(FormBuilder);
+
+  // Track which block is selected/expanded
+  selectedBlock = signal<number | null>(null);
+  expandedBlocks = signal<Set<number>>(new Set());
 
   // Helper getter for the FormArray
   get formArray(): FormArray {
@@ -94,6 +129,11 @@ export class BlocksFieldComponent implements OnInit {
           this.formArray.push(this.createBlockGroup(blockMeta, item));
         }
       });
+      
+      // Expand first block by default
+      if (existingData.length > 0) {
+        this.expandedBlocks.update(set => new Set(set).add(0));
+      }
     }
   }
 
@@ -114,11 +154,23 @@ export class BlocksFieldComponent implements OnInit {
   }
 
   addBlock(blockMeta: BlockMetadata) {
+    const newIndex = this.formArray.length;
     this.formArray.push(this.createBlockGroup(blockMeta));
+    // Auto-expand newly added block
+    this.expandedBlocks.update(set => new Set(set).add(newIndex));
   }
 
   removeBlock(index: number) {
     this.formArray.removeAt(index);
+    // Update expanded blocks indices
+    this.expandedBlocks.update(set => {
+      const newSet = new Set<number>();
+      set.forEach(i => {
+        if (i < index) newSet.add(i);
+        else if (i > index) newSet.add(i - 1);
+      });
+      return newSet;
+    });
   }
 
   moveBlock(index: number, direction: number) {
@@ -127,7 +179,32 @@ export class BlocksFieldComponent implements OnInit {
       const control = this.formArray.at(index);
       this.formArray.removeAt(index);
       this.formArray.insert(newIndex, control);
+      
+      // Update expanded state
+      this.expandedBlocks.update(set => {
+        const wasExpanded = set.has(index);
+        const newSet = new Set(set);
+        newSet.delete(index);
+        if (wasExpanded) newSet.add(newIndex);
+        return newSet;
+      });
     }
+  }
+
+  toggleBlock(index: number) {
+    this.expandedBlocks.update(set => {
+      const newSet = new Set(set);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  }
+
+  isBlockExpanded(index: number): boolean {
+    return this.expandedBlocks().has(index);
   }
 
   // Helpers for Template

@@ -47,15 +47,15 @@ VertexCMS aims to become the **premier content management system for the Angular
 > **Job to be done**: As a developer, I need to link data types (e.g., Authors to Posts) easily and efficiently.
 
 ##### Advanced relationships
-- [ ] **UI**: Replace simple text ID input with **Async searchable select** component
+- [X] **UI**: Replace simple text ID input with **Async searchable select** component
   - Search by title/name
   - Display preview of related document
   - Support creating new related documents inline
-- [ ] **Backend**: Implement `populate()` DB logic in Generic API
+- [X] **Backend**: Implement `populate()` DB logic in Generic API
   - Add `?populate=author,categories` query parameter
   - Support nested population up to defined depth (e.g., max 3 levels)
   - Prevent circular references
-- [ ] **Many-to-Many relations**: Support array-based relationships (e.g., `tags: [ObjectId]`)
+- [X] **Many-to-Many relations**: Support array-based relationships (e.g., `tags: [ObjectId]`)
 
 ##### Media library 2.0
 - [ ] **Image processing**: Integrate `sharp` for automatic optimization
