@@ -3,6 +3,9 @@ import { VertexCoreModule } from '@vertex/core';
 import { Movie } from './collections/movie.collection';
 import { User } from './collections/user.collection';
 import { Page } from './collections/page.collection';
+import { Author } from './collections/author.collection';
+import { Tag } from './collections/tag.collection';
+import { Post } from './collections/post.collection';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -19,7 +22,10 @@ import { join } from 'path';
       entities: [
         Movie,
         User,
-        Page
+        Page,
+        Author,
+        Tag,
+        Post
       ],
       // Configure locales for your application
       locales: {

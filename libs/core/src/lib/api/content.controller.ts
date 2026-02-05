@@ -12,14 +12,30 @@ export class ContentController {
     return this.contentService.findAll(slug, query);
   }
 
+  @Get(':slug/search')
+  async search(
+    @Param('slug') slug: string,
+    @Query('q') searchTerm: string,
+    @Query('limit') limit?: string,
+    @Query('fields') fields?: string  // Comma-separated fields to search
+  ) {
+    return this.contentService.searchForRelationship(
+      slug, 
+      searchTerm, 
+      parseInt(limit || '10'),
+      fields?.split(',')
+    );
+  }
+
   @Get(':slug/:id')
   async findOne(
     @Param('slug') slug: string, 
     @Param('id') id: string,
     @Query('locale') locale?: string,
-    @Query('raw') raw?: string  // If 'true', skip locale transformation for admin
+    @Query('raw') raw?: string,  // If 'true', skip locale transformation for admin
+    @Query('populate') populate?: string  // Comma-separated field names to populate
   ) {
-    return this.contentService.findOne(slug, id, locale, raw === 'true');
+    return this.contentService.findOne(slug, id, locale, raw === 'true', populate);
   }
 
   @Post(':slug')

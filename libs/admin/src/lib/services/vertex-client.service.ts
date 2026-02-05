@@ -38,11 +38,13 @@ export class VertexClientService {
     return this.http.get<any>(`${this.apiUrl}/content/${slug}`, { params });
   }
 
-  findOne(slug: string, id: string) {
+  findOne(slug: string, id: string, populate?: string) {
     // Admin needs raw locale objects, not transformed strings
-    return this.http.get<any>(`${this.apiUrl}/content/${slug}/${id}`, {
-      params: { raw: 'true' }
-    });
+    const params: any = { raw: 'true' };
+    if (populate) {
+      params.populate = populate;
+    }
+    return this.http.get<any>(`${this.apiUrl}/content/${slug}/${id}`, { params });
   }
 
   create(slug: string, data: any) {
@@ -82,5 +84,14 @@ export class VertexClientService {
 
   restoreVersion(slug: string, id: string, versionId: string) {
     return this.http.post(`${this.apiUrl}/content/${slug}/${id}/restore/${versionId}`, {});
+  }
+
+  /**
+   * 5. Relationship Search
+   */
+  searchRelationship(slug: string, searchTerm: string, limit = 10) {
+    return this.http.get<any[]>(`${this.apiUrl}/content/${slug}/search`, {
+      params: { q: searchTerm, limit: limit.toString() }
+    });
   }
 }

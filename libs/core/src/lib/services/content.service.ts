@@ -62,11 +62,20 @@ export class ContentService {
     
     // Quick Fix: Allow direct matching for top-level fields
     // If query contains 'slug=home', we use it.
-    const { page: _p, limit: _l, locale: _loc, status: _s, ...rest } = query;
+    const { page: _p, limit: _l, locale: _loc, status: _s, populate: _pop, ...rest } = query;
     Object.assign(filter, rest);
 
+    // Build Mongoose query
+    let mongooseQuery = model.find(filter).limit(limit).skip(skip);
+    
+    // Apply population if requested
+    if (query.populate) {
+      const populateConfig = this.buildPopulateConfig(query.populate, slug);
+      mongooseQuery = this.applyPopulation(mongooseQuery, populateConfig);
+    }
+
     const [docs, total] = await Promise.all([
-      model.find(filter).limit(limit).skip(skip).lean().exec(),
+      mongooseQuery.lean().exec(),
       model.countDocuments(filter).exec()
     ]);
 
@@ -89,11 +98,19 @@ export class ContentService {
     };
   }
 
-  async findOne(slug: string, id: string, locale?: string, raw: boolean = false) {
+  async findOne(slug: string, id: string, locale?: string, raw: boolean = false, populate?: string) {
     const model = this.getModel(slug);
     const config = this.discovery.getCollection(slug); // Get config for hooks
 
-    const doc = await model.findById(id).exec();
+    let query = model.findById(id);
+    
+    // Apply population if requested
+    if (populate) {
+      const populateConfig = this.buildPopulateConfig(populate, slug);
+      query = this.applyPopulation(query, populateConfig);
+    }
+    
+    const doc = await query.exec();
     
     if (!doc) throw new NotFoundException();
 
@@ -264,5 +281,128 @@ export class ContentService {
     const restoredData = await this.versionService.restoreVersion(slug, versionId);
     // Update the document with restored data
     return this.update(slug, id, restoredData);
+  }
+
+  /**
+   * Build populate configuration from query parameter
+   * Supports nested population with depth limit and circular reference detection
+   * @param populateParam Comma-separated field names (e.g., "author,categories,author.company")
+   * @param collectionSlug Current collection slug for field validation
+   * @param depth Current depth level (for recursion limit)
+   * @param visited Set of already visited collection:field pairs (for circular reference detection)
+   */
+  private buildPopulateConfig(
+    populateParam: string, 
+    collectionSlug: string, 
+    depth: number = 0,
+    visited: Set<string> = new Set()
+  ): any[] {
+    const MAX_DEPTH = 3;
+    
+    if (depth >= MAX_DEPTH) {
+      return [];
+    }
+    
+    const config = this.discovery.getCollection(collectionSlug);
+    if (!config) return [];
+    
+    const fields = populateParam.split(',').map(f => f.trim());
+    const populateConfig: any[] = [];
+    
+    for (const field of fields) {
+      // Check for nested population (e.g., "author.company")
+      const parts = field.split('.');
+      const firstField = parts[0];
+      
+      // Find the field in collection metadata
+      const fieldMeta = config.fields.find(f => f.name === firstField && f.type === 'relationship');
+      if (!fieldMeta || !fieldMeta.relationTo) continue;
+      
+      // Check for circular references
+      const visitKey = `${collectionSlug}:${firstField}`;
+      if (visited.has(visitKey)) continue;
+      
+      const newVisited = new Set(visited);
+      newVisited.add(visitKey);
+      
+      // Build populate object
+      const populateObj: any = { path: firstField };
+      
+      // Handle nested population
+      if (parts.length > 1 && depth + 1 < MAX_DEPTH) {
+        const nestedFields = parts.slice(1).join('.');
+        const nestedConfig = this.buildPopulateConfig(
+          nestedFields, 
+          fieldMeta.relationTo, 
+          depth + 1,
+          newVisited
+        );
+        if (nestedConfig.length > 0) {
+          populateObj.populate = nestedConfig;
+        }
+      }
+      
+      populateConfig.push(populateObj);
+    }
+    
+    return populateConfig;
+  }
+
+  /**
+   * Apply populate configuration to a Mongoose query
+   */
+  private applyPopulation(query: any, populateConfig: any[]): any {
+    if (!populateConfig || populateConfig.length === 0) {
+      return query;
+    }
+    
+    for (const config of populateConfig) {
+      query = query.populate(config);
+    }
+    
+    return query;
+  }
+
+  /**
+   * Search documents for relationship field autocomplete
+   * Searches in title, name, or specified fields
+   */
+  async searchForRelationship(
+    slug: string,
+    searchTerm: string,
+    limit: number = 10,
+    searchFields?: string[]
+  ): Promise<any[]> {
+    const model = this.getModel(slug);
+    const config = this.discovery.getCollection(slug);
+    
+    if (!searchTerm || searchTerm.length < 2) {
+      return [];
+    }
+    
+    // Determine which fields to search
+    const fieldsToSearch = searchFields || ['title', 'name'];
+    
+    // Build search filter using $or for multiple fields
+    const searchFilter: any = {
+      $or: fieldsToSearch.map(field => ({
+        [field]: { $regex: searchTerm, $options: 'i' }
+      }))
+    };
+    
+    // Add published status filter if drafts are enabled
+    const draftsEnabled = config?.drafts !== false;
+    if (draftsEnabled) {
+      searchFilter.status = DocumentStatus.Published;
+    }
+    
+    const results = await model
+      .find(searchFilter)
+      .limit(limit)
+      .select(fieldsToSearch.join(' ') + ' _id')
+      .lean()
+      .exec();
+    
+    return results;
   }
 }

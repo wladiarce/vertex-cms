@@ -65,11 +65,19 @@ export class MongooseSchemaFactory {
 
       // Crucial: Relationships are stored as ObjectIds
       case FieldType.Relationship:
-        return { 
-          ...base, 
+        // Support both single and many-to-many relationships
+        const relationshipType = { 
           type: Schema.Types.ObjectId, 
           ref: field.relationTo // We will ensure this string matches the Mongoose model name
         };
+        
+        if (field.relationMany) {
+          // Many-to-many: array of ObjectIds
+          return { ...base, type: [relationshipType] };
+        }
+        
+        // One-to-one: single ObjectId
+        return { ...base, ...relationshipType };
 
       case FieldType.Blocks:
         // We store blocks as a generic array of objects.

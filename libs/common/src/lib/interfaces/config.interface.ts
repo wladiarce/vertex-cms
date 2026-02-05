@@ -56,6 +56,7 @@ export interface FieldOptions {
   
   // For 'relationship' type
   relationTo?: string; // The slug of the related collection
+  relationMany?: boolean; // If true, field stores array of ObjectIds (many-to-many)
   
   // Validation
   minLength?: number;
