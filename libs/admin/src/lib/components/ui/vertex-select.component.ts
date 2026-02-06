@@ -27,7 +27,16 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule, FormsModu
           (change)="onSelectChange($event)"
           (blur)="onTouched()"
         >
-          <ng-content></ng-content>
+          @if (placeholder()) {
+            <option value="">{{ placeholder() }}</option>
+          }
+          @if (options().length > 0) {
+            @for (option of options(); track option.value) {
+              <option [value]="option.value">{{ option.label }}</option> 
+            }
+          } @else {
+            <ng-content></ng-content>
+          }
         </select>
         <i data-lucide="chevron-down" class="v-select-icon"></i>
       </div>
@@ -106,7 +115,9 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule, FormsModu
 })
 export class VertexSelectComponent implements ControlValueAccessor {
   label = input<string>('');
+  placeholder = input<string>('');
   disabled = input<boolean>(false);
+  options = input<{ label: string; value: string }[]>([]);
 
   value: string = '';
   onChange: any = () => {};
