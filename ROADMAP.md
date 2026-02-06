@@ -58,18 +58,18 @@ VertexCMS aims to become the **premier content management system for the Angular
 - [X] **Many-to-Many relations**: Support array-based relationships (e.g., `tags: [ObjectId]`)
 
 ##### Media library 2.0
-- [ ] **Image processing**: Integrate `sharp` for automatic optimization
+- [X] **Image processing**: Integrate `sharp` for automatic optimization
   - Generate thumbnails (150x150, 300x300)
   - Create responsive sizes (sm, md, lg, xl)
   - Auto-convert to WebP format
   - Preserve original
-- [ ] **Media grid UI**: Dedicated "Media" page in Admin
+- [X] **Media grid UI**: Dedicated "Media" page in Admin
   - Browse all uploaded files
   - Filter by type (image, video, document)
   - Search by filename
   - Bulk delete
   - Copy URLs to clipboard
-- [ ] **Metadata**: Store alt text, captions, and custom metadata for media files
+- [X] **Metadata**: Store alt text, captions, and custom metadata for media files
 
 ---
 

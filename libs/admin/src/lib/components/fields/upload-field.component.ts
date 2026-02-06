@@ -1,14 +1,18 @@
 import { Component, Input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { FieldOptions } from '@vertex/common';
+import { FieldOptions, Upload } from '@vertex/common';
 import { VertexClientService } from '../../services/vertex-client.service';
+import { VertexMediaPickerComponent } from '../ui/vertex-media-picker.component';
 
 @Component({
   selector: 'vertex-upload-field',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    VertexMediaPickerComponent
+  ],
   template: `
     <div [formGroup]="group" class="mb-6">
       <div class="v-input-group">
@@ -32,16 +36,33 @@ import { VertexClientService } from '../../services/vertex-client.service';
       }
 
       @if (!previewUrl()) {
-        <div class="flex items-center justify-center w-full">
-          <label class="flex flex-col items-center justify-center w-full h-32 border border-[var(--border)] bg-[var(--bg-surface)] cursor-pointer shadow-[var(--shadow-depth)] transition-all hover:shadow-[var(--shadow-hover)] hover:bg-[var(--bg-subtle)]">
-            <div class="flex flex-col items-center justify-center pt-5 pb-6">
-              <i data-lucide="upload-cloud" class="w-8 h-8 mb-4 text-[var(--text-muted)]"></i>
+        <div class="flex gap-2 justify-around">
+          <!-- Upload button -->
+          <div class="flex items-center justify-center">
+            <label class="flex flex-col items-center justify-center p-6 h-32 border border-[var(--border)] bg-[var(--bg-surface)] cursor-pointer shadow-[var(--shadow-depth)] transition-all hover:shadow-[var(--shadow-hover)] hover:bg-[var(--bg-subtle)]">
+              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <i data-lucide="upload-cloud" class="w-8 h-8 mb-4 text-[var(--text-muted)]"></i>
+                <p class="mb-2 font-mono text-xs text-[var(--text-muted)] uppercase">
+                  <span class="font-semibold">Click to upload</span>
+                </p>
+              </div>
+              <input type="file" class="hidden" (change)="onFileSelected($event)">
+            </label>
+          </div>
+
+          <!-- Choose from library button -->
+          <div class="flex items-center justify-center">
+            <button
+              type="button"
+              (click)="openMediaPicker()"
+              class="flex flex-col items-center justify-center px-6 border border-[var(--border)] bg-[var(--bg-surface)] cursor-pointer shadow-[var(--shadow-depth)] transition-all hover:shadow-[var(--shadow-hover)] hover:bg-[var(--bg-subtle)]"
+            >
+              <i data-lucide="image" class="w-8 h-8 mb-4 text-[var(--text-muted)]"></i>
               <p class="mb-2 font-mono text-xs text-[var(--text-muted)] uppercase">
-                <span class="font-semibold">Click to upload</span>
+                <span class="font-semibold">Choose from Library</span>
               </p>
-            </div>
-            <input type="file" class="hidden" (change)="onFileSelected($event)">
-          </label>
+            </button>
+          </div>
         </div>
       }
 
@@ -53,6 +74,14 @@ import { VertexClientService } from '../../services/vertex-client.service';
       }
 
       <input type="hidden" [formControlName]="field.name">
+
+      <!-- Media Picker Modal -->
+      @if (showMediaPicker()) {
+        <vertex-media-picker
+          (close)="closeMediaPicker()"
+          (select)="onMediaSelected($event)"
+        />
+      }
     </div>
   `
 })
@@ -61,8 +90,8 @@ export class UploadFieldComponent {
   @Input({ required: true }) group!: FormGroup;
 
   private clientService = inject(VertexClientService);
-//   private http = inject(HttpClient);
   uploading = signal(false);
+  showMediaPicker = signal(false);
 
   // Getter for the current value
   get control() { return this.group.get(this.field.name); }
@@ -103,5 +132,19 @@ export class UploadFieldComponent {
   removeFile() {
     this.control?.setValue(null);
     this.control?.markAsDirty();
+  }
+
+  openMediaPicker() {
+    this.showMediaPicker.set(true);
+  }
+
+  closeMediaPicker() {
+    this.showMediaPicker.set(false);
+  }
+
+  onMediaSelected(media: Upload) {
+    this.control?.setValue(media);
+    this.control?.markAsDirty();
+    this.closeMediaPicker();
   }
 }
