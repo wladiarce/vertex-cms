@@ -77,6 +77,12 @@
   border-color: var(--border);
 }
 
+.v-btn.danger {
+  background: var(--error);
+  color: #FFFFFF;
+  border-color: var(--border);
+}
+
 .v-btn.sm {
   padding: 0.4rem 0.8rem;
   font-size: 0.7rem;

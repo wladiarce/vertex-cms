@@ -24,7 +24,7 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class VertexButtonComponent {
-  variant = input<'default' | 'primary'>('default');
+  variant = input<'default' | 'primary' | 'danger'>('default');
   size = input<'sm' | 'md' | 'lg'>('md');
   disabled = input<boolean>(false);
   icon = input<string>('');
@@ -36,6 +36,8 @@ export class VertexButtonComponent {
     
     if (this.variant() === 'primary') {
       classes.push('primary');
+    } else if (this.variant() === 'danger') {
+      classes.push('danger');
     }
     
     if (this.size() === 'sm') {
