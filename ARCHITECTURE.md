@@ -1,7 +1,7 @@
 # VertexCMS - Architecture & framework documentation
 
-> **Version**: 0.1  
-> **Last Updated**: January 2026
+> **Version**: 0.2  
+> **Last Updated**: February 2026
 
 ## Table of Contents
 
@@ -64,7 +64,8 @@ Fields define the properties of a collection. They are declared using the `@Fiel
 - **Primitives**: `Text`, `Number`, `Boolean`, `Date`, `Email`
 - **Rich content**: `RichText` (WYSIWYG editor - tiptap)
 - **Media**: `Upload` (file uploads)
-- **Complex**: `Select`, `Relationship`, `Blocks` - some still WIP
+- **Relations**: `Relationship` (link to other collections)
+- **Complex**: `Select`, `Blocks`
 
 **Field options:**
 - `type`: The field type (required)
@@ -72,8 +73,10 @@ Fields define the properties of a collection. They are declared using the `@Fiel
 - `required`: Validation rule
 - `unique`: Database constraint
 - `defaultValue`: Default value
-- `options`: For select fields
-- `relationTo`: For relationship fields
+- `localized`: Enable multi-language support for this field
+- `options`: For select fields (array of `{label, value}`)
+- `relationTo`: For relationship fields (slug of target collection)
+- `relationMany`: For relationship fields (true = many-to-many, false/undefined = one-to-one)
 - `blocks`: For block fields (array of Block classes)
 
 ### 3. Blocks
@@ -655,6 +658,307 @@ export class LanguageSwitcherComponent {
 // Or query parameter
 /blog/welcome-to-vertexcms?locale=es
 ```
+---
+
+## Relationships
+
+### Overview
+VertexCMS supports defining relationships between collections, enabling you to link documents together. The system supports both single (one-to-one) and many-to-many relationships with automatic population, searchable autocomplete UI, and depth-limited population to prevent circular references.
+
+### Defining relationships
+
+**Single relationship (one-to-one)**
+```typescript
+@Collection({ slug: 'posts' })
+export class Post {
+  @Field({ type: FieldType.Text, required: true })
+  title: string;
+
+  @Field({ 
+    type: FieldType.Relationship,
+    relationTo: 'authors',  // References the 'authors' collection
+    required: true,
+    label: 'Author'
+  })
+  author: string;  // Stores ObjectId of author document
+}
+```
+
+**Many-to-many relationship**
+```typescript
+@Collection({ slug: 'posts' })
+export class Post {
+  @Field({ type: FieldType.Text, required: true })
+  title: string;
+
+  @Field({ 
+    type: FieldType.Relationship,
+    relationTo: 'tags',
+    relationMany: true,  // ← Enables many-to-many
+    label: 'Tags'
+  })
+  tags: string[];  // Stores array of ObjectIds
+}
+```
+
+### Database storage
+
+**Mongoose schema generation**
+The schema factory automatically generates the correct Mongoose schema based on the `relationMany` flag:
+
+```typescript
+// Single relationship → ObjectId
+{
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: 'authors',
+    required: true
+  }
+}
+
+// Many-to-many → Array of ObjectIds
+{
+  tags: [{
+    type: Schema.Types.ObjectId,
+    ref: 'tags'
+  }]
+}
+```
+
+**Stored data**
+```javascript
+// Document in database
+{
+  _id: "507f1f77bcf86cd799439011",
+  title: "Getting Started with VertexCMS",
+  author: "507f191e810c19729de860ea",  // Single ObjectId
+  tags: [
+    "507f1f77bcf86cd799439012",
+    "507f1f77bcf86cd799439013"
+  ]  // Array of ObjectIds
+}
+```
+
+### Population API
+
+**Automatic population**
+Use the `populate` query parameter to automatically replace ObjectIds with full documents:
+
+```typescript
+// Without population
+GET /api/content/posts/507f1f77bcf86cd799439011
+// Returns: { title: "...", author: "507f191e810c19729de860ea", tags: [...] }
+
+// With population
+GET /api/content/posts/507f1f77bcf86cd799439011?populate=author,tags
+// Returns: { 
+//   title: "...", 
+//   author: { _id: "...", name: "John Doe", email: "..." },
+//   tags: [
+//     { _id: "...", name: "Angular", slug: "angular" },
+//     { _id: "...", name: "CMS", slug: "cms" }
+//   ]
+// }
+```
+
+**Nested population**
+Relationships can be populated up to 3 levels deep:
+
+```typescript
+// Populate author and author's company
+GET /api/content/posts?populate=author,author.company
+
+// Response includes:
+{
+  author: {
+    name: "John Doe",
+    company: {
+      name: "Acme Corp",
+      address: "..."
+    }
+  }
+}
+```
+
+**Depth limit and circular reference protection**
+- Maximum population depth: **3 levels**
+- Circular references are automatically detected and prevented
+- Example: If `Post → Author → Company → CEO (User)`, the system stops at Company level
+
+**Implementation details**
+```typescript
+// ContentService.findOne() with populate
+const doc = await this.contentService.findOne(
+  'posts', 
+  documentId,
+  'author,tags'  // Comma-separated field names
+);
+
+// Backend automatically:
+// 1. Parses populate parameter
+// 2. Builds Mongoose populate configuration
+// 3. Detects and prevents circular references
+// 4. Limits depth to 3 levels
+```
+
+### Search and autocomplete
+
+**Relationship search endpoint**
+When editing documents, the admin UI provides searchable autocomplete for selecting related documents:
+
+```typescript
+// Search for authors matching "john"
+GET /api/content/authors/search?q=john&limit=10
+
+// Returns:
+[
+  { _id: "...", name: "John Doe", email: "john@example.com" },
+  { _id: "...", name "Johnny Smith", email: "johnny@example.com" }
+]
+```
+
+**Search behavior**
+- Searches in `title` and `name` fields by default
+- Case-insensitive partial matching
+- Only returns published documents (respects draft system)
+- Configurable result limit (default: 10)
+
+### Admin UI
+
+**Vertex autocomplete component**
+The admin panel includes a custom autocomplete component for relationship fields:
+
+**Features:**
+- ✅ Search-as-you-type with 300ms debouncing
+- ✅ Keyboard navigation (↑/↓/Enter/Esc)
+- ✅ Single and multiple selection modes
+- ✅ Chip display for multiple selections
+- ✅ Loading and empty states
+- ✅ Follows Vertex design system patterns
+
+**User experience:**
+1. User starts typing in the relationship field
+2. After 300ms, search request is sent to `/api/content/{relationTo}/search`
+3. Results appear in dropdown with keyboard navigation
+4. Selected items show as chips (many-to-many) or fill the input (single)
+5. When editing, populated data automatically displays names instead of IDs
+
+**Example admin form:**
+```html
+<!-- Relationship field in admin edit page -->
+<vertex-relationship-field [field]="authorField" [group]="form" />
+
+<!-- Renders as: -->
+<div class="v-field-relationship">
+  <vertex-autocomplete
+    formControlName="author"
+    label="Author"
+    placeholder="Search authors..."
+    [items]="authorSuggestions"
+    [loading]="searching"
+    (search)="searchAuthors($event)"
+  />
+  <button type="button">+ Create new author</button>
+</div>
+```
+
+### Frontend integration
+
+**Fetching populated relationships**
+```typescript
+// Public site: Fetch post with author populated
+this.cmsFetch.get('/api/content/posts', {
+  slug: 'my-post',
+  populate: 'author,tags'
+}).subscribe(post => {
+  console.log(post.author.name);  // "John Doe"
+  console.log(post.tags[0].name); // "Angular"
+});
+```
+
+**Admin panel: Automatic population on edit**
+When loading a document for editing, the admin automatically populates all relationship fields:
+
+```typescript
+// CollectionEditComponent automatically:
+// 1. Detects all relationship fields
+// 2. Builds populate string: "author,tags,category"
+// 3. Fetches document with populated data
+// 4. Displays names in autocomplete instead of IDs
+```
+
+### Best practices
+
+**When to use relationships**
+- ✅ Author/User references
+- ✅ Categories and tags
+- ✅ Related content (e.g., "Related Posts")
+- ✅ Parent/child hierarchies
+- ✅ Cross-collection references
+
+**When NOT to use relationships**
+- ❌ Simple enums (use `Select` field instead)
+- ❌ Static reference data (use `Select` with hardcoded options)
+- ❌ Deeply nested hierarchies (>3 levels)
+
+**Performance considerations**
+- Always specify `populate` parameter explicitly (don't auto-populate everything)
+- Limit population depth to what's actually needed
+- Use projection to limit populated fields: `populate=author.name,author.email`
+- Consider denormalizing frequently accessed  data
+
+**Example collection structure**
+```typescript
+// Author collection
+@Collection({ slug: 'authors' })
+export class Author {
+  @Field({ type: FieldType.Text, required: true })
+  name: string;
+
+  @Field({ type: FieldType.Email, required: true })
+  email: string;
+
+  @Field({ type: FieldType.Text })
+  bio?: string;
+}
+
+// Tag collection
+@Collection({ slug: 'tags' })
+export class Tag {
+  @Field({ type: FieldType.Text, required: true })
+  name: string;
+
+  @Field({ type: FieldType.Text, required: true })
+  slug: string;
+}
+
+// Post collection with relationships
+@Collection({ slug: 'posts', drafts: true })
+export class Post {
+  @Field({ type: FieldType.Text, required: true })
+  title: string;
+
+  @Field({ type: FieldType.RichText, required: true })
+  content: string;
+
+  // Single relationship
+  @Field({ 
+    type: FieldType.Relationship,
+    relationTo: 'authors',
+    required: true
+  })
+  author: string;
+
+  // Many-to-many relationship
+  @Field({ 
+    type: FieldType.Relationship,
+    relationTo: 'tags',
+    relationMany: true
+  })
+  tags: string[];
+}
+```
+
 ---
 
 ## Media Library 2.0

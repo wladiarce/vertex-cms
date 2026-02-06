@@ -6,7 +6,7 @@
 
 VertexCMS is a modern, block-based content management system designed specifically for developers who have chosen the Angular + NestJS stack. It bridges the gap between "Headless" flexibility and "Visual" page building, without forcing you to leave the ecosystem you love.
 
-## 🎯 Motivation: Why Another CMS?
+## 🎯 Motivation: Why another CMS?
 There are incredible Headless CMS options out there — Payload, Strapi, Prismic, Contentful. They are powerful tools, but I felt that they often treat **Angular** and **NestJS** as second-class citizens. Their documentation, SDKs, and starter kits heavily favor the React/Next.js ecosystem.
 
 As developers, we often face a choice: adapt our workflow to a tool built for a different stack, or build something custom.
@@ -36,6 +36,20 @@ export class Article {
   @Field({ type: FieldType.Text, required: true })
   title: string;
 
+  @Field({ 
+    type: FieldType.Relationship,
+    relationTo: 'authors',
+    required: true
+  })
+  author: string;  // Single relationship
+
+  @Field({ 
+    type: FieldType.Relationship,
+    relationTo: 'tags',
+    relationMany: true
+  })
+  tags: string[];  // Many-to-many relationship
+
   @Field({ type: FieldType.Blocks, blocks: [HeroBlock, TextBlock] })
   content: any[];
 }
@@ -58,6 +72,7 @@ Built-in support for Angular Server-Side Rendering with proper state transfer.
 - **Dynamic admin UI**: an Angular-based Admin panel that generates itself at runtime based on your backend schemas.
 - **Polymorphic forms**: manage complex, nested block structures with a clean UI.
 - **Rich text editor**: integrated Tiptap WYSIWYG editor for formatted content.
+- **Relationships**: define single and many-to-many relationships between collections with async searchable autocomplete UI and automatic population support.
 - **Database agnostic**: support for multiple database systems (PostgreSQL, MySQL, MongoDB, etc.) though adapters (*WIP; for the moment only MongoDB is implemented*).
 - **Media library**: comprehensive media management system with automatic image processing (WebP conversion, responsive variants), metadata editing (alt text, captions), search/filtering, and seamless integration with upload fields. Storage-agnostic architecture (Local filesystem implemented, extensible to S3/GCS or any custom adapter).
 - **Built-in auth**: secure JWT authentication with Role-Based Access Control (RBAC). More authentication methods will be added in the future.
