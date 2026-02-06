@@ -11,7 +11,8 @@ export const adminRoutes: Route[] = [
   // LOGIN - public
   {
     path: 'login',
-    component: LoginComponent
+    component: LoginComponent,
+
   },
   // ADMIN DASHBOARD - private
   {
@@ -33,6 +34,10 @@ export const adminRoutes: Route[] = [
         loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
+        path: 'media',
+        loadComponent: () => import('./pages/media-library/media-library.component').then(m => m.MediaLibraryComponent)
+      },
+      {
         // The Magic Dynamic Route
         path: 'collections/:slug',
         component: CollectionListComponent
@@ -46,6 +51,11 @@ export const adminRoutes: Route[] = [
         // The Magic Dynamic Route
         path: 'collections/:slug/:id',
         component: CollectionEditComponent
+      },
+      {
+        // Cath all: 404 not found -> for the moment goes to dashboard
+        path: '**',
+        redirectTo: 'dashboard'
       }
     ]
   }

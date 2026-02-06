@@ -1,17 +1,20 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, map, tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
   
   // Simple: just check if token exists in localStorage
-  // No platform checks needed since admin is CSR-only
-  isAuthenticated = signal<boolean>(!!localStorage.getItem('vertex_token'));
+  // Even though admin is CSR-only, we need to check if the token exists in localStorage due to compile errors :()
+  isAuthenticated = signal<boolean>(this.isBrowser ? !!localStorage.getItem('vertex_token') : false);
 
   private get apiUrl() { return '/api/vertex/auth'; }
   private validationStarted = false;
@@ -45,7 +48,9 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem('vertex_token');
+    if(this.isBrowser) {
+      localStorage.removeItem('vertex_token');
+    }
     this.isAuthenticated.set(false);
     this.router.navigate(['/admin/login']);
   }
@@ -89,7 +94,10 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('vertex_token');
+    if(this.isBrowser) {
+      return localStorage.getItem('vertex_token');
+    }
+    return null;
   }
 
   getUserInfo(): any {
@@ -103,10 +111,15 @@ export class AuthService {
   }
 
   private setToken(token: string) {
-    localStorage.setItem('vertex_token', token);
+    if(this.isBrowser) {
+      localStorage.setItem('vertex_token', token);
+    }
   }
 
   private hasToken(): boolean {
-    return !!localStorage.getItem('vertex_token');
+    if(this.isBrowser) {
+      return !!localStorage.getItem('vertex_token');
+    }
+    return false;
   }
 }
