@@ -48,11 +48,17 @@ export class BreadcrumbsService {
 
 
         // Interpolate parameters (:slug, :id)
+        const isSlug = label.includes(':slug');
+
         if (label !== null && label !== '') {
           label = this.interpolateParams(label, route.params);
         
           // Resolve collection display names if applicable
-          label = this.resolveCollectionName(label, route.params);
+          if(isSlug){
+            label = this.resolveCollectionName(label, route.params);
+          }
+        console.log(label)
+
 
           breadcrumbs.push({
             label,

@@ -163,6 +163,7 @@ export class CollectionEditComponent {
     this.route.paramMap.subscribe(params => {
       this.slug.set(params.get('slug')!);
       this.id.set(params.get('id'));
+      console.log(params);
       
       // 2. Rebuild form when route changes
       this.initForm();

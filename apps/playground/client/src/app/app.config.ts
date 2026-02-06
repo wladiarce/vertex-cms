@@ -3,7 +3,7 @@ import {
   inject,
   provideAppInitializer,
 } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withRouterConfig } from '@angular/router';
 import {
   provideHttpClient,
   withFetch,
@@ -38,6 +38,9 @@ export const appConfig: ApplicationConfig = {
         },
       ],
       withComponentInputBinding(),
+      withRouterConfig({
+        paramsInheritanceStrategy: 'always'
+      })
     ),
     provideAppInitializer(() => {
       const registryService = inject(VertexRegistryService);

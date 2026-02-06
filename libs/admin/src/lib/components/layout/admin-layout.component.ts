@@ -28,7 +28,6 @@ export class AdminLayoutComponent implements AfterViewInit {
     // In a real implementation, decode JWT token or fetch from API
     const userInfo = this.auth.getUserInfo();
 
-    console.log(userInfo);
     // For now, returning mock data - you can enhance this later
     return {
       name: userInfo.name || 'USER NAME',
