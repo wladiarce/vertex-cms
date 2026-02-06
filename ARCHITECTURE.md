@@ -657,6 +657,471 @@ export class LanguageSwitcherComponent {
 ```
 ---
 
+## Media Library 2.0
+
+### Overview
+VertexCMS includes a comprehensive media library system for managing uploads, images, videos, and documents. The system features automatic image processing, metadata management, and seamless integration with content fields.
+
+### Key features
+
+- **Automatic image processing**: WebP conversion and responsive variant generation
+- **Metadata management**: Alt text, captions, and custom metadata for accessibility and SEO
+- **Search and filtering**: Find media by filename, type (image/video/document)
+- **Bulk operations**: Select and delete multiple files at once
+- **Storage agnostic**: Extensible adapter pattern (currently supports local filesystem)
+- **Integrated workflows**: Upload fields support both new uploads and selecting from existing media
+
+### Image processing
+
+**Automatic variant generation**
+When an image is uploaded, the system automatically generates multiple variants optimized for different use cases:
+
+```typescript
+// Generated variants (all in WebP format):
+{
+  "thumbnail_150": "/uploads/filename-thumbnail-150.webp",  // 150×150 square
+  "thumbnail_300": "/uploads/filename-thumbnail-300.webp",  // 300×300 square
+  "sm": "/uploads/filename-sm.webp",   // 640px width
+  "md": "/uploads/filename-md.webp",   // 768px width
+  "lg": "/uploads/filename-lg.webp",   // 1024px width
+  "xl": "/uploads/filename-xl.webp"    // 1280px width
+}
+```
+
+**Image processor service**
+The `ImageProcessorService` uses the `sharp` library for high-performance image manipulation:
+
+```typescript
+@Injectable()
+export class ImageProcessorService {
+  async processImage(inputPath: string, filename: string): Promise<ImageFormats> {
+    const formats: ImageFormats = {};
+    
+    // Generate thumbnails (square crops)
+    formats.thumbnail_150 = await this.createThumbnail(inputPath, filename, 150);
+    formats.thumbnail_300 = await this.createThumbnail(inputPath, filename, 300);
+    
+    // Generate responsive variants (maintain aspect ratio)
+    formats.sm = await this.createResponsive(inputPath, filename, 640);
+    formats.md = await this.createResponsive(inputPath, filename, 768);
+    formats.lg = await this.createResponsive(inputPath, filename, 1024);
+    formats.xl = await this.createResponsive(inputPath, filename, 1280);
+    
+    return formats;
+  }
+}
+```
+
+**Format strategy:**
+- **WebP conversion**: All variants converted to WebP for optimal file size
+- **Thumbnails**: Use smart cropping to maintain focal point
+- **Responsive sizes**: Maintain aspect ratio, scale to fit width
+- **Quality**: 80% quality for good balance between size and visual fidelity
+
+### Database schema
+
+**Upload collection**
+Media files are stored in a dedicated `_uploads` collection with the following schema:
+
+```typescript
+@Schema({ timestamps: true })
+export class Upload {
+  @Prop({ required: true })
+  filename!: string;           // System-generated unique filename
+  
+  @Prop({ required: true })
+  originalName!: string;       // Original uploaded filename
+  
+  @Prop({ required: true })
+  url!: string;                // Primary file URL
+  
+  @Prop({ required: true })
+  mimetype!: string;           // MIME type (image/jpeg, video/mp4, etc.)
+  
+  @Prop({ required: true })
+  size!: number;               // File size in bytes
+  
+  @Prop()
+  width?: number;              // Image width (if applicable)
+  
+  @Prop()
+  height?: number;             // Image height (if applicable)
+  
+  @Prop()
+  alt?: string;                // Alt text for accessibility
+  
+  @Prop()
+  caption?: string;            // Image caption
+  
+  @Prop({ type: Object })
+  formats?: ImageFormats;      // Generated variants { thumbnail_150: "...", sm: "..." }
+  
+  @Prop({ type: Object })
+  metadata?: Record<string, any>;  // Extensible custom metadata
+  
+  @Prop()
+  createdAt?: Date;
+  
+  @Prop()
+  updatedAt?: Date;
+}
+```
+
+### API endpoints
+
+#### Upload media
+```typescript
+POST /api/vertex/media
+Content-Type: multipart/form-data
+
+// Body: FormData with 'file' field
+FormData {
+  file: [File object]
+}
+
+// Response:
+{
+  "_id": "507f1f77bcf86cd799439011",
+  "filename": "1633024800000-image.jpg",
+  "originalName": "vacation-photo.jpg",
+  "url": "/uploads/1633024800000-image.jpg",
+  "mimetype": "image/jpeg",
+  "size": 245678,
+  "width": 1920,
+  "height": 1080,
+  "formats": {
+    "thumbnail_150": "/uploads/1633024800000-image-thumbnail-150.webp",
+    "thumbnail_300": "/uploads/1633024800000-image-thumbnail-300.webp",
+    "sm": "/uploads/1633024800000-image-sm.webp",
+    "md": "/uploads/1633024800000-image-md.webp",
+    "lg": "/uploads/1633024800000-image-lg.webp",
+    "xl": "/uploads/1633024800000-image-xl.webp"
+  },
+  "createdAt": "2023-10-01T12:00:00.000Z"
+}
+```
+
+#### Get media list
+```typescript
+GET /api/vertex/media?page=1&limit=20&type=image&search=vacation
+
+// Query params:
+// - page: Page number (default: 1)
+// - limit: Items per page (default: 20)
+// - type: Filter by MIME type prefix (image, video, document)
+// - search: Search by filename (case-insensitive, partial match)
+
+// Response:
+{
+  "data": [
+    { /* Upload object */ },
+    { /* Upload object */ }
+  ],
+  "page": 1,
+  "limit": 20,
+  "total": 45,
+  "totalPages": 3
+}
+```
+
+#### Get single media item
+```typescript
+GET /api/vertex/media/:id
+
+// Response: Upload object
+{
+  "_id": "507f1f77bcf86cd799439011",
+  "filename": "1633024800000-image.jpg",
+  // ... full upload object
+}
+```
+
+#### Update metadata
+```typescript
+PATCH /api/vertex/media/:id
+Content-Type: application/json
+
+// Body:
+{
+  "alt": "Sunset over mountains",
+  "caption": "Beautiful sunset captured during our trip to Colorado",
+  "metadata": {
+    "photographer": "John Doe",
+    "location": "Rocky Mountains"
+  }
+}
+
+// Response: Updated Upload object
+```
+
+#### Delete media
+```typescript
+// Single delete
+DELETE /api/vertex/media/:id
+
+// Bulk delete
+DELETE /api/vertex/media
+Content-Type: application/json
+
+{
+  "ids": ["507f1f77bcf86cd799439011", "507f1f77bcf86cd799439012"]
+}
+
+// Response:
+{
+  "success": true,
+  "deletedCount": 2
+}
+```
+
+### Admin UI components
+
+#### Media library page
+Full-featured media management interface accessible at `/admin/media-library`:
+
+**Features:**
+- Grid view with thumbnail previews
+- Search bar for filename filtering
+- Type dropdown filter (All Types, Images, Videos, Documents)
+- Bulk selection with checkboxes
+- Bulk delete action
+- Upload new files via dropzone
+- Click to view details/edit metadata
+- Pagination controls
+
+**Component structure:**
+```typescript
+@Component({
+  selector: 'vertex-media-library',
+  template: `
+    <!-- Search and filters -->
+    <div class="filters">
+      <input [(ngModel)]="searchTerm" placeholder="Search by filename..." />
+      <select [(ngModel)]="selectedType">
+        <option value="">All Types</option>
+        <option value="image">Images</option>
+        <option value="video">Videos</option>
+        <option value="document">Documents</option>
+      </select>
+    </div>
+    
+    <!-- Media grid -->
+    <div class="media-grid">
+      @for (item of media(); track item._id) {
+        <div class="media-card" (click)="viewDetails(item)">
+          <img [src]="item.formats?.thumbnail_300 || item.url" />
+          <p>{{ item.originalName }}</p>
+        </div>
+      }
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination">
+      <button (click)="previousPage()" [disabled]="currentPage() === 1">Previous</button>
+      <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
+      <button (click)="nextPage()" [disabled]="currentPage() === totalPages()">Next</button>
+    </div>
+  `
+})
+export class MediaLibraryComponent { }
+```
+
+#### Media details modal
+Dedicated component for viewing and editing media metadata:
+
+**Features:**
+- Large preview (original for images, icons for other types)
+- Copy URL button
+- Open in new tab link
+- Editable metadata form (alt text, caption)
+- File information display (filename, type, size, dimensions, upload date)
+- Available formats list with copy buttons
+- Save/Reset buttons for form
+
+**Usage:**
+```typescript
+@Component({
+  template: `
+    @if (selectedMedia()) {
+      <vertex-media-details
+        [mediaItem]="selectedMedia()!"
+        (close)="closeDetails()"
+        (save)="saveMetadata($event)"
+      />
+    }
+  `
+})
+```
+
+#### Media picker modal
+Reusable component for selecting media from the library:
+
+**Features:**
+- Grid view of all media
+- Search and filter controls
+- Visual selection with highlighted border
+- Select button (disabled until item chosen)
+- Cancel button
+
+**Used by upload fields:**
+```typescript
+<vertex-media-picker
+  (close)="closeMediaPicker()"
+  (select)="onMediaSelected($event)"
+/>
+```
+
+#### Enhanced upload field
+The `UploadFieldComponent` now supports two workflows:
+
+**1. Upload new file (original behavior)**
+```html
+<label class="upload-button">
+  <i data-lucide="upload-cloud"></i>
+  <span>Click to upload</span>
+  <input type="file" (change)="onFileSelected($event)" />
+</label>
+```
+
+**2. Choose from library (new)**
+```html
+<button (click)="openMediaPicker()">
+  <i data-lucide="image"></i>
+  <span>Choose from Library</span>
+</button>
+```
+
+**Form integration:**
+Both workflows set the same form control value (full Upload object), ensuring consistent behavior:
+
+```typescript
+// After upload
+this.control?.setValue({
+  _id: "...",
+  url: "/uploads/...",
+  filename: "...",
+  // ... full Upload object
+});
+
+// After library selection
+this.control?.setValue(selectedMedia); // Same structure
+```
+
+### Frontend usage
+
+#### Using upload fields in collections
+```typescript
+@Collection({ slug: 'articles' })
+export class Article {
+  @Field({ type: FieldType.Text })
+  title!: string;
+  
+  @Field({ type: FieldType.Upload })
+  featuredImage!: any;  // Stores full Upload object
+}
+```
+
+#### Accessing media in templates
+```typescript
+// In component
+article = signal<Article | null>(null);
+
+// In template
+@if (article()) {
+  <img 
+    [src]="article().featuredImage.formats?.lg || article().featuredImage.url"
+    [alt]="article().featuredImage.alt || article().title"
+  />
+}
+```
+
+#### Responsive images
+Use the generated variants for responsive images:
+
+```html
+<picture>
+  <source
+    media="(min-width: 1024px)"
+    [srcset]="image.formats.xl"
+    type="image/webp"
+  />
+  <source
+    media="(min-width: 768px)"
+    [srcset]="image.formats.lg"
+    type="image/webp"
+  />
+  <source
+    media="(min-width: 640px)"
+    [srcset]="image.formats.md"
+    type="image/webp"
+  />
+  <img
+    [src]="image.formats.sm || image.url"
+    [alt]="image.alt"
+    loading="lazy"
+  />
+</picture>
+```
+
+### Storage adapters
+
+**Adapter interface**
+```typescript
+export interface StorageAdapter {
+  uploadFile(file: Express.Multer.File): Promise<string>;
+  deleteFile(path: string): Promise<void>;
+  getFilePath(filename: string): string;
+}
+```
+
+**Local storage (default)**
+```typescript
+@Injectable()
+export class LocalStorageAdapter implements StorageAdapter {
+  private uploadDir = './uploads';
+  
+  async uploadFile(file: Express.Multer.File): Promise<string> {
+    const filename = `${Date.now()}-${file.originalname}`;
+    const filepath = join(this.uploadDir, filename);
+    await writeFile(filepath, file.buffer);
+    return `/uploads/${filename}`;
+  }
+}
+```
+
+**Configuration**
+```typescript
+// In app.module.ts
+VertexCoreModule.forRoot({
+  // ... other config
+  storageAdapter: LocalStorageAdapter  // or custom S3Adapter, GCSAdapter, etc.
+})
+```
+
+### Best practices
+
+**Accessibility**
+- Always provide alt text for images used in content
+- Use descriptive filenames
+- Add captions for context
+
+**Performance**
+- Use appropriate variants for different screen sizes
+- Implement lazy loading: `<img loading="lazy" />`
+- Consider using `<picture>` for art direction
+
+**Organization**
+- Delete unused media regularly via bulk delete
+- Use search to find and audit media
+- Add metadata to improve searchability
+
+**SEO**
+- Fill out alt text for all content images
+- Use descriptive filenames (renamed on upload)
+- Leverage captions for additional context
+
+---
+
 ### 2. `@vertex/core`
 
 **Purpose**: NestJS backend engine.

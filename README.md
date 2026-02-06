@@ -59,7 +59,7 @@ Built-in support for Angular Server-Side Rendering with proper state transfer.
 - **Polymorphic forms**: manage complex, nested block structures with a clean UI.
 - **Rich text editor**: integrated Tiptap WYSIWYG editor for formatted content.
 - **Database agnostic**: support for multiple database systems (PostgreSQL, MySQL, MongoDB, etc.) though adapters (*WIP; for the moment only MongoDB is implemented*).
-- **Media management**: storage-agnostic upload system (Local filesystem implemented, extensible to S3/GCS or any custom adapter).
+- **Media library**: comprehensive media management system with automatic image processing (WebP conversion, responsive variants), metadata editing (alt text, captions), search/filtering, and seamless integration with upload fields. Storage-agnostic architecture (Local filesystem implemented, extensible to S3/GCS or any custom adapter).
 - **Built-in auth**: secure JWT authentication with Role-Based Access Control (RBAC). More authentication methods will be added in the future.
 - **Type safety**: shared interfaces between frontend and backend ensure your CMS data matches your UI components.
 
