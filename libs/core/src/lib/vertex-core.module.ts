@@ -4,6 +4,7 @@ import { SchemaDiscoveryService } from './services/schema-discovery.service';
 import { MongooseSchemaFactory } from './schema/mongoose-schema.factory';
 import { ContentService } from './services/content.service';
 import { VersionService } from './services/version.service';
+import { ImageProcessorService } from './services/image-processor.service';
 import { ConfigController } from './api/config.controller';
 import { ContentController } from './api/content.controller';
 import { JwtModule } from '@nestjs/jwt';
@@ -16,6 +17,7 @@ import { LocalStorageAdapter } from './storage/local-storage.adapter';
 import { UploadController } from './api/upload.controller';
 import { LocaleConfigProvider } from './providers/locale-config.provider';
 import { Version } from './collections/version.collection';
+import { Upload, UploadMongooseSchema } from './schema/upload.schema';
 
 
 @Global() // Make it global so we don't have to import it everywhere
@@ -25,12 +27,16 @@ import { Version } from './collections/version.collection';
         secret: process.env.JWT_SECRET,
         signOptions: { expiresIn: '1d' },
       }),
+      MongooseModule.forFeature([
+        { name: Upload.name, schema: UploadMongooseSchema }
+      ])
     ],
     providers: [
         SchemaDiscoveryService,
         MongooseSchemaFactory,
         ContentService,
         VersionService,
+        ImageProcessorService,
         AuthService,
         JwtStrategy,
         JwtAuthGuard,

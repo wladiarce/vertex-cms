@@ -9,6 +9,7 @@ export * from './lib/decorators/block.decorator';
 // INTERFACES
 export * from './lib/interfaces/config.interface';
 export * from './lib/interfaces/storage-adapter.interface';
+export * from './lib/interfaces/upload.interface';
 
 // CONFIG
 export * from './lib/config/locale.config';

@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CollectionMetadata } from '@vertex/common';
+import { CollectionMetadata, Upload } from '@vertex/common';
 import { tap } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
@@ -63,8 +63,7 @@ export class VertexClientService {
    * 3. Upload Methods
    */
   upload(formData: any) {
-    return this.http.post<any>(`${this.apiUrl}/vertex/upload`, formData);
-    // return this.http.post<any>(`http://localhost:3000/api/vertex/upload`, formData);
+    return this.http.post<any>(`${this.apiUrl}/vertex/media`, formData);
   }
 
   /**
@@ -92,6 +91,31 @@ export class VertexClientService {
   searchRelationship(slug: string, searchTerm: string, limit = 10) {
     return this.http.get<any[]>(`${this.apiUrl}/content/${slug}/search`, {
       params: { q: searchTerm, limit: limit.toString() }
+    });
+  }
+
+  /**
+   * 6. Media Library Methods
+   */
+  getMedia(page = 1, limit = 24, type?: string, search?: string) {
+    const params: any = { page, limit };
+    if (type) params.type = type;
+    if (search) params.search = search;
+    
+    return this.http.get<any>(`${this.apiUrl}/vertex/media`, { params });
+  }
+
+  getMediaById(id: string) {
+    return this.http.get<Upload>(`${this.apiUrl}/vertex/media/${id}`);
+  }
+
+  updateMedia(id: string, data: { alt?: string; caption?: string; metadata?: any }) {
+    return this.http.patch<Upload>(`${this.apiUrl}/vertex/media/${id}`, data);
+  }
+
+  bulkDeleteMedia(ids: string[]) {
+    return this.http.request('delete', `${this.apiUrl}/vertex/media`, {
+      body: { ids }
     });
   }
 }
