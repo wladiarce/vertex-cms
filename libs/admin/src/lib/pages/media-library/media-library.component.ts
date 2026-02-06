@@ -16,19 +16,10 @@ import { Upload } from '@vertex/common';
     FormsModule,
     VertexCardComponent,
     VertexButtonComponent,
-    VertexBreadcrumbComponent,
     VertexMediaDetailsComponent
   ],
   template: `
     <div class="media-library-page">
-      <!-- Breadcrumb -->
-      <vertex-breadcrumb
-        [items]="[
-          { label: 'Dashboard', route: '/admin/dashboard' },
-          { label: 'Media Library', route: '/admin/media' }
-        ]"
-      />
-
       <!-- Header -->
       <div class="page-header">
         <div>

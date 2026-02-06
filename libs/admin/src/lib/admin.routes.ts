@@ -1,11 +1,18 @@
-import { Route } from '@angular/router';
+import { Route, RouterOutlet } from '@angular/router';
 import { AdminLayoutComponent } from './components/layout/admin-layout.component';
 import { CollectionListComponent } from './pages/collection-list/collection-list.component';
-import { inject } from '@angular/core';
+import { inject, Component } from '@angular/core';
 import { VertexClientService } from './services/vertex-client.service';
 import { CollectionEditComponent } from './pages/collection-edit/collection-edit.component';
 import { authGuard } from './auth/auth.guard';
 import { LoginComponent } from './pages/login/login.component';
+
+@Component({
+  standalone: true,
+  imports: [RouterOutlet],
+  template: '<router-outlet></router-outlet>'
+})
+export class RouteOutletComponent {}
 
 export const adminRoutes: Route[] = [
   // LOGIN - public
@@ -26,36 +33,86 @@ export const adminRoutes: Route[] = [
     children: [
       {
         path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
-      },
-      {
-        path: 'dashboard',
-        loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
-      },
-      {
-        path: 'media',
-        loadComponent: () => import('./pages/media-library/media-library.component').then(m => m.MediaLibraryComponent)
-      },
-      {
-        // The Magic Dynamic Route
-        path: 'collections/:slug',
-        component: CollectionListComponent
-      },
-      {
-        // The Magic Dynamic Route
-        path: 'collections/:slug/create',
-        component: CollectionEditComponent
-      },
-      {
-        // The Magic Dynamic Route
-        path: 'collections/:slug/:id',
-        component: CollectionEditComponent
-      },
-      {
-        // Cath all: 404 not found -> for the moment goes to dashboard
-        path: '**',
-        redirectTo: 'dashboard'
+        data: {
+          breadcrumb: {
+            label: 'Vertex CMS'
+          }
+        },
+        children: [
+          // ROOT - REDIRECT
+          {
+            path: '',
+            redirectTo: 'dashboard',
+            pathMatch: 'full'
+          },
+          // DASHBOARD
+          {
+            path: 'dashboard',
+            loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
+            data: {
+              breadcrumb: {
+                label: ''
+              }
+            }
+          },
+          // MEDIA
+          {
+            path: 'media',
+            loadComponent: () => import('./pages/media-library/media-library.component').then(m => m.MediaLibraryComponent),
+            data: {
+              breadcrumb: {
+                label: 'Media Library'
+              }
+            }
+          },
+          // COLLECTION
+          {
+            path: 'collections/:slug',
+            component: RouteOutletComponent,
+            data: {
+              breadcrumb: {
+                label: ':slug'
+              }
+            },
+            children: [
+              // COLLECTION LIST
+              {
+                path: '',
+                component: CollectionListComponent,
+                data: {
+                  breadcrumb: {
+                    label: null
+                  }
+                }
+              },
+              // COLLECTION CREATE
+              {
+                path: 'create',
+                component: CollectionEditComponent,
+                data: {
+                  breadcrumb: {
+                    label: 'Create New'
+                  }
+                }
+              },
+              // COLLECTION EDIT
+              {
+                path: ':id',
+                component: CollectionEditComponent,
+                data: {
+                  breadcrumb: {
+                    label: 'Edit'
+                  }
+                }
+              }
+            ]
+          },
+          {
+            // Cath all: 404 not found -> for the moment goes to dashboard
+            path: '**',
+            redirectTo: 'dashboard'
+          }
+        ]
       }
     ]
   }
