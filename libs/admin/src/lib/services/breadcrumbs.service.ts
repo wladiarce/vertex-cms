@@ -48,9 +48,9 @@ export class BreadcrumbsService {
 
 
         // Interpolate parameters (:slug, :id)
-        const isSlug = label.includes(':slug');
-
         if (label !== null && label !== '') {
+          const isSlug = label.includes(':slug');
+
           label = this.interpolateParams(label, route.params);
         
           // Resolve collection display names if applicable
