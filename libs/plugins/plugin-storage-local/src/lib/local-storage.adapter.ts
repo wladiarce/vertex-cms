@@ -1,13 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { StorageAdapter, FileData, UploadResult } from '@vertex/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
+export interface StorageLocalOptions {
+  uploadDir?: string;
+}
+
+/**
+ * Adapter for local filesystem storage.
+ * Stores files in a local directory.
+ */
 @Injectable()
 export class LocalStorageAdapter implements StorageAdapter {
-  private uploadDir = 'uploads';
+  private uploadDir: string;
 
-  constructor() {
+  constructor(@Inject('STORAGE_LOCAL_OPTIONS') private options: StorageLocalOptions) {
+    this.uploadDir = options.uploadDir || 'uploads';
     // Ensure directory exists
     if (!fs.existsSync(this.uploadDir)) {
       fs.mkdirSync(this.uploadDir, { recursive: true });

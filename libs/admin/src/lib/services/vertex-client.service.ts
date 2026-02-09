@@ -10,6 +10,11 @@ export class VertexClientService {
   // Signals to hold the global state
   // We use a signal so the Sidebar automatically updates when config loads
   collections = signal<CollectionMetadata[]>([]);
+  capabilities = signal<{ storage: boolean; auth: boolean; database: boolean }>({
+    storage: false,
+    auth: false,
+    database: false
+  });
   
   // Base API URL (proxy is handled by Nx in dev, or relative path in prod)
   private apiUrl = '/api'; 
@@ -19,10 +24,13 @@ export class VertexClientService {
    * Fetches the schema to build the UI
    */
   loadConfig() {
-    return this.http.get<{ collections: CollectionMetadata[] }>(`${this.apiUrl}/vertex/config`)
+    return this.http.get<{ collections: CollectionMetadata[]; capabilities: any }>(`${this.apiUrl}/vertex/config`)
       .pipe(
         tap(response => {
           this.collections.set(response.collections);
+          if (response.capabilities) {
+            this.capabilities.set(response.capabilities);
+          }
         })
       );
   }

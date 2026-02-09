@@ -1,6 +1,6 @@
 # VertexCMS Roadmap
 
-> **Current version**: 0.1.x (Work in Progress)  
+> **Current version**: 0.4.0 (Alpha)  
 > **Target v1.0**: H2-2026??
 
 ---
@@ -74,6 +74,37 @@ VertexCMS aims to become the **premier content management system for the Angular
 ---
 
 #### Milestone 3: The "Integrator" update (v0.4.0)
+> **Job to be done**: As a SW engineer, I want to be able to extend Vertex CMS in an easy way. Extensibility comes first as being able to choose any storage provider or bing my own.
+
+##### Core Plugin Architecture
+- [x] **Registration:** Implement a plugin registration system within `VertexCoreModule.forRoot()`. Users must explicitly provide an array of plugins.
+- [x] **Configuration:** Support a unified configuration object where each plugin receives its specific parameters (e.g., API keys, bucket names, paths).
+- [x] **Extensibility Interface:** Define a standard `VertexPlugin` interface/contract.
+**Note:** While the initial implementation focuses on storage, this interface must be generic enough to support future plugin types (e.g., Database Adapters, Auth Providers) without breaking changes.
+
+##### Storage plugins
+- [ ] **@vertex/plugin-s3**: AWS S3 adapter
+- [x] **@vertex/plugin-gcs**: Google Cloud Storage adapter
+- [ ] **@vertex/plugin-azure**: Azure Blob Storage adapter (community contribution)
+- [x] **Plugin System**: Refactor Core to load plugins via `forRoot({ storage: S3Adapter })`
+- [x] **@vertex/plugin-storage-local**: Local filesystem adapter (Default/Migrated)
+- [x] **Configuration**: Support environment-based config (bucket names, regions, credentials)
+
+##### Database enhancements
+- [ ] **Connection pooling**: Support advanced MongoDB connection options via ENV
+- [ ] **Replica sets**: Configuration for high-availability setups
+- [ ] **Other database adapters - PLUGINS** (using TypeORM or Prisma):
+  - PostgreSQL adapter
+  - MySQL adapter
+
+---
+
+### Phase 2: Beta — Ecosystem & DX (v0.5.x - v0.8.x)
+
+**Goal**: Lower the barrier to entry. Make it trivial for a new developer to start and deploy.  
+**Timeline**: 4-6 Weeks
+
+#### Milestone 4: The "Cloud" update (v0.5.0)
 
 > **Job to be done**: As a developer, I need the CMS to talk to other systems when content changes.
 
@@ -92,31 +123,6 @@ VertexCMS aims to become the **premier content management system for the Angular
 - [ ] **Scopes**: Define read/write permissions per token
 - [ ] **UI**: Manage tokens in Admin (create, revoke, view last used)
 - [ ] **Authentication**: Support both JWT (user sessions) and API tokens (services)
-
----
-
-### Phase 2: Beta — Ecosystem & DX (v0.5.x - v0.8.x)
-
-**Goal**: Lower the barrier to entry. Make it trivial for a new developer to start and deploy.  
-**Timeline**: 4-6 Weeks
-
-#### Milestone 4: The "Cloud" update (v0.5.0)
-
-> **Job to be done**: As a DevOps engineer, I need to deploy this without worrying about losing user uploads.
-
-##### Storage plugins
-- [ ] **@vertex/plugin-s3**: AWS S3 adapter
-- [ ] **@vertex/plugin-gcs**: Google Cloud Storage adapter
-- [ ] **@vertex/plugin-azure**: Azure Blob Storage adapter (community contribution)
-- [ ] **Plugin System**: Refactor Core to load plugins via `forRoot({ storage: S3Adapter })`
-- [ ] **Configuration**: Support environment-based config (bucket names, regions, credentials)
-
-##### Database enhancements
-- [ ] **Connection pooling**: Support advanced MongoDB connection options via ENV
-- [ ] **Replica sets**: Configuration for high-availability setups
-- [ ] **Other database adapters** (using TypeORM or Prisma):
-  - PostgreSQL adapter
-  - MySQL adapter
 
 ---
 
@@ -174,7 +180,7 @@ VertexCMS aims to become the **premier content management system for the Angular
 
 > **Job to be done**: As a developer, I need to send transactional emails from the CMS.
 
-- [ ] **Email service abstraction**: Generic interface for email providers
+- [ ] **Email service abstraction**: Generic interface for email providers, injected as a plugin.
 - [ ] **Adapters**:
   - Nodemailer (SMTP)
   - SendGrid
@@ -248,6 +254,7 @@ VertexCMS aims to become the **premier content management system for the Angular
 - [ ] **Service worker**: Offline-first admin panel (optional)
 
 ##### SEO features
+- [ ] **SEO Plugin**: Official SEO plugin to extend entities with SEO fields
 - [ ] **Meta tags**: Built-in SEO field group (title, description, OG tags)
 - [ ] **Sitemap generation**: Auto-generate XML sitemaps
 - [ ] **Robots.txt**: Configurable robots.txt endpoint
@@ -356,9 +363,10 @@ If you want to contribute, we especially need help with:
 | Version | Release Date | Highlights |
 |---------|--------------|------------|
 | v0.1.0  | Jan 2026     | Initial alpha release with core CMS functionality |
-| v0.2.0  | TBD          | i18n and Draft/Publish system |
-| v0.3.0  | TBD          | Advanced relationships and Media Library 2.0 |
-| ...     | ...          | ...        |
+| v0.2.0  | Jan 2026     | i18n and Draft/Publish system |
+| v0.3.0  | Feb 2026     | Advanced relationships and Media Library 2.0 |
+| v0.4.0  | Feb 2026     | Plugin Ecosystem & Decoupled Storage |
+| ......  | ......       | ...... |
 | v1.0.0  | Q2 2026      | Stable production release |
 
 ---
@@ -371,4 +379,4 @@ If you want to contribute, we especially need help with:
 
 ---
 
-**Last updated**: January 2026
+**Last updated**: February 2026

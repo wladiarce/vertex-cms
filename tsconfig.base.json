@@ -13,12 +13,18 @@
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "@vertex/common": ["libs/common/src/index.ts"],
       "@vertex/core": ["libs/core/src/index.ts"],
       "@vertex/admin": ["libs/admin/src/index.ts"],
-      "@vertex/public": ["libs/public/src/index.ts"]
+      "@vertex/public": ["libs/public/src/index.ts"],
+      "@vertex/plugin-storage-local": [
+        "./libs/plugins/plugin-storage-local/src/index.ts"
+      ],
+      "@vertex/plugin-storage-gcs": [
+        "./libs/plugins/plugin-storage-gcs/src/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]

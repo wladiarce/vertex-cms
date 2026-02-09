@@ -1,4 +1,5 @@
 import { FieldType } from '../constants/field-types';
+import { VertexPlugin } from './plugin.interface';
 
 /**
  * Document status for draft/publish system
@@ -25,7 +26,15 @@ export interface VertexCoreOptions {
   mongoUri: string;
   entities: Function[];
   locales?: LocaleConfiguration;
-  storageAdapter?: any; // new (...args: any[]) => StorageAdapter - avoiding circular dependency
+  
+  // Named plugin slots
+  storage?: VertexPlugin;
+  blocks?: VertexPlugin[];
+  // auth?: VertexPlugin;
+  // db?: VertexPlugin;
+
+  // Generic plugins/addons
+  plugins?: VertexPlugin[];
 }
 
 export interface CollectionHooks {

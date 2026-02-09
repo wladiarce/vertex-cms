@@ -8,6 +8,7 @@ import { Tag } from './collections/tag.collection';
 import { Post } from './collections/post.collection';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { StorageLocalPlugin } from '@vertex/plugin-storage-local';
 
 @Module({
   imports: [
@@ -36,8 +37,11 @@ import { join } from 'path';
           es: 'Español',
           pt: 'Português'
         }
-      }
-      // storageAdapter: S3Adapter or GCSAdapter (Future) <--- This is how to swap adapters
+      },
+      storage: StorageLocalPlugin({
+        uploadDir: join(process.cwd(), 'uploads')
+      }),
+      plugins: []
     })
   ],
 })

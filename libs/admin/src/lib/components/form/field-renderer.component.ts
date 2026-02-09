@@ -1,7 +1,8 @@
-import { Component, Input, OnInit, signal, Type } from '@angular/core';
+import { Component, Input, OnInit, signal, Type, inject } from '@angular/core';
 import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BlockMetadata, FieldOptions, FieldType } from '@vertex/common';
+import { VertexClientService } from '../../services/vertex-client.service';
 import { InputFieldComponent } from '../fields/input-field.component';
 import { UploadFieldComponent } from '../fields/upload-field.component';
 import { RichTextFieldComponent } from '../fields/rich-text-field.component';
@@ -42,7 +43,17 @@ import { RelationshipFieldComponent } from '../fields/relationship-field.compone
         }
       }
       @case ('upload') {
-        <vertex-upload-field [field]="field" [group]="group" />
+        @if (cms.capabilities().storage) {
+          <vertex-upload-field [field]="field" [group]="group" />
+        } @else {
+          <div class="v-card border-dashed p-4 flex items-center gap-3 text-[var(--text-muted)] bg-[var(--bg-subtle)]">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+            <div>
+              <p class="text-sm font-medium">Upload feature is disabled</p>
+              <p class="text-xs">No storage plugin is registered. Please contact your administrator.</p>
+            </div>
+          </div>
+        }
       }
       @case ('rich-text') {
         @if (field.localized) {
@@ -63,6 +74,7 @@ import { RelationshipFieldComponent } from '../fields/relationship-field.compone
   `
 })
 export class FieldRendererComponent implements OnInit {
+  cms = inject(VertexClientService);
   @Input({ required: true }) field!: FieldOptions & { name: string; blocks?: BlockMetadata[] | undefined; };
   @Input({ required: true }) group!: FormGroup;
 

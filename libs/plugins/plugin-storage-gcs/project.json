@@ -1,0 +1,19 @@
+{
+  "name": "plugin-storage-gcs",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/plugins/plugin-storage-gcs/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/plugins/plugin-storage-gcs",
+        "main": "libs/plugins/plugin-storage-gcs/src/index.ts",
+        "tsConfig": "libs/plugins/plugin-storage-gcs/tsconfig.lib.json",
+        "assets": ["libs/plugins/plugin-storage-gcs/*.md"]
+      }
+    }
+  }
+}

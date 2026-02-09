@@ -1,10 +1,11 @@
-import { Controller, Post, Get, Patch, Delete, UseInterceptors, UploadedFile, UseGuards, Param, Body, Query } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, UseInterceptors, UploadedFile, UseGuards, Param, Body, Query, Optional, HttpException, HttpStatus } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { StorageAdapter } from '@vertex/common';
 import { ImageProcessorService } from '../services/image-processor.service';
+import { PluginRegistryService } from '../services/plugin-registry.service';
 import { Upload, UploadDocument } from '../schema/upload.schema';
 
 
@@ -13,14 +14,19 @@ import { Upload, UploadDocument } from '../schema/upload.schema';
 export class UploadController {
   
   constructor(
-    private storage: StorageAdapter,
+    @Optional() private storage: StorageAdapter,
     private imageProcessor: ImageProcessorService,
+    private pluginRegistry: PluginRegistryService,
     @InjectModel(Upload.name) private uploadModel: Model<UploadDocument>
   ) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('file')) 
   async uploadFile(@UploadedFile() file: any) {
+    if (!this.storage) {
+        throw new HttpException('Storage capability is not active. Please register a storage plugin.', HttpStatus.NOT_IMPLEMENTED);
+    }
+
     console.log('[UploadController] Processing upload:', file.originalname);
 
     // 1. Upload original file
@@ -138,6 +144,10 @@ export class UploadController {
 
   @Delete()
   async bulkDelete(@Body('ids') ids: string[]) {
+    if (!this.storage) {
+       throw new HttpException('Storage capability is not active.', HttpStatus.NOT_IMPLEMENTED);
+    }
+
     if (!Array.isArray(ids) || ids.length === 0) {
       throw new Error('Invalid ids array');
     }

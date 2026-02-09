@@ -9,11 +9,11 @@ import { ConfigController } from './api/config.controller';
 import { ContentController } from './api/content.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth/auth.service';
+import { PluginRegistryService } from './services/plugin-registry.service';
 import { AuthController } from './auth/auth.controller';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { StorageAdapter, VertexCoreOptions, DEFAULT_LOCALE_CONFIG } from '@vertex/common';
-import { LocalStorageAdapter } from './storage/local-storage.adapter';
+import { StorageAdapter, VertexCoreOptions, DEFAULT_LOCALE_CONFIG, VertexPlugin } from '@vertex/common';
 import { UploadController } from './api/upload.controller';
 import { LocaleConfigProvider } from './providers/locale-config.provider';
 import { Version } from './collections/version.collection';
@@ -40,7 +40,8 @@ import { Upload, UploadMongooseSchema } from './schema/upload.schema';
         AuthService,
         JwtStrategy,
         JwtAuthGuard,
-        LocaleConfigProvider
+        LocaleConfigProvider,
+        PluginRegistryService
     ],
     controllers: [
         ConfigController,
@@ -50,26 +51,25 @@ import { Upload, UploadMongooseSchema } from './schema/upload.schema';
     ],
     exports: [
         SchemaDiscoveryService,
-        LocaleConfigProvider
+        LocaleConfigProvider,
+        PluginRegistryService
 ]
 })
 export class VertexCoreModule {
   static forRoot(options: VertexCoreOptions): DynamicModule {
-
-    // Default to LocalStorage if none provided
-    const AdapterClass = options.storageAdapter || LocalStorageAdapter;
     
-    return {
-      module: VertexCoreModule,
-      imports: [
-        // Initialize Mongoose with the user's URI
-        MongooseModule.forRoot(options.mongoUri),
-      ],
-      providers: [
-        {
-          provide: StorageAdapter,
-          useClass: AdapterClass 
-        },
+    // Gather all plugins from named slots and generic array
+    const allPlugins = [
+      options.storage,
+      ...(options.blocks || []),
+      // options.auth,
+      // options.db,
+      ...(options.plugins || [])
+    ].filter(Boolean) as VertexPlugin[];
+
+    const pluginModules = allPlugins.map(p => p.module);
+
+    const providers: any[] = [
         {
           provide: 'LOCALE_CONFIG',
           useValue: options.locales || DEFAULT_LOCALE_CONFIG
@@ -77,6 +77,14 @@ export class VertexCoreModule {
         {
           provide: 'VERTEX_OPTIONS',
           useValue: options
+        },
+        // Initialize the plugin registry
+        {
+          provide: 'VERTEX_PLUGIN_INITIALIZER',
+          useFactory: (registry: PluginRegistryService) => {
+            registry.init(allPlugins);
+          },
+          inject: [PluginRegistryService]
         },
         // We run a factory to trigger the discovery logic immediately on startup
         {
@@ -87,10 +95,19 @@ export class VertexCoreModule {
           },
           inject: [SchemaDiscoveryService]
         }
+    ];
+
+    return {
+      module: VertexCoreModule,
+      imports: [
+        // Initialize Mongoose with the user's URI
+        MongooseModule.forRoot(options.mongoUri),
+        ...pluginModules,
       ],
+      providers,
       exports: [
         SchemaDiscoveryService,
-        StorageAdapter,
+        PluginRegistryService,
       ]
     };
   }
