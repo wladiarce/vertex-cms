@@ -24,6 +24,10 @@
       ],
       "@vertex/plugin-storage-gcs": [
         "./libs/plugins/plugin-storage-gcs/src/index.ts"
+      ],
+      "@vertex/plugin-db-mongo": ["libs/plugins/plugin-db-mongo/src/index.ts"],
+      "@vertex/plugin-db-typeorm": [
+        "libs/plugins/plugin-db-typeorm/src/index.ts"
       ]
     }
   },
