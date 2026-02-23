@@ -1,0 +1,13 @@
+{
+  "name": "create-vertex-app",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "bin": {
+    "create-vertex-app": "./bin/create-vertex-app.js"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  }
+}
