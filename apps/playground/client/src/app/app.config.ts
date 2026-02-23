@@ -9,8 +9,8 @@ import {
   withFetch,
   withInterceptors,
 } from '@angular/common/http';
-import { adminRoutes, authInterceptor } from '@vertex/admin';
-import { VertexRegistryService } from '@vertex/public';
+import { adminRoutes, authInterceptor } from '@vertex-cms/admin';
+import { VertexRegistryService } from '@vertex-cms/public';
 
 import { HeroComponent } from './components/hero/hero.component';
 import { TextComponent } from './components/text/text.component';
@@ -29,7 +29,7 @@ export const appConfig: ApplicationConfig = {
       [
         {
           path: 'admin',
-          children: adminRoutes, // loads @vertex/admin library
+          children: adminRoutes, // loads @vertex-cms/admin library
         },
         {
           // Catch-All for public pages

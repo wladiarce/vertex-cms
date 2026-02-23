@@ -1,4 +1,4 @@
-import { Collection, Field, FieldType } from '@vertex/common';
+import { Collection, Field, FieldType } from '@vertex-cms/common';
 import { HeroBlock } from '../blocks/hero.block';
 import { TextBlock } from '../blocks/text.block';
 import { ImageBlock } from '../blocks/image.block';

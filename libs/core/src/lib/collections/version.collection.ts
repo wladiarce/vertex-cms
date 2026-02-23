@@ -1,4 +1,4 @@
-import { Collection, Field, FieldType } from '@vertex/common';
+import { Collection, Field, FieldType } from '@vertex-cms/common';
 
 /**
  * Internal collection for storing document version history

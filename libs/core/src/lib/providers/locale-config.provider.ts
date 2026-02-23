@@ -1,5 +1,5 @@
 import { Injectable, Inject, Optional } from '@nestjs/common';
-import { LocaleConfiguration, DEFAULT_LOCALE_CONFIG } from '@vertex/common';
+import { LocaleConfiguration, DEFAULT_LOCALE_CONFIG } from '@vertex-cms/common';
 
 /**
  * Provider for accessing locale configuration

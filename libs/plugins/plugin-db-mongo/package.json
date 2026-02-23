@@ -1,5 +1,5 @@
 {
-  "name": "@vertex/plugin-db-mongo",
+  "name": "@vertex-cms/plugin-db-mongo",
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",

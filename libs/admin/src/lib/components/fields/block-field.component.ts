@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { FieldOptions, BlockMetadata } from '@vertex/common';
+import { FieldOptions, BlockMetadata } from '@vertex-cms/common';
 import { FieldRendererComponent } from '../form/field-renderer.component'; // Recursive import!
 
 @Component({

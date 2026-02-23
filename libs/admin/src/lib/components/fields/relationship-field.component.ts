@@ -1,7 +1,7 @@
 import { Component, Input, inject, signal, effect, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { FieldOptions } from '@vertex/common';
+import { FieldOptions } from '@vertex-cms/common';
 import { VertexAutocompleteComponent, AutocompleteItem } from '../ui/vertex-autocomplete.component';
 import { VertexButtonComponent } from '../ui/vertex-button.component';
 import { VertexClientService } from '../../services/vertex-client.service';

@@ -1,5 +1,5 @@
 {
-  "name": "@vertex/core",
+  "name": "@vertex-cms/core",
   "version": "0.0.1",
   "private": false,
   "type": "commonjs",
@@ -12,7 +12,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/mongoose": "^11.0.4",
     "@nestjs/jwt": "^11.0.2",
-    "@vertex/common": "^0.0.1",
+    "@vertex-cms/common": "^0.0.1",
     "mongoose": "^9.1.4",
     "bcryptjs": "^3.0.3",
     "reflect-metadata": "^0.2.2",

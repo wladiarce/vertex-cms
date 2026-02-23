@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { BlockRendererComponent, CmsFetchService } from '@vertex/public';
+import { BlockRendererComponent, CmsFetchService } from '@vertex-cms/public';
 import { map } from 'rxjs';
 
 @Component({

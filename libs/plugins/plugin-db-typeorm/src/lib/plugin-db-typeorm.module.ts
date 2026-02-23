@@ -2,7 +2,7 @@ import { Module, DynamicModule, Global } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeORMDatabaseAdapter } from './typeorm-database.adapter';
 import { TypeORMEntityFactory } from './typeorm-entity.factory';
-import { VERTEX_DB_ADAPTER } from '@vertex/common';
+import { VERTEX_DB_ADAPTER } from '@vertex-cms/common';
 
 @Global()
 @Module({

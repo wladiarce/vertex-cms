@@ -6,7 +6,7 @@ import { VertexCardComponent } from '../../components/ui/vertex-card.component';
 import { VertexButtonComponent } from '../../components/ui/vertex-button.component';
 import { VertexBreadcrumbComponent } from '../../components/ui/vertex-breadcrumb.component';
 import { VertexMediaDetailsComponent } from '../../components/ui/vertex-media-details.component';
-import { Upload } from '@vertex/common';
+import { Upload } from '@vertex-cms/common';
 
 @Component({
   selector: 'vertex-media-library',

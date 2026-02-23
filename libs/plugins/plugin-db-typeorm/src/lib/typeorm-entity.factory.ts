@@ -1,5 +1,5 @@
 import { EntitySchema, EntitySchemaColumnOptions } from 'typeorm';
-import { CollectionMetadata, FieldType, FieldOptions } from '@vertex/common';
+import { CollectionMetadata, FieldType, FieldOptions } from '@vertex-cms/common';
 
 export class TypeORMEntityFactory {
   createEntity(metadata: CollectionMetadata): EntitySchema {

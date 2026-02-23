@@ -1,5 +1,5 @@
 {
-  "name": "@vertex/common",
+  "name": "@vertex-cms/common",
   "version": "0.0.1",
   "private": false,
   "type": "commonjs",

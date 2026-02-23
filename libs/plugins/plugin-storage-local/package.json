@@ -1,5 +1,5 @@
 {
-  "name": "@vertex/plugin-storage-local",
+  "name": "@vertex-cms/plugin-storage-local",
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",

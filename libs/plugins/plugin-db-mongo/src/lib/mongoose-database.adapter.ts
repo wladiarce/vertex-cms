@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
-import { DatabaseAdapter, VertexRepository, FindAllQuery } from '@vertex/common';
+import { DatabaseAdapter, VertexRepository, FindAllQuery } from '@vertex-cms/common';
 import { MongooseSchemaFactory } from './mongoose-schema.factory';
 
 class MongooseRepository implements VertexRepository {

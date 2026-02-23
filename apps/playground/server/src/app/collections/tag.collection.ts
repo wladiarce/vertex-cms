@@ -1,4 +1,4 @@
-import { Collection, Field, FieldType } from '@vertex/common';
+import { Collection, Field, FieldType } from '@vertex-cms/common';
 
 @Collection({
   slug: 'tags',

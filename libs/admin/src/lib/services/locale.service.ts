@@ -1,6 +1,6 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { LocaleConfiguration } from '@vertex/common';
+import { LocaleConfiguration } from '@vertex-cms/common';
 
 /**
  * Service to manage locale state in the Admin UI

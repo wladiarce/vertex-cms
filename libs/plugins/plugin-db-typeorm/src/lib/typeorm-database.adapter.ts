@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, EntityManager, Repository, EntitySchema } from 'typeorm';
-import { DatabaseAdapter, VertexRepository, FindAllQuery } from '@vertex/common';
+import { DatabaseAdapter, VertexRepository, FindAllQuery } from '@vertex-cms/common';
 import { TypeORMEntityFactory } from './typeorm-entity.factory';
 
 class TypeORMVertexRepository implements VertexRepository {

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VertexClientService } from '../../services/vertex-client.service';
 import { VertexButtonComponent } from '../ui/vertex-button.component';
-import { Upload } from '@vertex/common';
+import { Upload } from '@vertex-cms/common';
 
 @Component({
   selector: 'vertex-media-picker',

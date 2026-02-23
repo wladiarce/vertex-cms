@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, Injector, runInInjectionContext, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormsModule } from '@angular/forms';
-import { FieldOptions } from '@vertex/common';
+import { FieldOptions } from '@vertex-cms/common';
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import { TiptapEditorDirective } from 'ngx-tiptap';

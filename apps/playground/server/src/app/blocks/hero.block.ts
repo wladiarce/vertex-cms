@@ -1,4 +1,4 @@
-import { Block, Field, FieldType } from '@vertex/common';
+import { Block, Field, FieldType } from '@vertex-cms/common';
 
 @Block({
   slug: 'hero',

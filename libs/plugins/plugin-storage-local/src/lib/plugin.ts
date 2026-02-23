@@ -1,4 +1,4 @@
-import { VertexPlugin } from '@vertex/common';
+import { VertexPlugin } from '@vertex-cms/common';
 import { VertexPluginStorageLocalModule } from './vertex-plugin-storage-local.module';
 import { StorageLocalOptions } from './local-storage.adapter';
 

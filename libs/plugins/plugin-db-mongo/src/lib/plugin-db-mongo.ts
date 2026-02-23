@@ -1,4 +1,4 @@
-import { VertexPlugin } from '@vertex/common';
+import { VertexPlugin } from '@vertex-cms/common';
 import { PluginDbMongoModule } from './plugin-db-mongo.module';
 
 export interface MongoPluginOptions {

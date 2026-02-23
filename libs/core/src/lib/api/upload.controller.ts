@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Patch, Delete, UseInterceptors, UploadedFile, UseGuards, Param, Body, Query, Optional, HttpException, HttpStatus } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { StorageAdapter } from '@vertex/common';
+import { StorageAdapter } from '@vertex-cms/common';
 import { ImageProcessorService } from '../services/image-processor.service';
 import { PluginRegistryService } from '../services/plugin-registry.service';
 import { DatabaseRegistryService } from '../services/database-registry.service';

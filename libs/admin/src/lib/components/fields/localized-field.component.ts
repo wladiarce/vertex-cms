@@ -1,7 +1,7 @@
 import { Component, Input, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { FieldOptions, FieldType } from '@vertex/common';
+import { FieldOptions, FieldType } from '@vertex-cms/common';
 import { LocaleService } from '../../services/locale.service';
 import { VertexTabsComponent, VertexTab } from '../ui/vertex-tabs.component';
 

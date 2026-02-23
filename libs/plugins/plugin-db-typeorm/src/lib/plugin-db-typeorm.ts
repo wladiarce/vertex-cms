@@ -1,4 +1,4 @@
-import { VertexPlugin } from '@vertex/common';
+import { VertexPlugin } from '@vertex-cms/common';
 import { PluginDbTypeormModule } from './plugin-db-typeorm.module';
 
 export interface TypeOrmPluginOptions {

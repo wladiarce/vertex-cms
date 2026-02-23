@@ -132,9 +132,9 @@ This happens at application startup when you register your collections with `Ver
 ┌─────────────────────────────────────────────────────────────────┐
 │                 Angular client - browser                        │
 │  ┌─────────────────┐              ┌─────────────────────────┐   │
-│  │  Public pages   │              │    Admin panel          │   │
-│  │  (@vertex/      │              │    (@vertex/admin)      │   │
-│  │   public)       │              │                         │   │
+│  │  Public pages   │              │      Admin panel        │   │
+│  │  (@vertex.cms   │              │   (@vertex-cms/admin)   │   │
+│  │    /public)     │              │                         │   │
 │  └─────────────────┘              └─────────────────────────┘   │
 │         │                                    │                  │
 │         │ HTTP Requests                      │ HTTP Requests    │
@@ -144,7 +144,7 @@ This happens at application startup when you register your collections with `Ver
 ┌─────────────────────────────────────────────────────────────────┐
 │                        NestJS backend                           │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │              VertexCoreModule (@vertex/core)             │   │
+│  │            VertexCoreModule (@vertex-cms/core)           │   │
 │  │  ┌────────────────┐  ┌──────────────┐  ┌─────────────┐   │   │
 │  │  │ Schema         │  │ Content      │  │ Auth        │   │   │
 │  │  │ Discovery      │  │ service      │  │ service     │   │   │
@@ -190,7 +190,7 @@ This happens at application startup when you register your collections with `Ver
 
 VertexCMS is organized as an **Nx monorepo** with four core libraries:
 
-### 1. `@vertex/common`
+### 1. `@vertex-cms/common`
 
 **Purpose**: Shared code between frontend and backend.
 
@@ -333,9 +333,9 @@ VertexCMS is initialized by providing plugins for core functionality:
 
 ```typescript
 // apps/your-app/server/src/app/app.module.ts
-import { VertexCoreModule } from '@vertex/core';
-import { DatabaseMongoPlugin } from '@vertex/plugin-db-mongo';
-import { StorageLocalPlugin } from '@vertex/plugin-storage-local';
+import { VertexCoreModule } from '@vertex-cms/core';
+import { DatabaseMongoPlugin } from '@vertex-cms/plugin-db-mongo';
+import { StorageLocalPlugin } from '@vertex-cms/plugin-storage-local';
 
 @Module({
   imports: [
@@ -414,9 +414,9 @@ All media management is handled through a unified `StorageAdapter`.
 - **URL generation**: Provides public URLs for uploaded assets.
 
 ### 2. Official plugins
-- `@vertex/plugin-storage-local`: Local disk storage (default).
-- `@vertex/plugin-gcs`: Google Cloud Storage integration.
-- `@vertex/plugin-s3`: Amazon S3 integration [WIP]
+- `@vertex-cms/plugin-storage-local`: Local disk storage (default).
+- `@vertex-cms/plugin-storage-gcs`: Google Cloud Storage integration.
+- `@vertex-cms/plugin-storage-s3`: Amazon S3 integration [WIP]
 
 ---
 
@@ -1494,7 +1494,7 @@ VertexCoreModule.forRoot({
 
 ---
 
-### 2. `@vertex/core`
+### 2. `@vertex-cms/core`
 
 **Purpose**: NestJS backend engine.
 
@@ -1538,7 +1538,7 @@ VertexCoreModule.forRoot({
 
 ---
 
-### 3. `@vertex/admin`
+### 3. `@vertex-cms/admin`
 
 **Purpose**: Admin panel (Angular library).
 
@@ -1582,7 +1582,7 @@ VertexCoreModule.forRoot({
 
 ---
 
-### 4. `@vertex/public`
+### 4. `@vertex-cms/public`
 
 **Purpose**: Frontend SDK for rendering CMS content.
 
@@ -1711,7 +1711,7 @@ Use this pattern when you want content editors to build pages by composing block
 **Define blocks**:
 ```typescript
 // src/blocks/hero.block.ts
-import { Block, Field, FieldType } from '@vertex/common';
+import { Block, Field, FieldType } from '@vertex-cms/common';
 
 @Block({
   slug: 'hero',
@@ -1741,7 +1741,7 @@ export class TextBlock {
 **Create page collection with blocks field**:
 ```typescript
 // src/collections/page.collection.ts
-import { Collection, Field, FieldType } from '@vertex/common';
+import { Collection, Field, FieldType } from '@vertex-cms/common';
 import { HeroBlock } from '../blocks/hero.block';
 import { TextBlock } from '../blocks/text.block';
 
@@ -1775,7 +1775,7 @@ export class Page {
 ```typescript
 // app.module.ts
 import { Module } from '@nestjs/common';
-import { VertexCoreModule } from '@vertex/core';
+import { VertexCoreModule } from '@vertex-cms/core';
 import { Page } from './collections/page.collection';
 
 @Module({
@@ -1829,7 +1829,7 @@ export class TextComponent {
 ```typescript
 // app.config.ts
 import { ApplicationConfig, provideAppInitializer, inject } from '@angular/core';
-import { VertexRegistryService } from '@vertex/public';
+import { VertexRegistryService } from '@vertex-cms/public';
 import { HeroComponent } from './components/hero/hero.component';
 import { TextComponent } from './components/text/text.component';
 
@@ -1850,7 +1850,7 @@ export const appConfig: ApplicationConfig = {
 // pages/dynamic-page/dynamic-page.component.ts
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CmsFetchService, BlockRendererComponent } from '@vertex/public';
+import { CmsFetchService, BlockRendererComponent } from '@vertex-cms/public';
 import { map } from 'rxjs';
 
 @Component({
@@ -1896,7 +1896,7 @@ Use this pattern for structured data like products, articles, events, etc.
 **Create data collection**:
 ```typescript
 // src/collections/product.collection.ts
-import { Collection, Field, FieldType } from '@vertex/common';
+import { Collection, Field, FieldType } from '@vertex-cms/common';
 
 @Collection({
   slug: 'products',
@@ -1932,7 +1932,7 @@ export class Product {
 // pages/shop/shop.component.ts
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CmsFetchService } from '@vertex/public';
+import { CmsFetchService } from '@vertex-cms/public';
 
 @Component({
   standalone: true,
@@ -2022,7 +2022,7 @@ export class Page {
 // components/product-list/product-list.component.ts
 import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CmsFetchService } from '@vertex/public';
+import { CmsFetchService } from '@vertex-cms/public';
 
 @Component({
   selector: 'app-product-list',
@@ -2189,7 +2189,7 @@ export class User {
 Implement the `StorageAdapter` interface to support different storage backends:
 
 ```typescript
-import { StorageAdapter } from '@vertex/common';
+import { StorageAdapter } from '@vertex-cms/common';
 
 export class S3Adapter implements StorageAdapter {
   async upload(file: Express.Multer.File): Promise<{ url: string }> {

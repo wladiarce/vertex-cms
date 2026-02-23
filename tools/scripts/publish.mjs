@@ -44,10 +44,10 @@ libs.forEach(lib => {
   pkg.version = version;
   
   // Update internal dependencies to match the new version
-  // e.g. @vertex/core depends on @vertex/common. We need to ensure it asks for ^0.0.1
+  // e.g. @vertex-cms/core depends on @vertex-cms/common. We need to ensure it asks for ^0.0.1
   if (pkg.peerDependencies) {
     Object.keys(pkg.peerDependencies).forEach(dep => {
-      if (dep.startsWith('@vertex/')) {
+      if (dep.startsWith('@vertex-cms/')) {
         pkg.peerDependencies[dep] = `^${version}`;
       }
     });
@@ -55,7 +55,7 @@ libs.forEach(lib => {
 
   writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
 
-  console.log(`📦 Publishing @vertex/${lib}...`);
+  console.log(`📦 Publishing @vertex-cms/${lib}...`);
   try {
     // --access public is required for scoped packages (@vertex)
     execSync(`npm publish ${distPath} --access public --tag ${tag}`, { stdio: 'inherit' });

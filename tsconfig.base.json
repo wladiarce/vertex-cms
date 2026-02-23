@@ -15,20 +15,23 @@
     "skipDefaultLibCheck": true,
     "baseUrl": "./",
     "paths": {
-      "@vertex/common": ["libs/common/src/index.ts"],
-      "@vertex/core": ["libs/core/src/index.ts"],
-      "@vertex/admin": ["libs/admin/src/index.ts"],
-      "@vertex/public": ["libs/public/src/index.ts"],
-      "@vertex/plugin-storage-local": [
+      "@vertex-cms/common": ["libs/common/src/index.ts"],
+      "@vertex-cms/core": ["libs/core/src/index.ts"],
+      "@vertex-cms/admin": ["libs/admin/src/index.ts"],
+      "@vertex-cms/public": ["libs/public/src/index.ts"],
+      "@vertex-cms/plugin-storage-local": [
         "./libs/plugins/plugin-storage-local/src/index.ts"
       ],
-      "@vertex/plugin-storage-gcs": [
+      "@vertex-cms/plugin-storage-gcs": [
         "./libs/plugins/plugin-storage-gcs/src/index.ts"
       ],
-      "@vertex/plugin-db-mongo": ["libs/plugins/plugin-db-mongo/src/index.ts"],
-      "@vertex/plugin-db-typeorm": [
+      "@vertex-cms/plugin-db-mongo": ["libs/plugins/plugin-db-mongo/src/index.ts"],
+      "@vertex-cms/plugin-db-typeorm": [
         "libs/plugins/plugin-db-typeorm/src/index.ts"
-      ]
+      ],
+      "@vertex-cms/plugin-email-smtp": ["libs/plugins/plugin-email-smtp/src/index.ts"],
+      "create-vertex-app": ["packages/create-vertex-app/src/index.ts"],
+      "@vertex-cms/cli": ["packages/vertex-cli/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

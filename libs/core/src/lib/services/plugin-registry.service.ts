@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { VertexPlugin, VertexPluginType } from '@vertex/common';
+import { VertexPlugin, VertexPluginType } from '@vertex-cms/common';
 
 @Injectable()
 export class PluginRegistryService {

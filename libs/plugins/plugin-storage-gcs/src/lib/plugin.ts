@@ -1,4 +1,4 @@
-import { VertexPlugin } from '@vertex/common';
+import { VertexPlugin } from '@vertex-cms/common';
 import { VertexPluginStorageGcsModule } from './vertex-plugin-storage-gcs.module';
 import { GcsStorageOptions } from './gcs-storage.adapter';
 

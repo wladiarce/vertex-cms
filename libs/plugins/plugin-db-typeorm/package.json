@@ -1,5 +1,5 @@
 {
-  "name": "@vertex/plugin-db-typeorm",
+  "name": "@vertex-cms/plugin-db-typeorm",
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",

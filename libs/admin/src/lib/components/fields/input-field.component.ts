@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup } from '@angular/forms';
-import { FieldOptions } from '@vertex/common';
+import { FieldOptions } from '@vertex-cms/common';
 
 @Component({
   selector: 'vertex-input-field',

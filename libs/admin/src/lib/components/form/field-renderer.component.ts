@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, signal, Type, inject } from '@angular/core';
 import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { BlockMetadata, FieldOptions, FieldType } from '@vertex/common';
+import { BlockMetadata, FieldOptions, FieldType } from '@vertex-cms/common';
 import { VertexClientService } from '../../services/vertex-client.service';
 import { InputFieldComponent } from '../fields/input-field.component';
 import { UploadFieldComponent } from '../fields/upload-field.component';

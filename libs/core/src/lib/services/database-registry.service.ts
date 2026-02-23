@@ -1,5 +1,5 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
-import { DatabaseAdapter, VertexRepository } from '@vertex/common';
+import { DatabaseAdapter, VertexRepository } from '@vertex-cms/common';
 
 @Injectable()
 export class DatabaseRegistryService {

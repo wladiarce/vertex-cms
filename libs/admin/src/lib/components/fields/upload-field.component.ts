@@ -1,7 +1,7 @@
 import { Component, Input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup } from '@angular/forms';
-import { FieldOptions, Upload } from '@vertex/common';
+import { FieldOptions, Upload } from '@vertex-cms/common';
 import { VertexClientService } from '../../services/vertex-client.service';
 import { VertexMediaPickerComponent } from '../ui/vertex-media-picker.component';
 

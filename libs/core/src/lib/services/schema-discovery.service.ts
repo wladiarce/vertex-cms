@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { COLLECTION_METADATA_KEY, CollectionMetadata, FIELD_METADATA_KEY, BLOCK_METADATA_KEY, BlockMetadata } from '@vertex/common';
+import { COLLECTION_METADATA_KEY, CollectionMetadata, FIELD_METADATA_KEY, BLOCK_METADATA_KEY, BlockMetadata } from '@vertex-cms/common';
 import { DatabaseRegistryService } from './database-registry.service';
 
 @Injectable()

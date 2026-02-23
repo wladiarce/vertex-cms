@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Schema } from 'mongoose';
-import { CollectionMetadata, FieldType, FieldOptions, DocumentStatus } from '@vertex/common';
+import { CollectionMetadata, FieldType, FieldOptions, DocumentStatus } from '@vertex-cms/common';
 
 @Injectable()
 export class MongooseSchemaFactory {

@@ -1,5 +1,5 @@
 {
-  "name": "@vertex/plugin-storage-gcs",
+  "name": "@vertex-cms/plugin-storage-gcs",
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",

@@ -2,7 +2,7 @@ import { Module, DynamicModule, Global } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongooseDatabaseAdapter } from './mongoose-database.adapter';
 import { MongooseSchemaFactory } from './mongoose-schema.factory';
-import { VERTEX_DB_ADAPTER } from '@vertex/common';
+import { VERTEX_DB_ADAPTER } from '@vertex-cms/common';
 
 @Global()
 @Module({

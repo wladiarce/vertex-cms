@@ -85,17 +85,17 @@ VertexCMS aims to become the **premier content management system for the Angular
 ##### Storage plugins
 - [x] **Plugin System**: Refactor Core to load plugins via `forRoot({ storage: S3Adapter })`
 - [x] **Configuration**: Support environment-based config (bucket names, regions, credentials)
-- [x] **@vertex/plugin-storage-local**: Local filesystem adapter (Default/Migrated)
-- [x] **@vertex/plugin-gcs**: Google Cloud Storage adapter
-- [ ] **@vertex/plugin-s3**: AWS S3 adapter
-- [ ] **@vertex/plugin-azure**: Azure Blob Storage adapter (community contribution)
+- [x] **@vertex-cms/plugin-storage-local**: Local filesystem adapter (Default/Migrated)
+- [x] **@vertex-cms/plugin-storage-gcs**: Google Cloud Storage adapter
+- [ ] **@vertex-cms/plugin-storage-s3**: AWS S3 adapter
+- [ ] **@vertex-cms/plugin-storage-azure**: Azure Blob Storage adapter (community contribution)
 
 ##### Database enhancements
 - [ ] **Connection pooling**: Support advanced MongoDB connection options via ENV
 - [ ] **Replica sets**: Configuration for high-availability setups
 - [x] **Other database adapters - PLUGINS**:
-- [x] **@vertex/plugin-db-mongo**: Performance-optimized MongoDB adapter with ID normalization.
-- [x] **@vertex/plugin-db-typeorm**: Support for SQL databases via TypeORM.
+- [x] **@vertex-cms/plugin-db-mongo**: Performance-optimized MongoDB adapter with ID normalization.
+- [x] **@vertex-cms/plugin-db-typeorm**: Support for SQL databases via TypeORM.
   - [x] PostgreSQL adapter (full UUID support)
   - [x] MySQL adapter
   - [x] SQLite adapter
@@ -270,7 +270,7 @@ VertexCMS aims to become the **premier content management system for the Angular
 > **Job to be done**: Announce the stable release to the world.
 
 ##### Deliverables
-- [ ] **Final NPM release**: `@vertex/core@1.0.0`, `@vertex/admin@1.0.0`, etc.
+- [ ] **Final NPM release**: `@vertex-cms/core@1.0.0`, `@vertex-cms/admin@1.0.0`, etc.
 - [ ] **Announcement blog post**: "Introducing VertexCMS: The Native CMS for Angular + NestJS"
 - [ ] **Product Hunt launch**: Prepare assets, demo video, landing page
 - [ ] **Community setup**:

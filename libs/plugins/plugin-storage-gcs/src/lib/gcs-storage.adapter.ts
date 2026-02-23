@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { StorageAdapter, FileData, UploadResult } from '@vertex/common';
+import { StorageAdapter, FileData, UploadResult } from '@vertex-cms/common';
 import { Storage } from '@google-cloud/storage';
 import * as path from 'path';
 

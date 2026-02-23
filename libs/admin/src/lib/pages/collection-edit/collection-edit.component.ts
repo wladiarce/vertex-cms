@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { VertexClientService } from '../../services/vertex-client.service';
 import { FieldRendererComponent } from '../../components/form/field-renderer.component';
-import { BlockMetadata } from '@vertex/common';
+import { BlockMetadata } from '@vertex-cms/common';
 import { LocaleService } from '../../services/locale.service';
 import { VertexCardComponent } from '../../components/ui/vertex-card.component';
 import { VertexButtonComponent } from '../../components/ui/vertex-button.component';

@@ -1,5 +1,5 @@
 import { Module, Global, DynamicModule } from '@nestjs/common';
-import { StorageAdapter } from '@vertex/common';
+import { StorageAdapter } from '@vertex-cms/common';
 import { LocalStorageAdapter, StorageLocalOptions } from './local-storage.adapter';
 
 @Global()

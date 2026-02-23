@@ -428,10 +428,10 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 
 ### Scopes
 
-- **core**: Changes to `@vertex/core`
-- **admin**: Changes to `@vertex/admin`
-- **public**: Changes to `@vertex/public`
-- **common**: Changes to `@vertex/common`
+- **core**: Changes to `@vertex-cms/core`
+- **admin**: Changes to `@vertex-cms/admin`
+- **public**: Changes to `@vertex-cms/public`
+- **common**: Changes to `@vertex-cms/common`
 - **playground**: Changes to example app
 - **docs**: Documentation changes
 

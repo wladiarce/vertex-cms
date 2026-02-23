@@ -1,7 +1,7 @@
 import { Component, input, output, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Upload } from '@vertex/common';
+import { Upload } from '@vertex-cms/common';
 import { VertexButtonComponent } from './vertex-button.component';
 import { VertexInputComponent } from './vertex-input.component';
 import { VertexCardComponent } from './vertex-card.component';

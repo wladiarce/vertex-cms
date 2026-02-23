@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { VertexCoreModule } from '@vertex/core';
+import { VertexCoreModule } from '@vertex-cms/core';
 import { Movie } from './collections/movie.collection';
 import { User } from './collections/user.collection';
 import { Page } from './collections/page.collection';
@@ -8,9 +8,9 @@ import { Tag } from './collections/tag.collection';
 import { Post } from './collections/post.collection';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { StorageLocalPlugin } from '@vertex/plugin-storage-local';
-import { DatabaseMongoPlugin } from '@vertex/plugin-db-mongo';
-import { DatabaseTypeORMPlugin } from '@vertex/plugin-db-typeorm';
+import { StorageLocalPlugin } from '@vertex-cms/plugin-storage-local';
+import { DatabaseMongoPlugin } from '@vertex-cms/plugin-db-mongo';
+import { DatabaseTypeORMPlugin } from '@vertex-cms/plugin-db-typeorm';
 
 
 @Module({

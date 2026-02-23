@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE_CONFIG } from '@vertex/common';
+import { DEFAULT_LOCALE_CONFIG } from '@vertex-cms/common';
 
 /**
  * Extracts value from localized field object with fallback logic

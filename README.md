@@ -82,10 +82,10 @@ Built-in support for Angular Server-Side Rendering with proper state transfer.
 ## 🛠 Architecture
 VertexCMS is built as a set of modular libraries within an Nx Monorepo (another must have for the Angular + NestJS stack):
 
-- ``@vertex/core``: the NestJS engine. Handles database (MongoDB through mongoose, more planned), schema discovery, and the generic REST API.
-- ``@vertex/admin``: the admin interface. A dynamic Angular app that consumes the Core API.
-- ``@vertex/public``: the frontend SDK. A lightweight Angular library for rendering CMS blocks.
-- ``@vertex/common``: shared decorators and interfaces.
+- ``@vertex-cms/core``: the NestJS engine. Handles database (MongoDB through mongoose, more planned), schema discovery, and the generic REST API.
+- ``@vertex-cms/admin``: the admin interface. A dynamic Angular app that consumes the Core API.
+- ``@vertex-cms/public``: the frontend SDK. A lightweight Angular library for rendering CMS blocks.
+- ``@vertex-cms/common``: shared decorators and interfaces.
 
 🏁 Quick Start (Local Playground)
 To see the system in action, run the included Playground app:
