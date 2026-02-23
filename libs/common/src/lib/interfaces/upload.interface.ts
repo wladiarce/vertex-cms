@@ -8,6 +8,7 @@ export interface UploadFormats {
 }
 
 export interface Upload {
+  id?: string;
   _id?: string;
   filename: string;
   originalName: string;

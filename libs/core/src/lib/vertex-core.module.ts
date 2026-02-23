@@ -1,7 +1,5 @@
 import { Module, DynamicModule, Global } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { SchemaDiscoveryService } from './services/schema-discovery.service';
-import { MongooseSchemaFactory } from './schema/mongoose-schema.factory';
 import { ContentService } from './services/content.service';
 import { VersionService } from './services/version.service';
 import { ImageProcessorService } from './services/image-processor.service';
@@ -13,12 +11,13 @@ import { PluginRegistryService } from './services/plugin-registry.service';
 import { AuthController } from './auth/auth.controller';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { StorageAdapter, VertexCoreOptions, DEFAULT_LOCALE_CONFIG, VertexPlugin } from '@vertex/common';
+import { VertexCoreOptions, DEFAULT_LOCALE_CONFIG, VertexPlugin, DatabaseAdapter } from '@vertex/common';
 import { UploadController } from './api/upload.controller';
 import { LocaleConfigProvider } from './providers/locale-config.provider';
 import { Version } from './collections/version.collection';
-import { Upload, UploadMongooseSchema } from './schema/upload.schema';
-
+import { Upload } from './collections/upload.collection';
+import { DatabaseRegistryService } from './services/database-registry.service';
+import { VERTEX_DB_ADAPTER } from '@vertex/common';
 
 @Global() // Make it global so we don't have to import it everywhere
 @Module({
@@ -27,13 +26,9 @@ import { Upload, UploadMongooseSchema } from './schema/upload.schema';
         secret: process.env.JWT_SECRET,
         signOptions: { expiresIn: '1d' },
       }),
-      MongooseModule.forFeature([
-        { name: Upload.name, schema: UploadMongooseSchema }
-      ])
     ],
     providers: [
         SchemaDiscoveryService,
-        MongooseSchemaFactory,
         ContentService,
         VersionService,
         ImageProcessorService,
@@ -41,7 +36,8 @@ import { Upload, UploadMongooseSchema } from './schema/upload.schema';
         JwtStrategy,
         JwtAuthGuard,
         LocaleConfigProvider,
-        PluginRegistryService
+        PluginRegistryService,
+        DatabaseRegistryService
     ],
     controllers: [
         ConfigController,
@@ -52,7 +48,8 @@ import { Upload, UploadMongooseSchema } from './schema/upload.schema';
     exports: [
         SchemaDiscoveryService,
         LocaleConfigProvider,
-        PluginRegistryService
+        PluginRegistryService,
+        DatabaseRegistryService
 ]
 })
 export class VertexCoreModule {
@@ -61,9 +58,9 @@ export class VertexCoreModule {
     // Gather all plugins from named slots and generic array
     const allPlugins = [
       options.storage,
+      options.database,
       ...(options.blocks || []),
       // options.auth,
-      // options.db,
       ...(options.plugins || [])
     ].filter(Boolean) as VertexPlugin[];
 
@@ -83,31 +80,46 @@ export class VertexCoreModule {
           provide: 'VERTEX_PLUGIN_INITIALIZER',
           useFactory: (registry: PluginRegistryService) => {
             registry.init(allPlugins);
+            return true;
           },
           inject: [PluginRegistryService]
+        },
+        // Initialize the database registry using the injected adapter from the plugin
+        {
+          provide: 'VERTEX_DATABASE_INITIALIZER',
+          useFactory: async (registry: DatabaseRegistryService, adapter: DatabaseAdapter) => {
+            await registry.registerAdapter(adapter);
+            return true;
+          },
+          inject: [DatabaseRegistryService, VERTEX_DB_ADAPTER]
         },
         // We run a factory to trigger the discovery logic immediately on startup
         {
           provide: 'VERTEX_BOOTSTRAP',
-          useFactory: async (discovery: SchemaDiscoveryService) => {
-             // Register Version collection first, then user collections
-             await discovery.registerCollections([Version, ...options.entities]);
+          useFactory: async (discovery: SchemaDiscoveryService, _p: any, _d: any, registry: DatabaseRegistryService) => {
+             // Register System collections first, then user collections
+             await discovery.registerCollections([Version, Upload, ...options.entities]);
+
+             // Finalize database adapter if needed (e.g. TypeORM needs to rebuild metadata)
+             const adapter = registry.getAdapter();
+             if (adapter.onDiscoveryComplete) {
+               await adapter.onDiscoveryComplete();
+             }
           },
-          inject: [SchemaDiscoveryService]
+          inject: [SchemaDiscoveryService, 'VERTEX_PLUGIN_INITIALIZER', 'VERTEX_DATABASE_INITIALIZER', DatabaseRegistryService]
         }
     ];
 
     return {
       module: VertexCoreModule,
       imports: [
-        // Initialize Mongoose with the user's URI
-        MongooseModule.forRoot(options.mongoUri),
         ...pluginModules,
       ],
       providers,
       exports: [
         SchemaDiscoveryService,
         PluginRegistryService,
+        DatabaseRegistryService
       ]
     };
   }

@@ -51,8 +51,8 @@ declare const lucide: any;
           </tr>
         </thead>
         <tbody>
-          @for (doc of documents(); track doc._id) {
-            <tr (click)="navigateToEdit(doc._id)">
+          @for (doc of documents(); track doc.id) {
+            <tr (click)="navigateToEdit(doc.id)">
               @if (draftsEnabled()) {
                 <td>
                   @if (doc.status === 'draft') {
@@ -64,10 +64,10 @@ declare const lucide: any;
                   }
                 </td>
               }
-              <td class="font-mono text-xs">{{ doc._id }}</td>
+              <td class="font-mono text-xs">{{ doc.id }}</td>
               <td class="text-[var(--text-muted)]">{{ doc.createdAt | date }}</td>
               <td>
-                <a [routerLink]="[doc._id]" class="text-[var(--primary)] hover:underline font-medium" (click)="$event.stopPropagation()">Edit</a>
+                <a [routerLink]="[doc.id]" class="text-[var(--primary)] hover:underline font-medium" (click)="$event.stopPropagation()">Edit</a>
               </td>
             </tr>
           }

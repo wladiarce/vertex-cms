@@ -1,23 +1,28 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
+import { DatabaseRegistryService } from '../services/database-registry.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    @InjectConnection() private connection: Connection
+    private readonly dbRegistry: DatabaseRegistryService
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
-    // We access the 'users' model directly
-    const userModel = this.connection.model('users');
-    const user = await userModel.findOne({ email }).select('+password').lean(); // Select password explicitly because afterRead might hide it? No, raw query access.
+    const repository = this.dbRegistry.getRepository('users');
+    
+    // Using findAll for custom filtering (email)
+    const { docs } = await repository.findAll({
+      filter: { email },
+      limit: 1
+    });
+    
+    const user = docs[0];
 
-    if (user && await bcrypt.compare(pass, (user as any)['password'])) {
-      const { password, ...result } = user as any;
+    if (user && await bcrypt.compare(pass, user.password)) {
+      const { password, ...result } = user;
       return result;
     }
     return null;

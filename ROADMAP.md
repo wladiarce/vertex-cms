@@ -93,10 +93,12 @@ VertexCMS aims to become the **premier content management system for the Angular
 ##### Database enhancements
 - [ ] **Connection pooling**: Support advanced MongoDB connection options via ENV
 - [ ] **Replica sets**: Configuration for high-availability setups
-- [x] **Other database adapters - PLUGINS** (using TypeORM or Prisma):
-  - [x] TypeORM - PostgreSQL adapter
-  - [x] TypeORM - MySQL adapter
-  - [x] TypeORM - SQLite adapter
+- [x] **Other database adapters - PLUGINS**:
+- [x] **@vertex/plugin-db-mongo**: Performance-optimized MongoDB adapter with ID normalization.
+- [x] **@vertex/plugin-db-typeorm**: Support for SQL databases via TypeORM.
+  - [x] PostgreSQL adapter (full UUID support)
+  - [x] MySQL adapter
+  - [x] SQLite adapter
 
 ---
 

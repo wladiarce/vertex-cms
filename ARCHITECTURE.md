@@ -327,38 +327,106 @@ GET /api/content/:slug?status=all
 
 ---
 
-## Internationalization (i18n) system
+### Module-based configuration
 
-### Overview
-VertexCMS includes a flexible internationalization system that allows content to be managed in multiple languages. The system supports module-level configuration, field-level localization, and automatic locale fallbacks.
-
-### Configuration
-
-**Module-based locale configuration**
-Locales are configured when initializing `VertexCoreModule.forRoot()`:
+VertexCMS is initialized by providing plugins for core functionality:
 
 ```typescript
 // apps/your-app/server/src/app/app.module.ts
-VertexCoreModule.forRoot({
-  mongoUri: process.env.MONGO_URI,
-  entities: [Page, Post, Product],
-  locales: {
-    default: 'en',
-    supported: ['en', 'es', 'fr', 'pt'],
-    names: {
-      en: 'English',
-      es: 'Español',
-      fr: 'Français',
-      pt: 'Português'
-    }
-  }
+import { VertexCoreModule } from '@vertex/core';
+import { DatabaseMongoPlugin } from '@vertex/plugin-db-mongo';
+import { StorageLocalPlugin } from '@vertex/plugin-storage-local';
+
+@Module({
+  imports: [
+    VertexCoreModule.forRoot({
+      // Database Plugin
+      database: DatabaseMongoPlugin({
+        uri: process.env.MONGO_URI || 'mongodb://localhost:27017/vertex'
+      }),
+      // Storage Plugin
+      storage: StorageLocalPlugin({
+        uploadDir: 'uploads',
+        publicPath: '/uploads'
+      }),
+      entities: [Page, Post, Product],
+      locales: {
+        default: 'en',
+        supported: ['en', 'es', 'fr'],
+        names: {
+          en: 'English',
+          es: 'Español',
+          fr: 'Français'
+        }
+      }
+    }),
+  ],
 })
+export class AppModule {}
 ```
 
-**Configuration properties**
-- `default`: Default locale code (fallback when no locale specified)
-- `supported`: Array of supported locale codes
-- `names`: Display names for each locale (used in admin UI)
+---
+
+## Plugin architecture
+
+VertexCMS uses a "Named Slots" plugin architecture. This allows users to customize core behavior without modifying the engine.
+
+### Core plugin interface
+Every plugin must implement the `VertexPlugin` interface:
+- `name`: Unique identifier for the plugin.
+- `type`: The "slot" it occupies (`database`, `storage`, `auth`, etc.).
+- `providers`: Optional NestJS providers to register.
+- `onDiscoveryComplete`: Optional hook called after schema discovery (useful for DB adapters to sync schemas).
+
+### Plugin slots
+
+| Slot | Responsibility | Interface |
+|------|----------------|-----------|
+| `database` | CRUD operations and schema management | `DatabaseAdapter` |
+| `storage` | File uploads and retrieval | `StorageAdapter` |
+| `auth` | User authentication and RBAC | `AuthAdapter` |
+
+---
+
+## Database adapters
+
+The system is database-agnostic through the `VertexRepository` abstraction.
+
+### 1. ID Normalization (Postgres vs MongoDB)
+To ensure a consistent developer experience, VertexCMS normalizes primary keys across all adapters:
+- **Consistent `id` field**: The frontend and API always communicate using an `id` field.
+- **Mongoose mapping**: The MongoDB plugin uses aliases and `toJSON` transforms to map `_id` to `id`.
+- **TypeORM mapping**: The SQL plugin uses UUIDs stored in an `id` column.
+
+### 2. Available adapters
+- **MongoDB**: Optimized for flexible schema growth. Uses Mongoose.
+- **TypeORM (PostgreSQL/MySQL/SQLite)**: Best for structured data and strict relationships. Autogenerates tables based on `@Collection` definitions.
+
+---
+
+## Storage adapters
+
+All media management is handled through a unified `StorageAdapter`.
+
+### 1. Features
+- **File upload**: Handles multipart streams.
+- **Asset cleanup**: Deletes files when media records are removed.
+- **URL generation**: Provides public URLs for uploaded assets.
+
+### 2. Official plugins
+- `@vertex/plugin-storage-local`: Local disk storage (default).
+- `@vertex/plugin-gcs`: Google Cloud Storage integration.
+- `@vertex/plugin-s3`: Amazon S3 integration [WIP]
+
+---
+
+## Internationalization (i18n) system
+
+### Overview
+VertexCMS includes a flexible internationalization system that allows content to be managed in multiple languages. The system supports field-level localization and automatic locale fallbacks.
+
+### Configuration
+Locales are configured in `VertexCoreModule.forRoot()` as shown in the [Module-based configuration](#module-based-configuration) section above.
 
 **Default configuration**
 If no locale configuration is provided, the system uses:

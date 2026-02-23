@@ -1,16 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/mongoose';
-import { Connection, Document } from 'mongoose';
 import { SchemaDiscoveryService } from './schema-discovery.service';
-
-// Interface for Version document
-interface VersionDocument extends Document {
-  collectionSlug: string;
-  documentId: string;
-  data: string;
-  createdBy: string;
-  versionNumber: number;
-}
+import { DatabaseRegistryService } from './database-registry.service';
 
 /**
  * Service for managing document versions
@@ -19,7 +9,7 @@ interface VersionDocument extends Document {
 @Injectable()
 export class VersionService {
   constructor(
-    @InjectConnection() private readonly connection: Connection,
+    private readonly dbRegistry: DatabaseRegistryService,
     private readonly discovery: SchemaDiscoveryService
   ) {}
 
@@ -32,27 +22,26 @@ export class VersionService {
     documentId: string,
     data: any,
     userId = ''
-  ): Promise<VersionDocument> {
-    const versionModel = this.connection.model<VersionDocument>('_versions');
+  ): Promise<any> {
+    const repository = this.dbRegistry.getRepository('_versions');
     
     // Get current version number
-    const latestVersion = await versionModel
-      .findOne({ collectionSlug, documentId })
-      .sort({ versionNumber: -1 })
-      .exec();
+    const { docs: latestDocs } = await repository.findAll({
+      filter: { collectionSlug, documentId },
+      limit: 1,
+      sort: { versionNumber: -1 }
+    });
     
-    const versionNumber = (latestVersion?.versionNumber || 0) + 1;
+    const versionNumber = (latestDocs[0]?.versionNumber || 0) + 1;
 
     // Create new version with stringified data
-    const version = new versionModel({
+    const version = await repository.create({
       collectionSlug,
       documentId,
       data: JSON.stringify(data), // Store as JSON string
       createdBy: userId,
       versionNumber
     });
-
-    await version.save();
 
     // Clean up old versions if limit exceeded
     await this.cleanupOldVersions(collectionSlug, documentId);
@@ -64,17 +53,17 @@ export class VersionService {
    * Get all versions for a specific document
    */
   async getVersions(collectionSlug: string, documentId: string): Promise<any[]> {
-    const versionModel = this.connection.model<VersionDocument>('_versions');
-    const versions = await versionModel
-      .find({ collectionSlug, documentId })
-      .sort({ versionNumber: -1 })
-      .lean()
-      .exec();
+    const repository = this.dbRegistry.getRepository('_versions');
+    const { docs: versions } = await repository.findAll({
+      filter: { collectionSlug, documentId },
+      limit: 100, // Reasonable limit for versions
+      sort: { versionNumber: -1 }
+    });
 
     // Parse data back to objects for each version
-    return versions.map((v) => ({
+    return versions.map((v: any) => ({
       ...v,
-      data: JSON.parse(v.data)
+      data: v.data ? JSON.parse(v.data) : null
     }));
   }
 
@@ -82,14 +71,14 @@ export class VersionService {
    * Restore a specific version by ID
    */
   async restoreVersion(collectionSlug: string, versionId: string): Promise<any> {
-    const versionModel = this.connection.model<VersionDocument>('_versions');
-    const version = await versionModel.findById(versionId).exec();
+    const repository = this.dbRegistry.getRepository('_versions');
+    const version = await repository.findOne(versionId);
     
     if (!version) {
       throw new NotFoundException('Version not found');
     }
     
-    return JSON.parse(version.data);
+    return version.data ? JSON.parse(version.data) : null;
   }
 
   /**
@@ -99,17 +88,18 @@ export class VersionService {
     const config = this.discovery.getCollection(collectionSlug);
     const maxVersions = config?.maxVersions || 5; // Default to 5 versions
     
-    const versionModel = this.connection.model<VersionDocument>('_versions');
-    const versions = await versionModel
-      .find({ collectionSlug, documentId })
-      .sort({ versionNumber: -1 })
-      .exec();
+    const repository = this.dbRegistry.getRepository('_versions');
+    const { docs: versions } = await repository.findAll({
+      filter: { collectionSlug, documentId },
+      limit: 100, // Get all versions to cleanup
+      sort: { versionNumber: -1 }
+    });
 
     if (versions.length > maxVersions) {
       const toDelete = versions.slice(maxVersions);
-      await versionModel.deleteMany({
-        _id: { $in: toDelete.map(v => v._id) }
-      });
+      for (const v of toDelete) {
+        await repository.delete(v._id || v.id);
+      }
     }
   }
 }

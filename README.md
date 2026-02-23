@@ -73,8 +73,9 @@ Built-in support for Angular Server-Side Rendering with proper state transfer.
 - **Polymorphic forms**: manage complex, nested block structures with a clean UI.
 - **Rich text editor**: integrated Tiptap WYSIWYG editor for formatted content.
 - **Relationships**: define single and many-to-many relationships between collections with async searchable autocomplete UI and automatic population support.
-- **Database agnostic**: support for multiple database systems (PostgreSQL, MySQL, MongoDB, etc.) though adapters (*WIP; for the moment only MongoDB is implemented*).
-- **Media library**: comprehensive media management system with automatic image processing (WebP conversion, responsive variants), metadata editing (alt text, captions), search/filtering, and seamless integration with upload fields. Storage-agnostic architecture (Local filesystem implemented, extensible to S3/GCS or any custom adapter).
+- **Database agnostic**: support for multiple database systems (PostgreSQL, MySQL, MongoDB, SQLite, etc.) through specialized adapters -> Mongoose for MongoDB; TypeORM for SQL databases.
+- **Media library**: comprehensive media management system with automatic image processing (WebP conversion, responsive variants), metadata editing (alt text, captions), search/filtering, and seamless integration with upload fields. Storage-agnostic architecture (Local storage, Google Cloud Storage, and AWS S3 [WIP] supported via plugins).
+- **Plugin Architecture**: extensible system allowing users to swap core functionality (Database, Storage, Auth) using a "Named Slots" pattern.
 - **Built-in auth**: secure JWT authentication with Role-Based Access Control (RBAC). More authentication methods will be added in the future.
 - **Type safety**: shared interfaces between frontend and backend ensure your CMS data matches your UI components.
 
@@ -112,14 +113,14 @@ npx nx serve playground-client
 
 - [WIP] **Packaging**: publishing core libraries to NPM for easy consumption.
 - [ ] **CLI**: ``create-vertex-app`` for instant project scaffolding.
-- [ ] **Storage adapters**: support for AWS S3, Google Cloud Storage and more.
-- [ ] **Database adapters**: support for PostgreSQL, MySQL and more.
-- [ ] **i18n**: native multi-language support.
+- [x] **Storage adapters**: support for AWS S3, Google Cloud Storage and more.
+- [x] **Database adapters**: support for PostgreSQL, MySQL, SQLite and more.
+- [x] **i18n**: native multi-language support.
 - [ ] **Email support**: sending emails through NestJS and an email adapter.
 - [ ] **SEO**: SEO support through Angular SSR and meta tags.
 - [ ] **UI/UX**: improve the admin panel UI/UX.
 - [ ] **Testing**: add tests for the core libraries.
-- [WIP] **Documentation**: write documentation for the core libraries (see [ARCHITECTURE.md](ARCHITECTURE.md)).
-- [WIP] **Examples**: add examples of how to use the core libraries (see [ARCHITECTURE.md](ARCHITECTURE.md)).
-- [ ] **Plugins**: allow for extensibility of the system through plugins, moving the DB and Storage adapters to plugins.
+- [x] **Documentation**: write documentation for the core libraries (see [ARCHITECTURE.md](ARCHITECTURE.md)).
+- [x] **Examples**: add examples of how to use the core libraries (see [ARCHITECTURE.md](ARCHITECTURE.md)).
+- [x] **Plugins**: allow for extensibility of the system through plugins, moving the DB and Storage adapters to plugins.
 - [ ] **Project website**: create a website for the project using, obiously, VertexCMS 😁.

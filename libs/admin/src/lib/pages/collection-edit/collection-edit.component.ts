@@ -102,7 +102,7 @@ import { VertexBadgeComponent } from '../../components/ui/vertex-badge.component
               No version history available.
             </div>
           } @else {
-            @for (version of versions(); track version._id) {
+            @for (version of versions(); track version.id) {
               <div class="mb-4 p-4 v-card transition-all hover:shadow-[var(--shadow-hover)]">
                 <div class="flex justify-between items-start mb-3">
                   <div>
@@ -113,7 +113,7 @@ import { VertexBadgeComponent } from '../../components/ui/vertex-badge.component
                     }
                   </div>
                   <vertex-button 
-                    (click)="restoreVersion(version._id)"
+                    (click)="restoreVersion(version.id)"
                     [size]="'sm'"
                     [variant]="'primary'"
                     [icon]="'rotate-ccw'">
@@ -250,8 +250,8 @@ export class CollectionEditComponent {
     this.cms.findOne(this.slug(), this.id()!, populate).subscribe({
       next: (data) => {
         // Store document status
-        if (data._status) {
-          this.documentStatus.set(data._status);
+        if (data.status) {
+          this.documentStatus.set(data.status);
         }
         
         // 1. We must manually reconstruct FormArrays before patching!
@@ -354,7 +354,7 @@ export class CollectionEditComponent {
         next: (result: any) => {
           this.loading.set(false);
           this.saveAction.set(null);
-          this.router.navigate(['/admin/collections', this.slug(), result._id]);
+          this.router.navigate(['/admin/collections', this.slug(), result.id]);
         },
         error: () => {
           this.loading.set(false);
@@ -393,11 +393,11 @@ export class CollectionEditComponent {
       // Create new and immediately publish
       this.cms.create(this.slug(), formValue).subscribe({
         next: (result: any) => {
-          this.cms.publish(this.slug(), result._id).subscribe({
+          this.cms.publish(this.slug(), result.id).subscribe({
             next: () => {
               this.loading.set(false);
               this.saveAction.set(null);
-              this.router.navigate(['/admin/collections', this.slug(), result._id]);
+              this.router.navigate(['/admin/collections', this.slug(), result.id]);
             },
             error: () => {
               this.loading.set(false);

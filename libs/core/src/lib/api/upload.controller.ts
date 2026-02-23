@@ -1,13 +1,11 @@
 import { Controller, Post, Get, Patch, Delete, UseInterceptors, UploadedFile, UseGuards, Param, Body, Query, Optional, HttpException, HttpStatus } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { StorageAdapter } from '@vertex/common';
 import { ImageProcessorService } from '../services/image-processor.service';
 import { PluginRegistryService } from '../services/plugin-registry.service';
-import { Upload, UploadDocument } from '../schema/upload.schema';
-
+import { DatabaseRegistryService } from '../services/database-registry.service';
+import { Upload } from '../collections/upload.collection';
 
 @Controller('api/vertex/media')
 @UseGuards(JwtAuthGuard)
@@ -17,7 +15,7 @@ export class UploadController {
     @Optional() private storage: StorageAdapter,
     private imageProcessor: ImageProcessorService,
     private pluginRegistry: PluginRegistryService,
-    @InjectModel(Upload.name) private uploadModel: Model<UploadDocument>
+    private readonly dbRegistry: DatabaseRegistryService
   ) {}
 
   @Post()
@@ -59,7 +57,8 @@ export class UploadController {
     }
 
     // 4. Save to database
-    const upload = new this.uploadModel({
+    const repository = this.dbRegistry.getRepository('uploads');
+    const savedUpload = await repository.create({
       filename: result.key || file.originalname,
       originalName: file.originalname,
       url: result.url,
@@ -70,8 +69,6 @@ export class UploadController {
       height: processingResult?.height,
       formats: Object.keys(formats).length > 0 ? formats : undefined
     });
-
-    const savedUpload = await upload.save();
 
     return savedUpload;
   }
@@ -106,10 +103,13 @@ export class UploadController {
 
     const skip = (Number(page) - 1) * Number(limit);
     
-    const [items, total] = await Promise.all([
-      this.uploadModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
-      this.uploadModel.countDocuments(query)
-    ]);
+    const repository = this.dbRegistry.getRepository('uploads');
+    const { docs: items, total } = await repository.findAll({
+      filter: query,
+      limit: Number(limit),
+      skip,
+      sort: { createdAt: -1 }
+    });
 
     return {
       data: items,
@@ -124,7 +124,8 @@ export class UploadController {
 
   @Get(':id')
   async getMediaById(@Param('id') id: string) {
-    return this.uploadModel.findById(id);
+    const repository = this.dbRegistry.getRepository('uploads');
+    return repository.findOne(id);
   }
 
   @Patch(':id')
@@ -139,7 +140,8 @@ export class UploadController {
       }
     }
 
-    return this.uploadModel.findByIdAndUpdate(id, updates, { new: true });
+    const repository = this.dbRegistry.getRepository('uploads');
+    return repository.update(id, updates);
   }
 
   @Delete()
@@ -153,7 +155,16 @@ export class UploadController {
     }
 
     // Find all uploads to delete
-    const uploads = await this.uploadModel.find({ _id: { $in: ids } });
+    const repository = this.dbRegistry.getRepository('uploads');
+    
+    // Agnostic ID filter: Adapters should handle this. 
+    // For Mongoose, we might need to translate it back to _id: { $in: ids } in the adapter later.
+    const { docs: uploads } = await repository.findAll({
+      filter: this.pluginRegistry.getPluginsByType('database')[0]?.name === 'mongoose' 
+          ? { _id: { $in: ids } } 
+          : { id: ids },
+      limit: ids.length
+    });
 
     // Delete files from storage
     for (const upload of uploads) {
@@ -179,8 +190,12 @@ export class UploadController {
     }
 
     // Delete from database
-    const result = await this.uploadModel.deleteMany({ _id: { $in: ids } });
+    let deletedCount = 0;
+    for (const id of ids) {
+      await repository.delete(id);
+      deletedCount++;
+    }
 
-    return { deleted: result.deletedCount };
+    return { deleted: deletedCount };
   }
 }

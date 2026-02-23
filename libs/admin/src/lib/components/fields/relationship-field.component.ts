@@ -71,8 +71,8 @@ export class RelationshipFieldComponent implements OnInit {
     this.cms.searchRelationship(this.field.relationTo!, query).subscribe({
       next: (results: any[]) => {
         this.suggestions.set(results.map((r: any) => ({
-          id: r._id,
-          displayName: r.title || r.name || r._id,
+          id: r.id,
+          displayName: r.title || r.name || r.id,
           ...r
         })));
         this.loading.set(false);

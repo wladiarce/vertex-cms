@@ -9,6 +9,9 @@ import { Post } from './collections/post.collection';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { StorageLocalPlugin } from '@vertex/plugin-storage-local';
+import { DatabaseMongoPlugin } from '@vertex/plugin-db-mongo';
+import { DatabaseTypeORMPlugin } from '@vertex/plugin-db-typeorm';
+
 
 @Module({
   imports: [
@@ -18,8 +21,6 @@ import { StorageLocalPlugin } from '@vertex/plugin-storage-local';
       serveRoot: '/uploads',
     }),
     VertexCoreModule.forRoot({
-      // Make sure you have a local mongo running (as included in the docker-compose)or use a cloud URI -> Use mongodb atlas for a free cluster :)
-      mongoUri: process.env.MONGO_URI,
       entities: [
         Movie,
         User,
@@ -28,6 +29,19 @@ import { StorageLocalPlugin } from '@vertex/plugin-storage-local';
         Tag,
         Post
       ],
+      // Database Plugin
+      database: DatabaseMongoPlugin({
+        uri: process.env.MONGO_URI || 'mongodb://localhost:27017/vertex-playground'
+      }),
+      // database: DatabaseTypeORMPlugin({
+      //   type: 'postgres',
+      //   host: 'localhost',
+      //   port: 5432,
+      //   username: 'mab_admin',
+      //   password: 'mab_pass',
+      //   database: 'vertex-cms'
+
+      // }),
       // Configure locales for your application
       locales: {
         default: 'en',

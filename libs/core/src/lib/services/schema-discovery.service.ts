@@ -1,8 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
 import { COLLECTION_METADATA_KEY, CollectionMetadata, FIELD_METADATA_KEY, BLOCK_METADATA_KEY, BlockMetadata } from '@vertex/common';
-import { MongooseSchemaFactory } from '../schema/mongoose-schema.factory';
+import { DatabaseRegistryService } from './database-registry.service';
 
 @Injectable()
 export class SchemaDiscoveryService implements OnModuleInit {
@@ -10,8 +8,7 @@ export class SchemaDiscoveryService implements OnModuleInit {
   private readonly collections: Map<string, CollectionMetadata> = new Map();
 
   constructor(
-    @InjectConnection() private readonly connection: Connection,
-    private readonly schemaFactory: MongooseSchemaFactory
+    private readonly dbRegistry: DatabaseRegistryService,
   ) {}
 
   /**
@@ -50,15 +47,9 @@ export class SchemaDiscoveryService implements OnModuleInit {
       // 3. Store for internal use (API generation)
       this.collections.set(collectionMeta.slug, fullMeta);
 
-      // 4. Create Mongoose Schema & Model
-      const schema = this.schemaFactory.createSchema(fullMeta);
-      
-      // Register the model dynamically with Mongoose
-      // We use 'slug' or 'singularName' as the model name
-      if (!this.connection.models[collectionMeta.slug]) {
-        this.connection.model(collectionMeta.slug, schema);
-        console.log(`[VertexCMS] Registered Collection: ${collectionMeta.slug}`);
-      }
+      // 4. Register with the active database adapter
+      await this.dbRegistry.getAdapter().registerCollection(fullMeta);
+      console.log(`[VertexCMS] Registered Collection: ${collectionMeta.slug}`);
     }
   }
   

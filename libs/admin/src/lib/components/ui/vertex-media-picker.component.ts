@@ -61,10 +61,10 @@ import { Upload } from '@vertex/common';
             </div>
           } @else {
             <div class="media-grid">
-              @for (item of media(); track item._id) {
+              @for (item of media(); track item.id) {
                 <div 
                   class="media-item"
-                  [class.selected]="selectedItem()?._id === item._id"
+                  [class.selected]="selectedItem()?.id === item.id"
                   (click)="selectItem(item)"
                 >
                   <!-- Preview -->

@@ -23,7 +23,7 @@ export interface LocaleConfiguration {
  * Options for initializing VertexCoreModule
  */
 export interface VertexCoreOptions {
-  mongoUri: string;
+  database: VertexPlugin; // Mandatory database plugin
   entities: Function[];
   locales?: LocaleConfiguration;
   
@@ -31,7 +31,6 @@ export interface VertexCoreOptions {
   storage?: VertexPlugin;
   blocks?: VertexPlugin[];
   // auth?: VertexPlugin;
-  // db?: VertexPlugin;
 
   // Generic plugins/addons
   plugins?: VertexPlugin[];

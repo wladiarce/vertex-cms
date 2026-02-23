@@ -113,19 +113,19 @@ import { Upload } from '@vertex/common';
         </div>
       } @else {
         <div class="media-grid">
-          @for (item of media(); track item._id) {
+          @for (item of media(); track item.id) {
             <div 
               class="media-item"
-              [class.selected]="isSelected(item._id!)"
-              (click)="toggleSelection(item._id!)"
+              [class.selected]="isSelected(item.id!)"
+              (click)="toggleSelection(item.id!)"
             >
               <!-- Selection Checkbox -->
               <div class="selection-checkbox">
                 <input
                   type="checkbox"
-                  [checked]="isSelected(item._id!)"
+                  [checked]="isSelected(item.id!)"
                   (click)="$event.stopPropagation()"
-                  (change)="toggleSelection(item._id!)"
+                  (change)="toggleSelection(item.id!)"
                 />
               </div>
 
@@ -560,15 +560,15 @@ export class MediaLibraryComponent implements OnInit {
 
   saveMetadata(metadata: { alt?: string; caption?: string }) {
     const currentMedia = this.selectedMedia();
-    if (!currentMedia?._id) return;
+    if (!currentMedia?.id) return;
 
-    this.vertexClient.updateMedia(currentMedia._id, metadata).subscribe({
+    this.vertexClient.updateMedia(currentMedia.id, metadata).subscribe({
       next: (updatedMedia) => {
         console.log('Metadata saved successfully');
         
         // Update the media item in the grid
         const updatedList = this.media().map(item => 
-          item._id === updatedMedia._id ? updatedMedia : item
+          item.id === updatedMedia.id ? updatedMedia : item
         );
         this.media.set(updatedList);
         
