@@ -18,6 +18,13 @@ import { Version } from './collections/version.collection';
 import { Upload } from './collections/upload.collection';
 import { DatabaseRegistryService } from './services/database-registry.service';
 import { VERTEX_DB_ADAPTER } from '@vertex/common';
+import { ApiToken } from './collections/api-token.collection';
+import { TokenService } from './services/token.service';
+import { TokenController } from './api/token.controller';
+import { Webhook } from './collections/webhook.collection';
+import { WebhookLog } from './collections/webhook-log.collection';
+import { WebhookService } from './services/webhook.service';
+import { WebhookController } from './api/webhook.controller';
 
 @Global() // Make it global so we don't have to import it everywhere
 @Module({
@@ -37,19 +44,25 @@ import { VERTEX_DB_ADAPTER } from '@vertex/common';
         JwtAuthGuard,
         LocaleConfigProvider,
         PluginRegistryService,
-        DatabaseRegistryService
+        DatabaseRegistryService,
+        TokenService,
+        WebhookService
     ],
     controllers: [
         ConfigController,
         ContentController,
         AuthController,
-        UploadController
+        UploadController,
+        TokenController,
+        WebhookController
     ],
     exports: [
         SchemaDiscoveryService,
         LocaleConfigProvider,
         PluginRegistryService,
-        DatabaseRegistryService
+        DatabaseRegistryService,
+        TokenService,
+        WebhookService
 ]
 })
 export class VertexCoreModule {
@@ -98,7 +111,7 @@ export class VertexCoreModule {
           provide: 'VERTEX_BOOTSTRAP',
           useFactory: async (discovery: SchemaDiscoveryService, _p: any, _d: any, registry: DatabaseRegistryService) => {
              // Register System collections first, then user collections
-             await discovery.registerCollections([Version, Upload, ...options.entities]);
+             await discovery.registerCollections([Version, Upload, ApiToken, Webhook, WebhookLog, ...options.entities]);
 
              // Finalize database adapter if needed (e.g. TypeORM needs to rebuild metadata)
              const adapter = registry.getAdapter();
@@ -119,7 +132,9 @@ export class VertexCoreModule {
       exports: [
         SchemaDiscoveryService,
         PluginRegistryService,
-        DatabaseRegistryService
+        DatabaseRegistryService,
+        TokenService,
+        WebhookService
       ]
     };
   }

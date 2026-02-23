@@ -126,4 +126,47 @@ export class VertexClientService {
       body: { ids }
     });
   }
+
+  /**
+   * 7. API Token Methods
+   */
+  createToken(data: any) {
+    return this.http.post<any>(`${this.apiUrl}/vertex/tokens`, data);
+  }
+
+  listTokens() {
+    return this.http.get<any[]>(`${this.apiUrl}/vertex/tokens`);
+  }
+
+  revokeToken(id: string) {
+    return this.http.delete(`${this.apiUrl}/vertex/tokens/${id}`);
+  }
+
+  /**
+   * 8. Webhook Methods
+   */
+  createWebhook(data: any) {
+    return this.http.post<any>(`${this.apiUrl}/vertex/webhooks`, data);
+  }
+
+  listWebhooks() {
+    return this.http.get<any[]>(`${this.apiUrl}/vertex/webhooks`);
+  }
+
+  updateWebhook(id: string, data: any) {
+    return this.http.patch<any>(`${this.apiUrl}/vertex/webhooks/${id}`, data);
+  }
+
+  deleteWebhook(id: string) {
+    return this.http.delete(`${this.apiUrl}/vertex/webhooks/${id}`);
+  }
+
+  getWebhookLogs(id: string, limit = 50) {
+    return this.http.get<any[]>(`${this.apiUrl}/vertex/webhooks/${id}/logs`, { params: { limit }});
+  }
+
+  testWebhook(id: string) {
+    return this.http.post<any>(`${this.apiUrl}/vertex/webhooks/${id}/test`, {});
+  }
 }
+

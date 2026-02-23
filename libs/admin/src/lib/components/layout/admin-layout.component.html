@@ -42,7 +42,14 @@
         <i data-lucide="settings"></i>
         Settings
       </a>
-      <!-- ADD DOCS / GUIDES LINK -->
+      <a [routerLink]="['/admin/tokens']" routerLinkActive="active" class="v-nav-item">
+        <i data-lucide="key"></i>
+        API Tokens
+      </a>
+      <a [routerLink]="['/admin/webhooks']" routerLinkActive="active" class="v-nav-item">
+        <i data-lucide="webhook"></i>
+        Webhooks
+      </a>
     </nav>
     <div class="px-5 py-2">
       <vertex-theme-toggle></vertex-theme-toggle>

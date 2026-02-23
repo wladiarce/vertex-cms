@@ -83,12 +83,12 @@ VertexCMS aims to become the **premier content management system for the Angular
 **Note:** While the initial implementation focuses on storage, this interface must be generic enough to support future plugin types (e.g., Database Adapters, Auth Providers) without breaking changes.
 
 ##### Storage plugins
-- [ ] **@vertex/plugin-s3**: AWS S3 adapter
-- [x] **@vertex/plugin-gcs**: Google Cloud Storage adapter
-- [ ] **@vertex/plugin-azure**: Azure Blob Storage adapter (community contribution)
 - [x] **Plugin System**: Refactor Core to load plugins via `forRoot({ storage: S3Adapter })`
-- [x] **@vertex/plugin-storage-local**: Local filesystem adapter (Default/Migrated)
 - [x] **Configuration**: Support environment-based config (bucket names, regions, credentials)
+- [x] **@vertex/plugin-storage-local**: Local filesystem adapter (Default/Migrated)
+- [x] **@vertex/plugin-gcs**: Google Cloud Storage adapter
+- [ ] **@vertex/plugin-s3**: AWS S3 adapter
+- [ ] **@vertex/plugin-azure**: Azure Blob Storage adapter (community contribution)
 
 ##### Database enhancements
 - [ ] **Connection pooling**: Support advanced MongoDB connection options via ENV

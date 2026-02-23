@@ -5,6 +5,7 @@ import { getLocalizedValue } from '../utils/locale.utils';
 import { LocaleConfigProvider } from '../providers/locale-config.provider';
 import { DocumentStatus } from '@vertex/common';
 import { DatabaseRegistryService } from './database-registry.service';
+import { WebhookService } from './webhook.service';
 
 @Injectable()
 export class ContentService {
@@ -12,7 +13,8 @@ export class ContentService {
     private readonly dbRegistry: DatabaseRegistryService,
     private readonly discovery: SchemaDiscoveryService,
     private readonly localeConfig: LocaleConfigProvider,
-    private readonly versionService: VersionService
+    private readonly versionService: VersionService,
+    private readonly webhookService: WebhookService
   ) {}
 
   async findAll(slug: string, query: any = {}) {
@@ -115,7 +117,12 @@ export class ContentService {
       cleanData = await config.hooks.beforeChange({ data: cleanData, operation: 'create' });
     }
 
-    return repository.create(cleanData);
+    const result = await repository.create(cleanData);
+    
+    // Dispatch webhook
+    this.webhookService.dispatchEvent(`${slug}:create`, result);
+    
+    return result;
   }
 
   async update(slug: string, id: string, data: any) {
@@ -146,6 +153,8 @@ export class ContentService {
       await this.versionService.createVersion(slug, id, updated, currentDoc.createdBy);
     }
     
+    this.webhookService.dispatchEvent(`${slug}:update`, updated);
+    
     return updated;
   }
 
@@ -153,7 +162,11 @@ export class ContentService {
     const repository = this.dbRegistry.getRepository(slug);
     const deleted = await repository.delete(id);
     if (!deleted) throw new NotFoundException();
-    return { id: deleted._id || deleted.id, status: 'deleted' };
+    
+    const result = { id: deleted._id || deleted.id, status: 'deleted' };
+    this.webhookService.dispatchEvent(`${slug}:delete`, result);
+    
+    return result;
   }
 
   /**
@@ -214,6 +227,8 @@ export class ContentService {
     // Create version on publish
     await this.versionService.createVersion(slug, id, updated, updated.createdBy);
     
+    this.webhookService.dispatchEvent(`${slug}:publish`, updated);
+    
     return updated;
   }
 
@@ -235,6 +250,9 @@ export class ContentService {
     );
     
     if (!updated) throw new NotFoundException();
+    
+    this.webhookService.dispatchEvent(`${slug}:unpublish`, updated);
+    
     return updated;
   }
 

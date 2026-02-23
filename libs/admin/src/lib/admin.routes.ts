@@ -107,6 +107,26 @@ export const adminRoutes: Route[] = [
               }
             ]
           },
+          // API TOKENS
+          {
+            path: 'tokens',
+            loadComponent: () => import('./pages/api-tokens/api-tokens.component').then(m => m.ApiTokensComponent),
+            data: {
+              breadcrumb: {
+                label: 'API Tokens'
+              }
+            }
+          },
+          // WEBHOOKS
+          {
+            path: 'webhooks',
+            loadComponent: () => import('./pages/webhooks/webhooks.component').then(m => m.WebhooksComponent),
+            data: {
+              breadcrumb: {
+                label: 'Webhooks'
+              }
+            }
+          },
           {
             // Cath all: 404 not found -> for the moment goes to dashboard
             path: '**',
