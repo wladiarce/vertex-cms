@@ -30,6 +30,7 @@ export interface VertexCoreOptions {
   // Named plugin slots
   storage?: VertexPlugin;
   blocks?: VertexPlugin[];
+  email?: VertexPlugin;
   // auth?: VertexPlugin;
 
   // Generic plugins/addons

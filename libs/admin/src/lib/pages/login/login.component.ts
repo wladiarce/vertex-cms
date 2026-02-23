@@ -2,6 +2,7 @@ import { Component, inject, signal, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { VertexClientService } from '../../services/vertex-client.service';
 import { VertexCardComponent } from '../../components/ui/vertex-card.component';
 import { VertexLogoComponent } from '../../components/ui/vertex-logo.component';
 import { VertexInputComponent } from '../../components/ui/vertex-input.component';
@@ -26,17 +27,28 @@ declare const lucide: any;
 export class LoginComponent implements AfterViewInit {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
+  public vertex = inject(VertexClientService);
 
   loading = signal(false);
   error = signal('');
+  successMessage = signal('');
+  
+  showForgot = signal(false);
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required]
   });
 
+  forgotForm = this.fb.group({
+    email: ['', [Validators.required, Validators.email]]
+  });
+
   ngAfterViewInit() {
-    // Initialize Lucide icons
+    this.refreshIcons();
+  }
+
+  refreshIcons() {
     if (typeof lucide !== 'undefined') {
       try {
         lucide.createIcons({ nameAttr: 'data-lucide' });
@@ -44,6 +56,13 @@ export class LoginComponent implements AfterViewInit {
         console.warn('Lucide icons not initialized:', e);
       }
     }
+  }
+
+  toggleForgot() {
+    this.showForgot.set(!this.showForgot());
+    this.error.set('');
+    this.successMessage.set('');
+    setTimeout(() => this.refreshIcons(), 0);
   }
 
   submit() {
@@ -57,6 +76,26 @@ export class LoginComponent implements AfterViewInit {
       error: (err) => {
         this.loading.set(false);
         this.error.set('Invalid credentials');
+      }
+    });
+  }
+
+  forgotSubmit() {
+    if (this.forgotForm.invalid) return;
+
+    this.loading.set(true);
+    this.error.set('');
+    this.successMessage.set('');
+
+    this.vertex.forgotPassword(this.forgotForm.value.email!).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.successMessage.set('If that email is registered, you will receive a reset link shortly.');
+        this.forgotForm.reset();
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set(err.error?.message || 'Failed to request reset');
       }
     });
   }

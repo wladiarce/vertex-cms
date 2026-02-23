@@ -19,7 +19,8 @@ export class ConfigController {
       capabilities: {
         storage: this.pluginRegistry.hasCapability('storage'),
         auth: this.pluginRegistry.hasCapability('auth'),
-        database: this.pluginRegistry.hasCapability('database')
+        database: this.pluginRegistry.hasCapability('database'),
+        email: this.pluginRegistry.hasCapability('email')
       }
     };
   }

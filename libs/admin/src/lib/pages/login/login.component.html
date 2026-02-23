@@ -8,44 +8,96 @@
       <p class="text-[var(--text-muted)] text-sm font-mono">Sign in to manage your content</p>
     </div>
 
-    <!-- Login Form -->
-    <form [formGroup]="form" (ngSubmit)="submit()" class="p-8">
-      <div class="mb-4">
-        <vertex-input
-          [label]="'Email'"
-          [type]="'email'"
-          [placeholder]="'admin@example.com'"
-          formControlName="email"
-        ></vertex-input>
-      </div>
-      
-      <div class="mb-6">
-        <vertex-input
-          [label]="'Password'"
-          [type]="'password'"
-          [placeholder]="'••••••••'"
-          formControlName="password"
-        ></vertex-input>
-      </div>
-      <div class="w-full text-center">
-        <vertex-button
-          [variant]="'primary'"
-          [type]="'submit'"
-          [disabled]="form.invalid || loading()"
-          [fluid]
-          class="w-full"
-        >
-          {{ loading() ? 'Signing in...' : 'Sign In' }}
-        </vertex-button>
-      </div>
-      
+    <!-- Forms Container -->
+    <div class="p-8">
+      @if (!showForgot()) {
+        <!-- Login Form -->
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="mb-4">
+            <vertex-input
+              [label]="'Email'"
+              [type]="'email'"
+              [placeholder]="'admin@example.com'"
+              formControlName="email"
+            ></vertex-input>
+          </div>
+          
+          <div class="mb-2">
+            <vertex-input
+              [label]="'Password'"
+              [type]="'password'"
+              [placeholder]="'••••••••'"
+              formControlName="password"
+            ></vertex-input>
+          </div>
+
+          @if (vertex.capabilities().email) {
+            <div class="flex justify-end mb-6">
+              <a (click)="toggleForgot()" class="text-xs text-[var(--primary)] hover:underline cursor-pointer font-mono">Forgot password?</a>
+            </div>
+          } @else {
+            <div class="mb-6"></div>
+          }
+
+          <div class="w-full text-center">
+            <vertex-button
+              [variant]="'primary'"
+              [type]="'submit'"
+              [disabled]="form.invalid || loading()"
+              [fluid]="true"
+              class="w-full"
+            >
+              {{ loading() ? 'Signing in...' : 'Sign In' }}
+            </vertex-button>
+          </div>
+        </form>
+      } @else {
+        <!-- Forgot Password Form -->
+        <form [formGroup]="forgotForm" (ngSubmit)="forgotSubmit()">
+          <p class="text-[var(--text-muted)] text-xs mb-6 font-mono">
+            Enter your email and we'll send you a link to reset your password.
+          </p>
+
+          <div class="mb-6">
+            <vertex-input
+              [label]="'Email'"
+              [type]="'email'"
+              [placeholder]="'admin@example.com'"
+              formControlName="email"
+            ></vertex-input>
+          </div>
+
+          <div class="w-full text-center space-y-4">
+            <vertex-button
+              [variant]="'primary'"
+              [type]="'submit'"
+              [disabled]="forgotForm.invalid || loading()"
+              [fluid]="true"
+              class="w-full"
+            >
+              {{ loading() ? 'Sending...' : 'Send Reset Link' }}
+            </vertex-button>
+
+            <button type="button" (click)="toggleForgot()" class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors font-mono underline underline-offset-4">
+              Return to login
+            </button>
+          </div>
+        </form>
+      }
       
       @if (error()) {
-        <div class="mt-4 flex items-center gap-2 text-sm">
-          <i data-lucide="alert-circle" class="w-4 h-4 text-[var(--primary)]"></i>
-          <span class="text-[var(--text-code)] font-mono text-xs">{{ error() }}</span>
+        <div class="mt-6 p-3 bg-red-500/10 border border-red-500/20 rounded flex items-center gap-2 text-sm text-[var(--primary)]">
+          <i data-lucide="alert-circle" class="w-4 h-4"></i>
+          <span class="font-mono text-xs">{{ error() }}</span>
         </div>
       }
-    </form>
+
+      @if (successMessage()) {
+        <div class="mt-6 p-3 bg-green-500/10 border border-green-500/20 rounded flex items-center gap-2 text-sm text-green-500">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span class="font-mono text-xs">{{ successMessage() }}</span>
+        </div>
+      }
+    </div>
   </vertex-card>
 </div>

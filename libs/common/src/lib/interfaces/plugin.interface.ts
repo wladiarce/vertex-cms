@@ -1,6 +1,6 @@
 import { DynamicModule, Type } from '@nestjs/common';
 
-export type VertexPluginType = 'storage' | 'auth' | 'database' | 'blocks' | 'custom';
+export type VertexPluginType = 'storage' | 'auth' | 'database' | 'blocks' | 'email' | 'custom';
 
 /**
  * Interface representing a Vertex Plugin.

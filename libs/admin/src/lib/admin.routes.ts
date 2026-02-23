@@ -21,6 +21,10 @@ export const adminRoutes: Route[] = [
     component: LoginComponent,
 
   },
+  {
+    path: 'reset-password/:token',
+    loadComponent: () => import('./pages/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+  },
   // ADMIN DASHBOARD - private
   {
     path: '', // The base path '/admin'

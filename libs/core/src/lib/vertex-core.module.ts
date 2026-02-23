@@ -11,13 +11,12 @@ import { PluginRegistryService } from './services/plugin-registry.service';
 import { AuthController } from './auth/auth.controller';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { VertexCoreOptions, DEFAULT_LOCALE_CONFIG, VertexPlugin, DatabaseAdapter } from '@vertex/common';
+import { VertexCoreOptions, DEFAULT_LOCALE_CONFIG, VertexPlugin, DatabaseAdapter, VERTEX_DB_ADAPTER } from '@vertex-cms/common';
 import { UploadController } from './api/upload.controller';
 import { LocaleConfigProvider } from './providers/locale-config.provider';
 import { Version } from './collections/version.collection';
 import { Upload } from './collections/upload.collection';
 import { DatabaseRegistryService } from './services/database-registry.service';
-import { VERTEX_DB_ADAPTER } from '@vertex/common';
 import { ApiToken } from './collections/api-token.collection';
 import { TokenService } from './services/token.service';
 import { TokenController } from './api/token.controller';
@@ -25,6 +24,10 @@ import { Webhook } from './collections/webhook.collection';
 import { WebhookLog } from './collections/webhook-log.collection';
 import { WebhookService } from './services/webhook.service';
 import { WebhookController } from './api/webhook.controller';
+import { EmailService } from './services/email.service';
+import { EmailTemplateService } from './services/email-template.service';
+import { EmailTemplate } from './collections/email-template.collection';
+import { PasswordReset } from './collections/password-reset.collection';
 
 @Global() // Make it global so we don't have to import it everywhere
 @Module({
@@ -46,7 +49,9 @@ import { WebhookController } from './api/webhook.controller';
         PluginRegistryService,
         DatabaseRegistryService,
         TokenService,
-        WebhookService
+        WebhookService,
+        EmailService,
+        EmailTemplateService
     ],
     controllers: [
         ConfigController,
@@ -62,7 +67,9 @@ import { WebhookController } from './api/webhook.controller';
         PluginRegistryService,
         DatabaseRegistryService,
         TokenService,
-        WebhookService
+        WebhookService,
+        EmailService,
+        EmailTemplateService
 ]
 })
 export class VertexCoreModule {
@@ -72,6 +79,7 @@ export class VertexCoreModule {
     const allPlugins = [
       options.storage,
       options.database,
+      options.email,
       ...(options.blocks || []),
       // options.auth,
       ...(options.plugins || [])
@@ -110,17 +118,26 @@ export class VertexCoreModule {
         {
           provide: 'VERTEX_BOOTSTRAP',
           useFactory: async (discovery: SchemaDiscoveryService, _p: any, _d: any, registry: DatabaseRegistryService) => {
-             // Register System collections first, then user collections
-             await discovery.registerCollections([Version, Upload, ApiToken, Webhook, WebhookLog, ...options.entities]);
+              // Register System collections first, then user collections
+              await discovery.registerCollections([Version, Upload, ApiToken, Webhook, WebhookLog, EmailTemplate, PasswordReset, ...options.entities]);
 
              // Finalize database adapter if needed (e.g. TypeORM needs to rebuild metadata)
              const adapter = registry.getAdapter();
              if (adapter.onDiscoveryComplete) {
                await adapter.onDiscoveryComplete();
              }
-          },
-          inject: [SchemaDiscoveryService, 'VERTEX_PLUGIN_INITIALIZER', 'VERTEX_DATABASE_INITIALIZER', DatabaseRegistryService]
-        }
+           },
+           inject: [SchemaDiscoveryService, 'VERTEX_PLUGIN_INITIALIZER', 'VERTEX_DATABASE_INITIALIZER', DatabaseRegistryService]
+         },
+         // Seed default templates
+         {
+           provide: 'VERTEX_EMAIL_TEMPLATE_SEEDER',
+           useFactory: async (templateService: EmailTemplateService) => {
+             await templateService.seedDefaultTemplates();
+             return true;
+           },
+           inject: [EmailTemplateService, 'VERTEX_BOOTSTRAP']
+         }
     ];
 
     return {
@@ -131,10 +148,11 @@ export class VertexCoreModule {
       providers,
       exports: [
         SchemaDiscoveryService,
-        PluginRegistryService,
         DatabaseRegistryService,
         TokenService,
-        WebhookService
+        WebhookService,
+        EmailService,
+        EmailTemplateService
       ]
     };
   }

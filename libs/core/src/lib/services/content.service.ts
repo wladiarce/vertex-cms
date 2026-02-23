@@ -3,9 +3,10 @@ import { SchemaDiscoveryService } from './schema-discovery.service';
 import { VersionService } from './version.service';
 import { getLocalizedValue } from '../utils/locale.utils';
 import { LocaleConfigProvider } from '../providers/locale-config.provider';
-import { DocumentStatus } from '@vertex/common';
+import { DocumentStatus } from '@vertex-cms/common';
 import { DatabaseRegistryService } from './database-registry.service';
 import { WebhookService } from './webhook.service';
+import { EmailService } from './email.service';
 
 @Injectable()
 export class ContentService {
@@ -14,7 +15,8 @@ export class ContentService {
     private readonly discovery: SchemaDiscoveryService,
     private readonly localeConfig: LocaleConfigProvider,
     private readonly versionService: VersionService,
-    private readonly webhookService: WebhookService
+    private readonly webhookService: WebhookService,
+    private readonly emailService: EmailService
   ) {}
 
   async findAll(slug: string, query: any = {}) {
@@ -119,6 +121,15 @@ export class ContentService {
 
     const result = await repository.create(cleanData);
     
+    // Send welcome email for new users (if email is enabled)
+    if (slug === 'users' && this.emailService.isEnabled()) {
+      this.emailService.sendTemplate('welcome', result.email, {
+        userName: result.name || result.email,
+        loginUrl: '/admin/login',
+        appName: 'VertexCMS'
+      }).catch(err => console.warn('Failed to send welcome email', err));
+    }
+
     // Dispatch webhook
     this.webhookService.dispatchEvent(`${slug}:create`, result);
     

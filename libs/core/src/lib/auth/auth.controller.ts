@@ -18,4 +18,14 @@ export class AuthController {
   async validate(@Body() body: any) {
     return this.authService.validateToken(body.token);
   }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: { email: string }) {
+    return this.authService.requestPasswordReset(body.email);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() body: { token: string; password: any }) {
+    return this.authService.resetPassword(body.token, body.password);
+  }
 }

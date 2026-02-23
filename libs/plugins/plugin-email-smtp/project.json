@@ -1,0 +1,19 @@
+{
+  "name": "plugin-email-smtp",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/plugins/plugin-email-smtp/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/plugins/plugin-email-smtp",
+        "main": "libs/plugins/plugin-email-smtp/src/index.ts",
+        "tsConfig": "libs/plugins/plugin-email-smtp/tsconfig.lib.json",
+        "assets": ["libs/plugins/plugin-email-smtp/*.md"]
+      }
+    }
+  }
+}

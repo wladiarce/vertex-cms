@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CollectionMetadata, Upload } from '@vertex/common';
+import { CollectionMetadata, Upload } from '@vertex-cms/common';
 import { tap } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
@@ -10,10 +10,11 @@ export class VertexClientService {
   // Signals to hold the global state
   // We use a signal so the Sidebar automatically updates when config loads
   collections = signal<CollectionMetadata[]>([]);
-  capabilities = signal<{ storage: boolean; auth: boolean; database: boolean }>({
+  capabilities = signal<{ storage: boolean; auth: boolean; database: boolean; email: boolean }>({
     storage: false,
     auth: false,
-    database: false
+    database: false,
+    email: false
   });
   
   // Base API URL (proxy is handled by Nx in dev, or relative path in prod)
@@ -167,6 +168,17 @@ export class VertexClientService {
 
   testWebhook(id: string) {
     return this.http.post<any>(`${this.apiUrl}/vertex/webhooks/${id}/test`, {});
+  }
+
+  /**
+   * 9. Auth Methods
+   */
+  forgotPassword(email: string) {
+    return this.http.post<any>(`${this.apiUrl}/vertex/auth/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, password: any) {
+    return this.http.post<any>(`${this.apiUrl}/vertex/auth/reset-password`, { token, password });
   }
 }
 
