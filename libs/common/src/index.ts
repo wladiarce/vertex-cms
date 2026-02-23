@@ -12,6 +12,7 @@ export * from './lib/interfaces/storage-adapter.interface';
 export * from './lib/interfaces/upload.interface';
 export * from './lib/interfaces/plugin.interface';
 export * from './lib/interfaces/database.interface';
+export * from './lib/interfaces/email-adapter.interface';
 
 // CONFIG
 export * from './lib/config/locale.config';
