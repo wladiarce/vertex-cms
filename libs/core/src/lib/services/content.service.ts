@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { SchemaDiscoveryService } from './schema-discovery.service';
 import { VersionService } from './version.service';
 import { getLocalizedValue } from '../utils/locale.utils';
@@ -16,7 +16,7 @@ export class ContentService {
     private readonly localeConfig: LocaleConfigProvider,
     private readonly versionService: VersionService,
     private readonly webhookService: WebhookService,
-    private readonly emailService: EmailService
+    @Inject(forwardRef(() => EmailService)) private readonly emailService: EmailService
   ) {}
 
   async findAll(slug: string, query: any = {}) {

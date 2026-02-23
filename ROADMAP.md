@@ -112,20 +112,20 @@ VertexCMS aims to become the **premier content management system for the Angular
 > **Job to be done**: As a developer, I need the CMS to talk to other systems when content changes.
 
 ##### Webhooks
-- [ ] **UI**: Settings page to define Webhook URLs
+- [x] **UI**: Settings page to define Webhook URLs
   - Configure triggers: `on: ['create', 'update', 'delete']`
   - Filter by collection: `collection: 'pages'`
   - Add custom headers (e.g., `X-API-Key`)
-- [ ] **Dispatch service**: POST payload to external URLs on events
+- [x] **Dispatch service**: POST payload to external URLs on events
   - Retry logic (3 attempts with exponential backoff)
   - Webhook logs (success/failure, timestamp, response)
-- [ ] **Use cases**: Trigger Netlify/Vercel builds, sync to Algolia, notify Slack
+- [] **Use cases**: Trigger Netlify/Vercel builds, sync to Algolia, notify Slack
 
 ##### API tokens
-- [ ] **Token generation**: Allow creating long-lived "API Keys" for external services
-- [ ] **Scopes**: Define read/write permissions per token
-- [ ] **UI**: Manage tokens in Admin (create, revoke, view last used)
-- [ ] **Authentication**: Support both JWT (user sessions) and API tokens (services)
+- [x] **Token generation**: Allow creating long-lived "API Keys" for external services
+- [x] **Scopes**: Define read/write permissions per token
+- [x] **UI**: Manage tokens in Admin (create, revoke, view last used)
+- [x] **Authentication**: Support both JWT (user sessions) and API tokens (services)
 
 ---
 
@@ -134,26 +134,26 @@ VertexCMS aims to become the **premier content management system for the Angular
 > **Job to be done**: As a new user, I want to try VertexCMS in under 5 minutes.
 
 ##### create-vertex-app
-- [ ] **Interactive CLI**: `npx create-vertex-app my-site`
-- [ ] **Prompts**:
+- [x] **Interactive CLI**: `npx create-vertex-app my-site`
+- [x] **Prompts**:
   - "Choose your frontend" (Angular SSR, Angular SPA, Admin page only)
   - "Choose your database" (MongoDB, PostgreSQL)
   - "Choose your storage" (Local, S3, GCS)
   - "Include example collections?" (Yes/No)
-- [ ] **Template generation**:
+- [x] **Template generation**:
   - Clone appropriate starter template
   - Install dependencies automatically
   - Initialize a local DB container (Docker Compose) - optional
   - Generate JWT secret
-- [ ] **First run experience**:
+- [x] **First run experience**:
   - Create default admin user or prompt DB initialization instructions if no DB container has been initialized
   - Seed example content (optional)
   - Open browser to `http://localhost:4200/admin`
 
 ##### Project scaffolding commands
-- [ ] `vertex generate collection <name>`: Generate collection boilerplate
-- [ ] `vertex generate block <name>`: Generate block + component boilerplate
-- [ ] `vertex migrate`: Database migration tool for version upgrades
+- [x] `vertex generate collection <name>`: Generate collection boilerplate
+- [x] `vertex generate block <name>`: Generate block + component boilerplate
+- [x] `vertex migrate`: Database migration tool for version upgrades
 
 ---
 
@@ -183,16 +183,20 @@ VertexCMS aims to become the **premier content management system for the Angular
 
 > **Job to be done**: As a developer, I need to send transactional emails from the CMS.
 
-- [ ] **Email service abstraction**: Generic interface for email providers, injected as a plugin.
-- [ ] **Adapters**:
-  - Nodemailer (SMTP)
-  - SendGrid
-  - AWS SES
-  - Mailgun
-- [ ] **Template system**: Email templates with variable interpolation
-- [ ] **Use cases**: Password reset, welcome emails, notifications
+- [x] **Email service abstraction**: Generic interface for email providers, injected as a plugin.
+- [WIP] **Adapters**:
+  - [x] Nodemailer (SMTP)
+  - [ ] SendGrid
+  - [ ] AWS SES
+  - [ ] Mailgun
+- [x] **Template system**: Email templates with variable interpolation
+- [x] **Use cases**: Password reset, welcome emails, notifications
 
 ---
+
+#### Milestone 7.1: Improved email editor (v0.7.6)
+
+- [ ] **Email editor plugin**: Plugin dependent on any email adapted, that adds a Monca Engine editor for the email templates.
 
 ### Phase 3: Stable — Production hardening (v0.9.x - v1.0.0)
 

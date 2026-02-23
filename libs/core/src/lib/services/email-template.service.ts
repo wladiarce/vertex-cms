@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { ContentService } from './content.service';
 import { EmailTemplate } from '../collections/email-template.collection';
 
@@ -6,7 +6,7 @@ import { EmailTemplate } from '../collections/email-template.collection';
 export class EmailTemplateService {
   private logger = new Logger(EmailTemplateService.name);
 
-  constructor(private contentService: ContentService) {}
+  constructor(@Inject(forwardRef(() => ContentService)) private contentService: ContentService) {}
 
   async getTemplate(slug: string): Promise<EmailTemplate | null> {
     const results = await this.contentService.findAll('_email_templates', {
