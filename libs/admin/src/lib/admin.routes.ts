@@ -19,6 +19,10 @@ export const adminRoutes: Route[] = [
   {
     path: 'login',
     component: LoginComponent,
+    resolve: {
+      // Before loading the admin, fetch the config!
+      config: () => inject(VertexClientService).loadConfig()
+    },
 
   },
   {

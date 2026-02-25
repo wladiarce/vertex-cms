@@ -11,6 +11,7 @@ import { join } from 'path';
 import { StorageLocalPlugin } from '@vertex-cms/plugin-storage-local';
 import { DatabaseMongoPlugin } from '@vertex-cms/plugin-db-mongo';
 import { DatabaseTypeORMPlugin } from '@vertex-cms/plugin-db-typeorm';
+import { EmailSmtpPlugin } from '@vertex-cms/plugin-email-smtp';
 
 
 @Module({
@@ -42,6 +43,13 @@ import { DatabaseTypeORMPlugin } from '@vertex-cms/plugin-db-typeorm';
       //   database: 'vertex-cms'
 
       // }),
+      email: EmailSmtpPlugin({
+        host: process.env.SMTP_HOST || 'smtp.example.com',
+        port: Number(process.env.SMTP_PORT) || 587,
+        secure: Boolean(process.env.SMTP_SECURE) || true,
+        auth: { user: process.env.SMTP_USER || 'username', pass: process.env.SMTP_PASS || 'password' },
+        from: process.env.SMTP_FROM || 'from@example.com'
+      }),
       // Configure locales for your application
       locales: {
         default: 'en',
