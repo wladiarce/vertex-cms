@@ -34,7 +34,7 @@ import { ProjectGalleryBlock } from './blocks/project-gallery.block';
     }),
     VertexCoreModule.forRoot({
       database: DatabaseMongoPlugin({
-        uri: process.env.MONGO_URI || 'mongodb+srv://vertex:Je3c5Syc9fesB3uR@test-cluster.187wcci.mongodb.net/vertex-cms?appName=test-cluster'
+        uri: process.env.MONGO_URI || ''
       }),
       entities: [
         User, DocPage, BlogPost, BlogCategory, Product, ProductCategory, 
