@@ -1,3 +1,6 @@
+# RUN VERDACCIO WITH CONFIG
+# npx verdaccio --config .verdaccio/config.yml --listen 4873
+
 # path to a directory with all packages
 storage: ../tmp/local-registry/storage
 

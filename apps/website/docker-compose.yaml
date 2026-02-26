@@ -1,0 +1,23 @@
+services:
+  mongo:
+    image: mongo:8.2.3
+    volumes: [mongo-data:/data/db]
+    
+  vertex-api:
+    build: { context: ., dockerfile: Dockerfile.backend }
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/vertex-website
+      - JWT_SECRET=${JWT_SECRET}
+      - UPLOAD_PATH=/app/uploads
+    depends_on: [mongo]
+
+  vertex-ssr:
+    build: { context: ., dockerfile: Dockerfile.ssr }
+
+  nginx:
+    build: { context: ., dockerfile: Dockerfile.nginx }
+    ports: ["80:80", "443:443"]
+    depends_on: [vertex-api, vertex-ssr]
+
+volumes:
+  mongo-data:

@@ -9,7 +9,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/plugins/plugin-storage-gcs",
+        "outputPath": "dist/libs/plugin-storage-gcs",
         "main": "libs/plugins/plugin-storage-gcs/src/index.ts",
         "tsConfig": "libs/plugins/plugin-storage-gcs/tsconfig.lib.json",
         "assets": ["libs/plugins/plugin-storage-gcs/*.md"]

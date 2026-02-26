@@ -16,7 +16,7 @@ if (!version) {
   process.exit(1);
 }
 
-const libs = ['common', 'core', 'public', 'admin'];
+const libs = ['common', 'core', 'public', 'admin', 'plugin-db-mongo', 'plugin-storage-local', 'plugin-db-typeorm', 'plugin-email-smtp', 'plugin-storage-gcs'];
 
 console.log(`🚀 Publishing Version: ${version} (tag: ${tag})`);
 

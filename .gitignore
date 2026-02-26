@@ -42,7 +42,7 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
-docs
+/docs
 .npmrc
 
 # System Files

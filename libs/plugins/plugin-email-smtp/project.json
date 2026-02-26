@@ -9,7 +9,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/plugins/plugin-email-smtp",
+        "outputPath": "dist/libs/plugin-email-smtp",
         "main": "libs/plugins/plugin-email-smtp/src/index.ts",
         "tsConfig": "libs/plugins/plugin-email-smtp/tsconfig.lib.json",
         "assets": ["libs/plugins/plugin-email-smtp/*.md"]

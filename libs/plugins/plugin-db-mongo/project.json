@@ -9,7 +9,7 @@
       "executor": "@nx/js:swc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/plugins/plugin-db-mongo",
+        "outputPath": "dist/libs/plugin-db-mongo",
         "main": "libs/plugins/plugin-db-mongo/src/index.ts",
         "tsConfig": "libs/plugins/plugin-db-mongo/tsconfig.lib.json",
         "assets": ["libs/plugins/plugin-db-mongo/*.md"]

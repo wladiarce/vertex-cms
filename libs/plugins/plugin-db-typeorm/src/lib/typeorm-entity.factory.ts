@@ -28,10 +28,10 @@ export class TypeORMEntityFactory {
       } else {
         // Handle Relationships
         relations[field.name] = {
-          type: field.relationMany ? 'many-to-many' : 'many-to-one',
+          type: field.hasMany ? 'many-to-many' : 'many-to-one',
           target: field.relationTo,
-          joinColumn: !field.relationMany,
-          joinTable: field.relationMany,
+          joinColumn: !field.hasMany,
+          joinTable: field.hasMany,
           cascade: true,
         };
       }
@@ -86,7 +86,8 @@ export class TypeORMEntityFactory {
         return { ...base, type: 'timestamp' } as EntitySchemaColumnOptions;
 
       case FieldType.Select:
-        return { ...base, type: 'varchar' } as EntitySchemaColumnOptions;
+        // hasMany selects (multi-select) use simple-json to store arrays
+        return { ...base, type: field.hasMany ? 'simple-json' : 'varchar' } as EntitySchemaColumnOptions;
 
       case FieldType.Blocks:
         return { ...base, type: 'simple-json' } as EntitySchemaColumnOptions;

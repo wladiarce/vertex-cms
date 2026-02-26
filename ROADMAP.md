@@ -162,8 +162,8 @@ VertexCMS aims to become the **premier content management system for the Angular
 > **Job to be done**: As a developer, I need to solve problems without reading the source code.
 
 ##### Docs site (using Vertex CMS!)
-- [ ] **Implementation**: Build docs site with VertexCMS itself
-- [ ] **Content structure**:
+- [x] **Implementation**: Build docs site with VertexCMS itself
+- [ x] **Content structure**:
   - Getting Started
   - Core Concepts (Collections, Fields, Blocks)
   - Guides: "Your first block", "Deploying to Docker", "Creating a plugin"
@@ -173,9 +173,9 @@ VertexCMS aims to become the **premier content management system for the Angular
 - [ ] **Code examples**: Embed live code snippets with syntax highlighting
 
 ##### Demo playground
-- [ ] **Live deployment**: Read-only Admin UI for prospective users
+- [x] **Live deployment**: Read-only Admin UI for prospective users
 - [ ] **Interactive tutorial**: Step-by-step guide within the demo
-- [ ] **Showcase**: Examples of different use cases (blog, e-commerce, portfolio)
+- [x] **Showcase**: Examples of different use cases (blog, e-commerce, portfolio)
 
 ---
 
