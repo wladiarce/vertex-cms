@@ -30,7 +30,7 @@ export class Post {
   @Field({ 
     type: FieldType.Relationship, 
     relationTo: 'tags',
-    relationMany: true,
+    hasMany: true,
     label: 'Tags'
   })
   tags!: string[];

@@ -30,4 +30,17 @@ export class User {
 
   @Field({ type: FieldType.Text, label: 'Full Name' })
   name: string;
+
+  @Field({ type: FieldType.Select, options: [
+    { label: 'Movies', value: 'movies' },
+    { label: 'Users', value: 'users' },
+    { label: 'Pages', value: 'pages' },
+    { label: 'Authors', value: 'authors' },
+    { label: 'Tags', value: 'tags' },
+    { label: 'Posts', value: 'posts' }
+  ], hasMany: true })
+  collections?: string[];
+
+  @Field({ type: FieldType.Boolean, defaultValue: false })
+  readOnly?: boolean;
 }

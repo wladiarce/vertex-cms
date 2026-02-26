@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Request } from '@nestjs/common';
 import { SchemaDiscoveryService } from '../services/schema-discovery.service';
 import { LocaleConfigProvider } from '../providers/locale-config.provider';
 import { PluginRegistryService } from '../services/plugin-registry.service';
@@ -12,15 +12,35 @@ export class ConfigController {
   ) {}
 
   @Get()
-  getConfig() {
-    // Returns the full JSON metadata of all collections
+  getConfig(@Request() req: any) {
+    let user: any = null;
+    const authHeader = req?.headers?.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.split(' ')[1];
+        const payload = token.split('.')[1];
+        user = JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
+      } catch (e) {}
+    }
+    
+    let collections = this.discovery.getAllCollections();
+    
+    // If user has scoped collections, filter
+    if (user?.collections?.length) {
+      collections = collections.filter(c => user.collections.includes(c.slug));
+    }
+    
+    // Filter out internal collections (starting with _)
+    collections = collections.filter(c => !c.slug.startsWith('_'));
+
     return {
-      collections: this.discovery.getAllCollections(),
+      collections,
       capabilities: {
         storage: this.pluginRegistry.hasCapability('storage'),
         auth: this.pluginRegistry.hasCapability('auth'),
         database: this.pluginRegistry.hasCapability('database'),
-        email: this.pluginRegistry.hasCapability('email')
+        email: this.pluginRegistry.hasCapability('email'),
+        readOnly: user?.readOnly || false
       }
     };
   }

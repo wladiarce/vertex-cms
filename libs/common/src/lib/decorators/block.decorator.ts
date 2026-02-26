@@ -3,6 +3,7 @@ import 'reflect-metadata';
 export interface BlockOptions {
   slug: string; // Internal ID (e.g. 'hero')
   label?: string; // Display name (e.g. 'Hero Section')
+  name?: string;
   icon?: string; // Optional icon for the Admin UI picker
 }
 

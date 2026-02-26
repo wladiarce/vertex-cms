@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal, effect, OnInit } from '@angular/core';
+import { Component, Input, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FieldOptions } from '@vertex-cms/common';
@@ -16,7 +16,7 @@ import { VertexClientService } from '../../services/vertex-client.service';
         [formControl]="control"
         [label]="field.label || field.name"
         [placeholder]="'Search ' + field.relationTo + '...'"
-        [multiple]="field.relationMany || false"
+        [multiple]="field.hasMany || false"
         [items]="suggestions()"
         [loading]="loading()"
         (search)="onSearch($event)"
@@ -54,11 +54,9 @@ export class RelationshipFieldComponent implements OnInit {
   }
   
   ngOnInit() {
-    // Load initial selected documents when editing
-    const value = this.control.value;
-    if (value) {
-      this.loadSelectedDocuments(value);
-    }
+    // Relationship value normalization (populated objects → {id, displayName})
+    // is now handled upstream by CollectionEditComponent.normalizeRelationshipData()
+    // before patchValue is called, so writeValue receives the correct shape.
   }
   
   onSearch(query: string) {
@@ -71,21 +69,14 @@ export class RelationshipFieldComponent implements OnInit {
     this.cms.searchRelationship(this.field.relationTo!, query).subscribe({
       next: (results: any[]) => {
         this.suggestions.set(results.map((r: any) => ({
-          id: r.id,
-          displayName: r.title || r.name || r.id,
+          id: r._id ?? r.id,
+          displayName: r.title ?? r.name ?? r.email ?? r._id ?? r.id,
           ...r
         })));
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
     });
-  }
-  
-  private loadSelectedDocuments(ids: string | string[]) {
-    // Fetch full documents for selected IDs to display in autocomplete
-    const idArray = Array.isArray(ids) ? ids : [ids];
-    // TODO: Implement batch fetch endpoint or individual fetches
-    // For now, this is a placeholder for when editing existing documents
   }
   
   openCreateModal() {

@@ -29,12 +29,14 @@ declare const lucide: any;
             <option value="all">All</option>
           </vertex-select>
         }
-        <vertex-button 
-          [variant]="'primary'" 
-          [icon]="'plus'" 
-          [routerLink]="['create']">
-          New {{ collection()?.singularName }}
-        </vertex-button>
+        @if (!cms.readOnly()) {
+          <vertex-button 
+            [variant]="'primary'" 
+            [icon]="'plus'" 
+            [routerLink]="['create']">
+            New {{ collection()?.singularName }}
+          </vertex-button>
+        }
       </div>
     </header>
 
@@ -106,7 +108,7 @@ declare const lucide: any;
 })
 export class CollectionListComponent implements AfterViewInit {
   private route = inject(ActivatedRoute);
-  private cms = inject(VertexClientService);
+  protected cms = inject(VertexClientService);
   
   slug = signal('');
   documents = signal<any[]>([]);

@@ -26,26 +26,28 @@ import { Upload } from '@vertex-cms/common';
           <h1>Media Library</h1>
           <p class="text-muted">Manage all your uploaded files and images</p>
         </div>
-        <vertex-button
-          variant="primary"
-          (click)="triggerUpload()"
-        >
-        <!-- REPLACE SVG BY ICON -->
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" x2="12" y1="3" y2="15"></line>
-          </svg>
-          Upload Files
-        </vertex-button>
-        <input
-          #fileInput
-          type="file"
-          multiple
-          accept="image/*,video/*,application/pdf"
-          (change)="handleFileSelect($event)"
-          style="display: none;"
-        />
+        @if (!vertexClient.readOnly()) {
+          <vertex-button
+            variant="primary"
+            (click)="triggerUpload()"
+          >
+          <!-- REPLACE SVG BY ICON -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" x2="12" y1="3" y2="15"></line>
+            </svg>
+            Upload Files
+          </vertex-button>
+          <input
+            #fileInput
+            type="file"
+            multiple
+            accept="image/*,video/*,application/pdf"
+            (change)="handleFileSelect($event)"
+            style="display: none;"
+          />
+        }
       </div>
 
       <!-- Filters & Search -->
@@ -76,7 +78,7 @@ import { Upload } from '@vertex-cms/common';
             </select>
           </div>
 
-          @if (selectedItems().length > 0) {
+          @if (selectedItems().length > 0 && !vertexClient.readOnly()) {
             <div class="bulk-actions">
               <span class="selected-count">{{ selectedItems().length }} selected</span>
               <vertex-button
@@ -433,7 +435,7 @@ import { Upload } from '@vertex-cms/common';
   `]
 })
 export class MediaLibraryComponent implements OnInit {
-  private vertexClient = inject(VertexClientService);
+  protected vertexClient = inject(VertexClientService);
 
   // State
   media = signal<Upload[]>([]);

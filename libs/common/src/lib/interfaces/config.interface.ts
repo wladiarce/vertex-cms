@@ -64,8 +64,10 @@ export interface FieldOptions {
   options?: { label: string; value: string | number }[];
   
   // For 'relationship' type
-  relationTo?: string; // The slug of the related collection
-  relationMany?: boolean; // If true, field stores array of ObjectIds (many-to-many)
+  relationTo?: string;   // The slug of the related collection
+  hasMany?: boolean;     // If true, field stores an array of values.
+                         // For relationships: array of ObjectIds (many-to-many).
+                         // For other types: array of that type's values.
   
   // Validation
   minLength?: number;

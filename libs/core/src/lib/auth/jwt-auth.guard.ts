@@ -96,8 +96,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   // Handle the scenario where Passport returns 'null' user without throwing
   override handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     if (err) throw err;
+    const request = context.switchToHttp().getRequest();
     // If we have a user, great.
-    if (user) return user;
+    if (user) {
+      if (user.readOnly && ['POST', 'PATCH', 'PUT', 'DELETE'].includes(request.method) && request.url.includes('/api/content/')) {
+        throw new ForbiddenException('Read-only user cannot modify content');
+      }
+      return user;
+    }
     
     // If no user, we don't throw yet. We return null so canActivate can check public access.
     return null;

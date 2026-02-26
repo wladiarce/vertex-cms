@@ -40,34 +40,39 @@ import { VertexBadgeComponent } from '../../components/ui/vertex-badge.component
               }
             </div>
             <div class="flex gap-2">
+              @if (cms.readOnly()) {
+                <vertex-badge [status]="'archived'">👁 You are viewing this in read-only demo mode.</vertex-badge>
+              }
               <a [routerLink]="['../']">
-                <vertex-button [icon]="'x'">Cancel</vertex-button>
+                <vertex-button [icon]="'x'">{{ cms.readOnly() ? 'Back' : 'Cancel' }}</vertex-button>
               </a>
               
-              @if (draftsEnabled() && !isNew()) {
-                <vertex-button [icon]="'history'" (click)="toggleVersionHistory()">
-                  History
-                </vertex-button>
-              }
-              @if (draftsEnabled()) {
-                <vertex-button (click)="saveAsDraft()" 
-                               [disabled]="form.invalid || loading()"
-                               [icon]="'save'">
-                  {{ loading() && saveAction() === 'draft' ? 'Saving...' : 'Save as Draft' }}
-                </vertex-button>
-                <vertex-button (click)="publishDocument()" 
-                               [disabled]="form.invalid || loading()"
-                               [variant]="'primary'"
-                               [icon]="'check-circle'">
-                  {{ loading() && saveAction() === 'publish' ? 'Publishing...' : 'Publish' }}
-                </vertex-button>
-              } @else {
-                <vertex-button (click)="save()" 
-                               [disabled]="form.invalid || loading()"
-                               [variant]="'primary'"
-                               [icon]="'save'">
-                  {{ loading() ? 'Saving...' : 'Save' }}
-                </vertex-button>
+              @if (!cms.readOnly()) {
+                @if (draftsEnabled() && !isNew()) {
+                  <vertex-button [icon]="'history'" (click)="toggleVersionHistory()">
+                    History
+                  </vertex-button>
+                }
+                @if (draftsEnabled()) {
+                  <vertex-button (click)="saveAsDraft()" 
+                                 [disabled]="form.invalid || loading()"
+                                 [icon]="'save'">
+                    {{ loading() && saveAction() === 'draft' ? 'Saving...' : 'Save as Draft' }}
+                  </vertex-button>
+                  <vertex-button (click)="publishDocument()" 
+                                 [disabled]="form.invalid || loading()"
+                                 [variant]="'primary'"
+                                 [icon]="'check-circle'">
+                    {{ loading() && saveAction() === 'publish' ? 'Publishing...' : 'Publish' }}
+                  </vertex-button>
+                } @else {
+                  <vertex-button (click)="save()" 
+                                 [disabled]="form.invalid || loading()"
+                                 [variant]="'primary'"
+                                 [icon]="'save'">
+                    {{ loading() ? 'Saving...' : 'Save' }}
+                  </vertex-button>
+                }
               }
             </div>
           </div>
@@ -135,7 +140,7 @@ export class CollectionEditComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
-  private cms = inject(VertexClientService);
+  protected cms = inject(VertexClientService);
   private localeService = inject(LocaleService);
 
   // State
@@ -233,6 +238,10 @@ export class CollectionEditComponent {
     });
 
     this.form = this.fb.group(group);
+
+    if (this.cms.readOnly()) {
+      this.form.disable();
+    }
   }
 
   private loadData() {
@@ -254,16 +263,65 @@ export class CollectionEditComponent {
           this.documentStatus.set(data.status);
         }
         
-        // 1. We must manually reconstruct FormArrays before patching!
-        // Because standard patchValue won't create the controls for us.
-        this.rebuildFormArrays(data);
+        // 1. Normalize populated relationship objects → AutocompleteItem shape
+        //    The API returns fully-populated sub-documents (e.g. {_id:'...', name:'Foo'})
+        //    but the autocomplete control expects {id, displayName} or a plain ID string.
+        //    We must convert before patching so writeValue receives the right shape.
+        const normalized = this.normalizeRelationshipData(data);
         
-        // 2. Now patch
-        this.form.patchValue(data);
+        // 2. Reconstruct FormArrays before patching (blocks fields)
+        this.rebuildFormArrays(normalized);
+        
+        // 3. Patch the form with normalized data
+        this.form.patchValue(normalized);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
     });
+  }
+
+  /**
+   * Converts populated relationship sub-documents into the AutocompleteItem shape
+   * { id, displayName } that the VertexAutocompleteComponent expects via writeValue.
+   *
+   * Without this, patchValue writes the raw object into the FormControl and the
+   * autocomplete renders it as "[object Object]".
+   */
+  private normalizeRelationshipData(data: any): any {
+    const col = this.collection();
+    if (!col) return data;
+
+    const result = { ...data };
+
+    col.fields.forEach(field => {
+      if (field.type !== 'relationship') return;
+      const raw = result[field.name];
+      if (raw == null) return;
+
+      const toItem = (v: any) => {
+        if (v == null) return v;
+        // Already a plain string ID — leave it; writeValue handles it
+        if (typeof v === 'string') return v;
+        // Populated document object
+        if (typeof v === 'object') {
+          return {
+            id: v._id ?? v.id ?? v,
+            displayName: v.title ?? v.name ?? v.email ?? v._id ?? v.id ?? String(v),
+            // Carry through the original for downstream use
+            ...v,
+          };
+        }
+        return v;
+      };
+
+      if (field.hasMany || Array.isArray(raw)) {
+        result[field.name] = (Array.isArray(raw) ? raw : [raw]).map(toItem);
+      } else {
+        result[field.name] = toItem(raw);
+      }
+    });
+
+    return result;
   }
 
   private rebuildFormArrays(data: any) {
@@ -313,11 +371,49 @@ export class CollectionEditComponent {
     });
   }
 
+  /**
+   * Inverse of normalizeRelationshipData().
+   * Strips relationship fields back to plain ID strings / arrays of IDs
+   * before posting to the server — because the form control holds the full
+   * AutocompleteItem object ({id, displayName, ...}) when the user hasn't
+   * re-touched the field after it was pre-populated via writeValue.
+   */
+  private serializeFormValue(value: any): any {
+    const col = this.collection();
+    if (!col) return value;
+
+    const result = { ...value };
+
+    col.fields.forEach(field => {
+      if (field.type !== 'relationship') return;
+      const raw = result[field.name];
+      if (raw == null) return;
+
+      const extractId = (v: any): string | null => {
+        if (v == null) return null;
+        // AutocompleteItem or normalized object — extract id
+        if (typeof v === 'object') return v.id ?? v._id ?? null;
+        // Already a plain string ID
+        return typeof v === 'string' ? v : null;
+      };
+
+      if (field.hasMany || Array.isArray(raw)) {
+        result[field.name] = (Array.isArray(raw) ? raw : [raw])
+          .map(extractId)
+          .filter((id): id is string => id !== null);
+      } else {
+        result[field.name] = extractId(raw);
+      }
+    });
+
+    return result;
+  }
+
   save() {
     if (this.form.invalid) return;
     
     this.loading.set(true);
-    const data = this.form.value;
+    const data = this.serializeFormValue(this.form.value);
     const request = this.isNew()
       ? this.cms.create(this.slug(), data)
       : this.cms.update(this.slug(), this.id()!, data);
@@ -325,7 +421,6 @@ export class CollectionEditComponent {
     request.subscribe({
       next: () => {
         this.loading.set(false);
-        // Navigate back to list on success
         this.router.navigate(['../'], { relativeTo: this.route });
       },
       error: (err) => {
@@ -345,7 +440,7 @@ export class CollectionEditComponent {
     this.saveAction.set('draft');
     this.loading.set(true);
     
-    const formValue = { ...this.form.value, status: 'draft' };
+    const formValue = { ...this.serializeFormValue(this.form.value), status: 'draft' };
     const currentId = this.id();
     
     if (!currentId) {
@@ -386,7 +481,7 @@ export class CollectionEditComponent {
     this.saveAction.set('publish');
     this.loading.set(true);
     
-    const formValue = { ...this.form.value };
+    const formValue = { ...this.serializeFormValue(this.form.value) };
     const currentId = this.id();
     
     if (!currentId) {

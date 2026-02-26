@@ -6,15 +6,7 @@ import { CollectionMetadata, FieldType, FieldOptions, DocumentStatus } from '@ve
 export class MongooseSchemaFactory {
   
   createSchema(metadata: CollectionMetadata): Schema {
-    const schemaDefinition: Record<string, any> = {
-      // Define id as an alias of _id to align with SQL 'id' field
-      // This allows using 'id' in queries and document instances
-      id: {
-        type: Schema.Types.ObjectId,
-        alias: '_id',
-        auto: true
-      }
-    };
+    const schemaDefinition: Record<string, any> = {};
 
     metadata.fields.forEach((field) => {
       schemaDefinition[field.name] = this.mapFieldToMongoose(field);
@@ -36,7 +28,7 @@ export class MongooseSchemaFactory {
 
     const schema = new Schema(schemaDefinition, { 
       timestamps: metadata.timestamps || false,
-      // Disable default id virtual to use our alias instead
+      // Disable Mongoose's default 'id' virtual; we expose id via toJSON/toObject transform instead
       id: false,
       toJSON: {
         virtuals: true,
@@ -73,18 +65,27 @@ export class MongooseSchemaFactory {
       case FieldType.Text:
       case FieldType.Email:
       case FieldType.RichText:
-        return { ...base, type: String };
+        return { ...base, type: field.hasMany ? [String] : String };
         
       case FieldType.Number:
-        return { ...base, type: Number };
+        return { ...base, type: field.hasMany ? [Number] : Number };
         
       case FieldType.Boolean:
-        return { ...base, type: Boolean };
+        return { ...base, type: field.hasMany ? [Boolean] : Boolean };
         
       case FieldType.Date:
-        return { ...base, type: Date };
+        return { ...base, type: field.hasMany ? [Date] : Date };
 
       case FieldType.Select:
+        if (field.hasMany) {
+          return {
+            ...base,
+            type: [{
+              type: String,
+              enum: field.options?.map(o => o.value)
+            }]
+          };
+        }
         return { 
           ...base, 
           type: String, 
@@ -99,7 +100,9 @@ export class MongooseSchemaFactory {
           ref: field.relationTo // We will ensure this string matches the Mongoose model name
         };
         
-        if (field.relationMany) {
+        const isMany = field.hasMany;
+        
+        if (isMany) {
           // Many-to-many: array of ObjectIds
           return { ...base, type: [relationshipType] };
         }

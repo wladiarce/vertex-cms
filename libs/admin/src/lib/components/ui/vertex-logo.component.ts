@@ -12,9 +12,9 @@ declare const lucide: any;
       <div [class]="iconBoxClasses()">
         <i data-lucide="box" class="text-white"></i>
       </div>
-      <h1 [class]="titleClasses()">
+      <div [class]="titleClasses()">
         Vertex <span class="text-[var(--primary)]">CMS</span>
-      </h1>
+      </div>
     </div>
   `,
   styles: [`

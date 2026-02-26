@@ -8,6 +8,7 @@ import { UploadFieldComponent } from '../fields/upload-field.component';
 import { RichTextFieldComponent } from '../fields/rich-text-field.component';
 import { LocalizedFieldComponent } from '../fields/localized-field.component';
 import { RelationshipFieldComponent } from '../fields/relationship-field.component';
+import { SelectFieldComponent } from '../fields/select-field.component';
 
 @Component({
   selector: 'vertex-field-renderer',
@@ -20,7 +21,8 @@ import { RelationshipFieldComponent } from '../fields/relationship-field.compone
     UploadFieldComponent,
     RichTextFieldComponent,
     LocalizedFieldComponent,
-    RelationshipFieldComponent
+    RelationshipFieldComponent,
+    SelectFieldComponent
   ],
   template: `
     @switch (field.type) {
@@ -64,6 +66,9 @@ import { RelationshipFieldComponent } from '../fields/relationship-field.compone
       }
       @case ('relationship') {
         <vertex-relationship-field [field]="field" [group]="group" />
+      }
+      @case ('select') {
+        <vertex-select-field [field]="field" [group]="group" />
       }
       @default {
         <div class="p-4 bg-yellow-50 text-yellow-700 text-sm rounded">

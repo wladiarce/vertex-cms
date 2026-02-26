@@ -10,12 +10,14 @@ export class VertexClientService {
   // Signals to hold the global state
   // We use a signal so the Sidebar automatically updates when config loads
   collections = signal<CollectionMetadata[]>([]);
-  capabilities = signal<{ storage: boolean; auth: boolean; database: boolean; email: boolean }>({
+  capabilities = signal<{ storage: boolean; auth: boolean; database: boolean; email: boolean; readOnly?: boolean }>({
     storage: false,
     auth: false,
     database: false,
-    email: false
+    email: false,
+    readOnly: false
   });
+  readOnly = signal<boolean>(false);
   
   // Base API URL (proxy is handled by Nx in dev, or relative path in prod)
   private apiUrl = '/api'; 
@@ -31,6 +33,7 @@ export class VertexClientService {
           this.collections.set(response.collections);
           if (response.capabilities) {
             this.capabilities.set(response.capabilities);
+            this.readOnly.set(response.capabilities.readOnly || false);
           }
         })
       );

@@ -217,20 +217,38 @@ export class VertexAutocompleteComponent implements ControlValueAccessor {
   }
 
   private toAutocompleteItem(value: any): AutocompleteItem {
-    // If it's already an object with _id, treat it as populated
+    if (value == null) return { id: '', displayName: '' };
+
+    // Already normalized: { id, displayName, ...} — from normalizeRelationshipData()
+    if (typeof value === 'object' && value.id != null && value.displayName != null) {
+      return { id: value.id, displayName: value.displayName, ...value };
+    }
+
+    // Populated MongoDB document with _id
     if (typeof value === 'object' && value._id) {
       return {
         id: value._id,
-        displayName: value.title || value.name || value._id,
-        ...value
+        displayName: value.title ?? value.name ?? value.email ?? String(value._id),
+        ...value,
       };
     }
-    
-    // If it's a string ID, create a basic item (will show ID until data loads)
-    return {
-      id: value,
-      displayName: value // Fallback to ID if we don't have the name yet
-    };
+
+    // Populated document with id (no _id)
+    if (typeof value === 'object' && value.id) {
+      return {
+        id: value.id,
+        displayName: value.title ?? value.name ?? value.email ?? String(value.id),
+        ...value,
+      };
+    }
+
+    // Plain string / number ID — display as-is until user searches for a replacement
+    if (typeof value === 'string' || typeof value === 'number') {
+      return { id: value, displayName: String(value) };
+    }
+
+    // Fallback
+    return { id: String(value), displayName: String(value) };
   }
   
   registerOnChange(fn: any): void {
