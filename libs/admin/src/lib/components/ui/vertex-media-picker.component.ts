@@ -1,4 +1,4 @@
-import { Component, output, inject, signal, OnInit } from '@angular/core';
+import { Component, Input, output, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VertexClientService } from '../../services/vertex-client.service';
@@ -14,18 +14,20 @@ import { Upload } from '@vertex-cms/common';
     VertexButtonComponent
   ],
   template: `
-    <div class="modal-overlay" (click)="onClose()">
+    <div class="modal-overlay" [class.modal-overlay--embedded]="immediateSelect" (click)="!immediateSelect && onClose()">
       <div class="modal-container" (click)="$event.stopPropagation()">
-        <!-- Header -->
-        <div class="modal-header">
-          <h2>Choose Media</h2>
-          <button class="close-btn" (click)="onClose()" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 6 6 18"></path>
-              <path d="m6 6 12 12"></path>
-            </svg>
-          </button>
-        </div>
+        <!-- Header — hidden in immediateSelect mode -->
+        @if (!immediateSelect) {
+          <div class="modal-header">
+            <h2>Choose Media</h2>
+            <button class="close-btn" (click)="onClose()" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </button>
+          </div>
+        }
 
         <!-- Filters -->
         <div class="modal-filters">
@@ -37,16 +39,18 @@ import { Upload } from '@vertex-cms/common';
             (ngModelChange)="onFilterChange()"
           />
           
-          <select
-            class="v-select"
-            [(ngModel)]="selectedType"
-            (ngModelChange)="onFilterChange()"
-          >
-            <option value="">All Types</option>
-            <option value="image">Images</option>
-            <option value="video">Videos</option>
-            <option value="document">Documents</option>
-          </select>
+          @if (!immediateSelect) {
+            <select
+              class="v-select"
+              [(ngModel)]="selectedType"
+              (ngModelChange)="onFilterChange()"
+            >
+              <option value="">All Types</option>
+              <option value="image">Images</option>
+              <option value="video">Videos</option>
+              <option value="document">Documents</option>
+            </select>
+          }
         </div>
 
         <!-- Content -->
@@ -65,6 +69,7 @@ import { Upload } from '@vertex-cms/common';
                 <div 
                   class="media-item"
                   [class.selected]="selectedItem()?.id === item.id"
+                  [class.media-item--immediate]="immediateSelect"
                   (click)="selectItem(item)"
                 >
                   <!-- Preview -->
@@ -102,19 +107,21 @@ import { Upload } from '@vertex-cms/common';
           }
         </div>
 
-        <!-- Footer -->
-        <div class="modal-footer">
-          <vertex-button (click)="onClose()">
-            Cancel
-          </vertex-button>
-          <vertex-button 
-            variant="primary" 
-            [disabled]="!selectedItem()"
-            (click)="onSelect()"
-          >
-            Select Media
-          </vertex-button>
-        </div>
+        <!-- Footer — hidden in immediateSelect mode -->
+        @if (!immediateSelect) {
+          <div class="modal-footer">
+            <vertex-button (click)="onClose()">
+              Cancel
+            </vertex-button>
+            <vertex-button 
+              variant="primary" 
+              [disabled]="!selectedItem()"
+              (click)="onSelect()"
+            >
+              Select Media
+            </vertex-button>
+          </div>
+        }
       </div>
     </div>
   `,
@@ -131,6 +138,15 @@ import { Upload } from '@vertex-cms/common';
       justify-content: center;
       z-index: 1000;
       padding: 2rem;
+
+      /* Embedded mode: no backdrop, fills its container naturally */
+      &--embedded {
+        position: static;
+        background: none;
+        padding: 0;
+        display: block;
+        height: 100%;
+      }
     }
 
     .modal-container {
@@ -143,6 +159,16 @@ import { Upload } from '@vertex-cms/common';
       max-height: 90vh;
       display: flex;
       flex-direction: column;
+
+      /* Embedded mode: no border/shadow, fills the host container */
+      .modal-overlay--embedded & {
+        max-width: 100%;
+        max-height: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
     }
 
     .modal-header {
@@ -234,6 +260,13 @@ import { Upload } from '@vertex-cms/common';
         border-color: var(--primary);
         box-shadow: 0 0 0 2px var(--primary);
       }
+
+      /* In immediate-select mode show a stronger hover to signal click-to-select */
+      &--immediate:hover {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 40%, transparent);
+        transform: translateY(-2px);
+      }
     }
 
     .media-preview {
@@ -273,11 +306,25 @@ import { Upload } from '@vertex-cms/common';
 export class VertexMediaPickerComponent implements OnInit {
   private vertexClient = inject(VertexClientService);
 
-  // Outputs
+  // ── Inputs ─────────────────────────────────────────────────────────────
+  /**
+   * When true: clicking an item immediately emits `select` (no footer button
+   * needed). The header and footer are hidden. Intended for embedding the
+   * picker inside another component (e.g. ImagePickerModal).
+   */
+  @Input() immediateSelect = false;
+
+  /**
+   * Pre-sets the media type filter. Useful when embedding in a context that
+   * only needs a specific type (e.g. 'image').
+   */
+  @Input() filterType = '';
+
+  // ── Outputs ─────────────────────────────────────────────────────────────
   close = output<void>();
   select = output<Upload>();
 
-  // State
+  // ── State ────────────────────────────────────────────────────────────────
   media = signal<Upload[]>([]);
   loading = signal(true);
   searchTerm = '';
@@ -285,6 +332,10 @@ export class VertexMediaPickerComponent implements OnInit {
   selectedItem = signal<Upload | null>(null);
 
   ngOnInit() {
+    // Apply the pre-set filter type if provided
+    if (this.filterType) {
+      this.selectedType = this.filterType;
+    }
     this.loadMedia();
   }
 
@@ -315,6 +366,10 @@ export class VertexMediaPickerComponent implements OnInit {
 
   selectItem(item: Upload) {
     this.selectedItem.set(item);
+    // In immediate-select mode emit right away — no footer button required
+    if (this.immediateSelect) {
+      this.select.emit(item);
+    }
   }
 
   onSelect() {

@@ -4,7 +4,9 @@ import { ReactiveFormsModule, FormGroup, FormsModule } from '@angular/forms';
 import { FieldOptions } from '@vertex-cms/common';
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
+import Image from '@tiptap/extension-image';
 import { TiptapEditorDirective } from 'ngx-tiptap';
+import { ImagePickerModalComponent, ImageSelection } from './image-picker-modal.component';
 
 // StarterKit v3 includes: Bold, Italic, Underline, Strike, Code, CodeBlock,
 // Heading (all levels), BulletList, OrderedList, ListItem, ListKeymap,
@@ -23,7 +25,7 @@ interface Tool {
 @Component({
   selector: 'vertex-rich-text-field',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, TiptapEditorDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, TiptapEditorDirective, ImagePickerModalComponent],
   template: `
     <div [formGroup]="group" class="mb-6">
       <!-- Label -->
@@ -111,6 +113,15 @@ interface Tool {
 
             <div class="rte-sep"></div>
 
+            <!-- Image -->
+            <button type="button" class="rte-btn" title="Insert image" (click)="openImageModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </button>
+
+            <div class="rte-sep"></div>
+
             <!-- HR -->
             <button type="button" class="rte-btn" title="Horizontal rule" (click)="cmd.insertHorizontalRule()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13H5v-2h14v2z"/></svg>
@@ -158,6 +169,14 @@ interface Tool {
             <button type="button" class="rte-link-apply" (click)="applyLink()">Apply</button>
             <button type="button" class="rte-link-cancel" (click)="showLinkInput = false">✕</button>
           </div>
+        }
+
+        <!-- ── Image picker modal ──────────────────────────────────────── -->
+        @if (showImageModal) {
+          <vertex-image-picker-modal
+            (imageSelected)="onImageSelected($event)"
+            (closed)="showImageModal = false"
+          />
         }
 
         <!-- ── Tiptap editor ────────────────────────────────────────── -->
@@ -466,6 +485,16 @@ interface Tool {
         margin: 1.5rem 0;
       }
 
+      /* Images */
+      img {
+        max-width: 100%;
+        border-radius: var(--radius);
+        border: 1px solid var(--border-dim);
+        display: block;
+        margin: 1rem 0;
+        height: auto;
+      }
+
       /* Text alignment — requires @tiptap/extension-text-align (not yet installed) */
 
       /* Selection */
@@ -490,6 +519,7 @@ export class RichTextFieldComponent implements OnInit, OnDestroy {
   editor!: Editor;
   focused = false;
   showLinkInput = false;
+  showImageModal = false;
   linkUrl = '';
   charCount = 0;
 
@@ -540,6 +570,18 @@ export class RichTextFieldComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ── Image handling ─────────────────────────────────────────────────────
+
+  openImageModal() {
+    this.showLinkInput = false; // close link bar if open
+    this.showImageModal = true;
+  }
+
+  onImageSelected(selection: ImageSelection) {
+    this.editor.chain().focus().setImage({ src: selection.src, alt: selection.alt }).run();
+    this.showImageModal = false;
+  }
+
   applyLink() {
     if (!this.linkUrl.trim()) return;
     this.editor.chain().focus()
@@ -586,6 +628,7 @@ export class RichTextFieldComponent implements OnInit, OnDestroy {
             HTMLAttributes: { target: '_blank', rel: 'noopener noreferrer' },
           },
         }),
+        Image.configure({ inline: false, allowBase64: false }),
       ],
       content: this.value,
       editorProps: {
