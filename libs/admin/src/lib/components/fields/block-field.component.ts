@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { FieldOptions, BlockMetadata } from '@vertex-cms/common';
 import { FieldRendererComponent } from '../form/field-renderer.component'; // Recursive import!
+import { LocaleService } from '../../services/locale.service';
 
 @Component({
   selector: 'vertex-blocks-field',
@@ -94,6 +95,7 @@ export class BlocksFieldComponent implements OnInit {
   @Input({ required: true }) group!: FormGroup;
 
   private fb = inject(FormBuilder);
+  private localeService = inject(LocaleService);
 
   // Track which block is selected/expanded
   selectedBlock = signal<number | null>(null);
@@ -148,6 +150,18 @@ export class BlocksFieldComponent implements OnInit {
     blockMeta.fields.forEach(f => {
       if (f.type === 'blocks' || f.type === 'repeater') {
         group[f.name] = this.fb.array([]);
+      } else if (f.localized) {
+        // Handle localized fields inside blocks
+        const localeControls: any = {};
+        const supportedLocales = this.localeService.getSupportedLocales()();
+        const localeData = data[f.name] || {};
+        
+        supportedLocales.forEach(locale => {
+          localeControls[locale] = [localeData[locale] || ''];
+        });
+        
+        const validators = f.required ? [Validators.required] : [];
+        group[f.name] = this.fb.group(localeControls, { validators });
       } else {
         const validators = f.required ? [Validators.required] : [];
         group[f.name] = [data[f.name] || '', validators];

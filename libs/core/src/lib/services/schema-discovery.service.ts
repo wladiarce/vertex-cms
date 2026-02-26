@@ -26,23 +26,7 @@ export class SchemaDiscoveryService implements OnModuleInit {
         continue;
       }
 
-      // Process fields to resolve Block/Repeater Classes into JSON Metadata
-      const processedFields = fields.map((field: any) => {
-        if (field.type === 'blocks' && Array.isArray(field.blocks)) {
-          return {
-            ...field,
-            blocks: field.blocks.map((blockClass: Function) => this.extractBlockMetadata(blockClass))
-          };
-        }
-        if (field.type === 'repeater' && field.repeaterBlock) {
-          const { repeaterBlock, ...rest } = field; // strip the Function — not JSON-serializable
-          return {
-            ...rest,
-            repeaterFields: this.extractRepeaterMetadata(repeaterBlock)
-          };
-        }
-        return field;
-      });
+      const processedFields = this.processFields(fields);
 
       // 2. Combine them into a full definition
       const fullMeta: CollectionMetadata = {
@@ -69,6 +53,32 @@ export class SchemaDiscoveryService implements OnModuleInit {
   }
 
   /**
+   * Process fields to resolve Block/Repeater Classes into JSON Metadata recursively.
+   */
+  private processFields(fields: any[]): any[] {
+    return fields.map((field: any) => {
+      if (field.type === 'blocks' && Array.isArray(field.blocks)) {
+        return {
+          ...field,
+          blocks: field.blocks.map((blockClass: Function | any) => {
+            // If already processed (not a function), return as is
+            if (typeof blockClass !== 'function') return blockClass;
+            return this.extractBlockMetadata(blockClass);
+          })
+        };
+      }
+      if (field.type === 'repeater' && field.repeaterBlock) {
+        const { repeaterBlock, ...rest } = field;
+        return {
+          ...rest,
+          repeaterFields: this.extractRepeaterMetadata(repeaterBlock)
+        };
+      }
+      return field;
+    });
+  }
+
+  /**
    * Helper: extract metadata from a @Block-decorated class
    */
   private extractBlockMetadata(blockClass: Function): BlockMetadata {
@@ -82,16 +92,7 @@ export class SchemaDiscoveryService implements OnModuleInit {
     return {
       slug: blockOptions.slug,
       label: blockOptions.label || blockOptions.slug,
-      fields: fields.map((f: any) => {
-        if (f.type === 'blocks' && f.blocks) {
-           f.blocks = f.blocks.map((b: Function) => this.extractBlockMetadata(b));
-        }
-        if (f.type === 'repeater' && f.repeaterBlock) {
-          const { repeaterBlock, ...rest } = f;
-          return { ...rest, repeaterFields: this.extractRepeaterMetadata(repeaterBlock) };
-        }
-        return f;
-      })
+      fields: this.processFields(fields)
     };
   }
 
@@ -100,7 +101,7 @@ export class SchemaDiscoveryService implements OnModuleInit {
    */
   private extractRepeaterMetadata(cls: Function): RepeaterMetadata {
     const fields = Reflect.getMetadata(FIELD_METADATA_KEY, cls) || [];
-    return { fields };
+    return { fields: this.processFields(fields) };
   }
 
   // Not used yet, but required by OnModuleInit interface

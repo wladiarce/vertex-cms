@@ -15,5 +15,8 @@ export * from './lib/interfaces/plugin.interface';
 export * from './lib/interfaces/database.interface';
 export * from './lib/interfaces/email-adapter.interface';
 
+// UTILS
+export * from './lib/utils/localization.utils';
+
 // CONFIG
 export * from './lib/config/locale.config';

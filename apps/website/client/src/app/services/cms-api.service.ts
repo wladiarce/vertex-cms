@@ -58,6 +58,22 @@ export interface Page {
   content: any[]; // Blocks
 }
 
+export interface MenuItem {
+  label: string | Record<string, string>; // localized string or object
+  url: string;
+  openInNewTab: boolean;
+  button?: boolean;
+  class?: string;
+  children?: MenuItem[];
+}
+
+export interface CmsMenu {
+  _id: string;
+  handle: string;
+  label: string;
+  items: MenuItem[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class CmsApiService {
   private cms = inject(CmsFetchService);
@@ -128,5 +144,11 @@ export class CmsApiService {
       'slug': slug,
       'category': category,
     }).pipe(map(items => items[0] ?? null));
+  }
+
+  // ── Menus ─────────────────────────────────────────────────────────────────
+  getMenu(handle: string): Observable<CmsMenu | null> {
+    return this.list<CmsMenu>('menus', { handle })
+      .pipe(map(items => items[0] ?? null));
   }
 }

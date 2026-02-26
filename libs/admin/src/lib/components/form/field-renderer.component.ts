@@ -9,6 +9,7 @@ import { RichTextFieldComponent } from '../fields/rich-text-field.component';
 import { LocalizedFieldComponent } from '../fields/localized-field.component';
 import { RelationshipFieldComponent } from '../fields/relationship-field.component';
 import { SelectFieldComponent } from '../fields/select-field.component';
+import { BooleanFieldComponent } from '../fields/boolean-field.component';
 
 @Component({
   selector: 'vertex-field-renderer',
@@ -22,7 +23,8 @@ import { SelectFieldComponent } from '../fields/select-field.component';
     RichTextFieldComponent,
     LocalizedFieldComponent,
     RelationshipFieldComponent,
-    SelectFieldComponent
+    SelectFieldComponent,
+    BooleanFieldComponent
   ],
   template: `
     @switch (field.type) {
@@ -74,6 +76,9 @@ import { SelectFieldComponent } from '../fields/select-field.component';
       }
       @case ('select') {
         <vertex-select-field [field]="field" [group]="group" />
+      }
+      @case ('boolean') {
+        <vertex-boolean-field [field]="field" [group]="group" />
       }
       @default {
         <div class="p-4 bg-yellow-50 text-yellow-700 text-sm rounded">

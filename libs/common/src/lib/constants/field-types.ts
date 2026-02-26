@@ -19,5 +19,5 @@ export enum FieldType {
 
 // Helper to check if a type needs a frontend distinct component
 export const isPrimitive = (type: FieldType): boolean => {
-  return [FieldType.Text, FieldType.Number, FieldType.Email, FieldType.Date].includes(type);
+  return [FieldType.Text, FieldType.Number, FieldType.Email, FieldType.Date, FieldType.Boolean].includes(type);
 };

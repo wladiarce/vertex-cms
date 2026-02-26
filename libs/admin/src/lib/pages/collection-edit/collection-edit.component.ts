@@ -184,22 +184,44 @@ export class CollectionEditComponent {
       const supportedLocales = this.localeService.getSupportedLocales()();
       const col = this.collection();
       
-      if (!col || supportedLocales.length <= 1) return; // Skip if config not loaded
+      if (!col || supportedLocales.length === 0) return; // Skip if config not loaded
       
-      // Update localized field controls when locale config loads
-      col.fields.forEach(field => {
-        if (field.localized) {
-          const localeGroup = this.form.get(field.name) as FormGroup;
-          if (localeGroup) {
-            // Add missing locale controls
-            supportedLocales.forEach(locale => {
-              if (!localeGroup.get(locale)) {
-                localeGroup.addControl(locale, this.fb.control(''));
-              }
-            });
+      // Update localized field controls recursively (handles top-level, repeaters, and blocks)
+      this.syncLocalesRecursively(this.form, col.fields, supportedLocales);
+    });
+  }
+
+  /**
+   * Recursively ensures all localized fields have the required locale controls.
+   */
+  private syncLocalesRecursively(group: FormGroup, fields: any[], locales: string[]) {
+    fields.forEach(field => {
+      const control = group.get(field.name);
+      if (!control) return;
+
+      if (field.localized && control instanceof FormGroup) {
+        locales.forEach(locale => {
+          if (!control.get(locale)) {
+            control.addControl(locale, this.fb.control(''));
           }
-        }
-      });
+        });
+      } else if (field.type === 'repeater' && control instanceof FormArray) {
+        control.controls.forEach(row => {
+          if (row instanceof FormGroup) {
+            this.syncLocalesRecursively(row, field.repeaterFields?.fields || [], locales);
+          }
+        });
+      } else if (field.type === 'blocks' && control instanceof FormArray) {
+        control.controls.forEach((block, index) => {
+          if (block instanceof FormGroup) {
+            const blockType = block.get('blockType')?.value;
+            const blockMeta = (field.blocks as any[])?.find(b => b.slug === blockType);
+            if (blockMeta) {
+              this.syncLocalesRecursively(block, blockMeta.fields, locales);
+            }
+          }
+        });
+      }
     });
   }
 
@@ -395,6 +417,18 @@ export class CollectionEditComponent {
         // Recurse to fill the nested array before adding it to the group
         this.syncFormArrayWithData(nestedArray, f, data);
         group[f.name] = nestedArray;
+      } else if (f.localized) {
+        // For localized fields, create a FormGroup with controls for each locale
+        const localeControls: any = {};
+        const supportedLocales = this.localeService.getSupportedLocales()();
+        const localeData = data[f.name] || {};
+        
+        supportedLocales.forEach(locale => {
+          localeControls[locale] = [localeData[locale] || ''];
+        });
+        
+        const validators = f.required ? [Validators.required] : [];
+        group[f.name] = this.fb.group(localeControls, { validators });
       } else {
         const validators = f.required ? [Validators.required] : [];
         group[f.name] = [data[f.name] ?? '', validators];

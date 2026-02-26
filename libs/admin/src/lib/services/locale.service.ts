@@ -1,6 +1,6 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { LocaleConfiguration } from '@vertex-cms/common';
+import { LocaleConfiguration, resolveLocalizedValue } from '@vertex-cms/common';
 
 /**
  * Service to manage locale state in the Admin UI
@@ -80,5 +80,17 @@ export class LocaleService {
   getLocaleName(locale: string): string {
     const names = this.config()?.names;
     return names?.[locale] || locale.toUpperCase();
+  }
+
+  /**
+   * Translate a localized field value
+   */
+  translate(value: Record<string, string> | string | undefined | null, fallback?: string): string {
+    return resolveLocalizedValue(
+      value,
+      this.currentLocale(),
+      this.getDefaultLocale(),
+      fallback
+    );
   }
 }

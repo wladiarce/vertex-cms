@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { FieldOptions, BlockMetadata, RepeaterMetadata } from '@vertex-cms/common';
 import { FieldRendererComponent } from '../form/field-renderer.component';
+import { LocaleService } from '../../services/locale.service';
 
 /** The resolved shape of a repeater field as received from the API */
 type ResolvedRepeaterField = Omit<FieldOptions, 'blocks'> & {
@@ -246,6 +247,7 @@ export class RepeaterFieldComponent implements OnInit {
   @Input({ required: true }) group!: FormGroup;
 
   private fb = inject(FormBuilder);
+  private localeService = inject(LocaleService);
 
   expandedRows = signal<Set<number>>(new Set());
 
@@ -291,6 +293,18 @@ export class RepeaterFieldComponent implements OnInit {
     for (const f of this.rowFields) {
       if (f.type === 'blocks' || f.type === 'repeater') {
         controls[f.name] = this.fb.array([]);
+      } else if (f.localized) {
+        // Handle localized fields inside repeaters
+        const localeControls: any = {};
+        const supportedLocales = this.localeService.getSupportedLocales()();
+        const localeData = data[f.name] || {};
+        
+        supportedLocales.forEach(locale => {
+          localeControls[locale] = [localeData[locale] || ''];
+        });
+        
+        const validators = f.required ? [Validators.required] : [];
+        controls[f.name] = this.fb.group(localeControls, { validators });
       } else {
         const validators = f.required ? [Validators.required] : [];
         // Boolean fields default to false, others to empty string or provided value
@@ -365,7 +379,13 @@ export class RepeaterFieldComponent implements OnInit {
     );
     if (firstTextField) {
       const v = val[firstTextField.name];
-      if (v !== undefined && v !== null && v !== '') return String(v);
+      if (v !== undefined && v !== null && v !== '') {
+        // Handle localized values in preview
+        if (typeof v === 'object') {
+          return this.localeService.translate(v);
+        }
+        return String(v);
+      }
     }
     return 'Empty';
   }

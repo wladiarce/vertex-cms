@@ -13,10 +13,12 @@ export class CmsFetchService {
   // API base URL: different for server vs browser
   private get apiBaseUrl(): string {
     if (this.isServer) {
-      // Server-side: use Docker internal network
-      return 'http://vertex-api:3001';
+      // In local development or generic environments, try to reach the API.
+      // If we are in Docker, 'vertex-api' is the host. If local, it's 'localhost'.
+      const ssrBase = ((globalThis as any).process?.env?.['SSR_API_BASE']) || 'http://localhost:3001';
+      return ssrBase;
     } else {
-      // Browser: use relative URL (goes through Nginx)
+      // Browser: use relative URL (goes through Nginx or Vite proxy)
       return '';
     }
   }

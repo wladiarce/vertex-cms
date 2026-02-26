@@ -122,7 +122,7 @@ export interface BlockMetadata {
  * Sent to the Admin UI as part of a 'repeater' field descriptor.
  */
 export interface RepeaterMetadata {
-  fields: (FieldOptions & { name: string })[];
+  fields: (FieldOptions & { name: string; blocks?: BlockMetadata[] | undefined; repeaterFields?: RepeaterMetadata | undefined; })[];
 }
 
 // Update CollectionMetadata to include available blocks (optional but helpful)

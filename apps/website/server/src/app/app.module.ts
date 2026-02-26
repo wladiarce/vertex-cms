@@ -15,6 +15,7 @@ import { ProductCategory } from './collections/product-category.collection';
 import { Project } from './collections/project.collection';
 import { ProjectCategory } from './collections/project-category.collection';
 import { Page } from './collections/page.collection';
+import { MenuCollection } from './collections/menu.collection';
 
 // Blocks
 import { HeroBlock } from './blocks/hero.block';
@@ -38,11 +39,20 @@ import { ProjectGalleryBlock } from './blocks/project-gallery.block';
       }),
       entities: [
         User, DocPage, BlogPost, BlogCategory, Product, ProductCategory, 
-        Project, ProjectCategory, Page
+        Project, ProjectCategory, Page, MenuCollection
       ],
       storage: StorageLocalPlugin({
         uploadDir: join(process.cwd(), 'uploads')
-      })
+      }),
+      locales: {
+        default: 'en',
+        supported: ['en', 'es', 'pt'],
+        names: {
+          en: 'English',
+          es: 'Español',
+          pt: 'Português'
+        }
+      },
     })
   ]
 })
