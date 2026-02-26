@@ -1,14 +1,25 @@
-import { Block, Field, FieldType } from '@vertex-cms/common';
+import { Block, Field, FieldType, RepeatBlock } from '@vertex-cms/common';
 
 /**
  * Pricing Section Block
  *
- * Renders a row of plan cards. Each plan has:
- *   - planName  : Display name (e.g. "Pro", "Enterprise")
- *   - price     : Number or the string "Free"
- *   - featured  : Highlight this card (accent border + badge)
- *   - features  : Bullet list of feature strings (stored as newline-separated text)
+ * Renders a row of plan cards.
  */
+
+@RepeatBlock()
+export class PricingPlan {
+  @Field({ type: FieldType.Text, required: true })
+  planName: string;
+
+  @Field({ type: FieldType.Text, label: 'Price (or "Free")' })
+  price: string;
+
+  @Field({ type: FieldType.Boolean })
+  featured: boolean;
+
+  @Field({ type: FieldType.RichText, label: 'Features (List)' })
+  features: string;
+}
 @Block({
   slug: 'pricing',
   name: 'Pricing Section',
@@ -22,13 +33,11 @@ export class PricingBlock {
   @Field({ type: FieldType.Text })
   subheadline: string;
 
-  // ── Plans (stored as a JSON text field; frontend parses it) ──────────────
-  // Each plan JSON object: { planName, price, featured, features: string[] }
-  // Stored as a JSON string in a Text field (simplest approach given current
-  // block field limitations — no nested block support yet).
   @Field({
-    type: FieldType.RichText,
-    label: 'Plans (JSON)',
+    type: FieldType.Repeater,
+    repeaterBlock: PricingPlan,
+    label: 'Plans',
   })
-  plans: string; // JSON: Array<{ planName: string; price: number | 'Free'; featured?: boolean; features: string[] }>
+  plans: PricingPlan[];
 }
+

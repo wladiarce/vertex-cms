@@ -111,8 +111,9 @@ export class MongooseSchemaFactory {
         return { ...base, ...relationshipType };
 
       case FieldType.Blocks:
-        // We store blocks as a generic array of objects.
-        // Structure: [ { blockType: 'hero', ...fields }, { blockType: 'text', ...fields } ]
+      // We store blocks and repeaters as a generic array of objects.
+      // Structure: [ { blockType: 'hero', ...fields }, { blockType: 'text', ...fields } ]
+      case FieldType.Repeater:
         return { 
           ...base, 
           type: [Schema.Types.Mixed] // Array of Mixed

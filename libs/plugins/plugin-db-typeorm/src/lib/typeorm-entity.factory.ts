@@ -92,6 +92,9 @@ export class TypeORMEntityFactory {
       case FieldType.Blocks:
         return { ...base, type: 'simple-json' } as EntitySchemaColumnOptions;
 
+      case FieldType.Repeater:
+        return { ...base, type: 'simple-json' } as EntitySchemaColumnOptions;
+
       default:
         return { ...base, type: 'text' } as EntitySchemaColumnOptions;
     }

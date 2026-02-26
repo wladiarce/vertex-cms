@@ -75,6 +75,9 @@ export interface FieldOptions {
 
   // For 'blocks' type
   blocks?: Function[]; // Array of Classes (e.g., [HeroBlock, TextBlock])
+
+  // For 'repeater' type
+  repeaterBlock?: Function; // Reference to a @RepeatBlock()-decorated class
 }
 
 /**
@@ -104,16 +107,22 @@ export interface CollectionOptions {
  */
 export interface CollectionMetadata extends CollectionOptions {
   name: string; // The class name
-  // fields: (FieldOptions & { name: string })[]; // Field name is inferred from property key
-  fields: (FieldOptions & { name: string;  blocks?: BlockMetadata[] | undefined; })[]; // Field name is inferred from property key
+  fields: (FieldOptions & { name: string; blocks?: BlockMetadata[] | undefined; repeaterFields?: RepeaterMetadata | undefined; })[];
 }
 
 // We also need a metadata interface for the API response
 export interface BlockMetadata {
   slug: string;
   label: string;
-  // fields: (FieldOptions & { name: string })[];
-  fields: (FieldOptions & { name: string; blocks?: BlockMetadata[] | undefined; })[];
+  fields: (FieldOptions & { name: string; blocks?: BlockMetadata[] | undefined; repeaterFields?: RepeaterMetadata | undefined; })[];
+}
+
+/**
+ * Metadata resolved from a @RepeatBlock() class.
+ * Sent to the Admin UI as part of a 'repeater' field descriptor.
+ */
+export interface RepeaterMetadata {
+  fields: (FieldOptions & { name: string })[];
 }
 
 // Update CollectionMetadata to include available blocks (optional but helpful)

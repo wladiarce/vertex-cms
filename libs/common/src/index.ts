@@ -5,6 +5,7 @@ export * from './lib/constants/field-types';
 export * from './lib/decorators/collection.decorator';
 export * from './lib/decorators/field.decorator';
 export * from './lib/decorators/block.decorator';
+export * from './lib/decorators/repeat-block.decorator';
 
 // INTERFACES
 export * from './lib/interfaces/config.interface';

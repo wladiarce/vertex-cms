@@ -146,8 +146,12 @@ export class BlocksFieldComponent implements OnInit {
     };
 
     blockMeta.fields.forEach(f => {
-      const validators = f.required ? [Validators.required] : [];
-      group[f.name] = [data[f.name] || '', validators];
+      if (f.type === 'blocks' || f.type === 'repeater') {
+        group[f.name] = this.fb.array([]);
+      } else {
+        const validators = f.required ? [Validators.required] : [];
+        group[f.name] = [data[f.name] || '', validators];
+      }
     });
 
     return this.fb.group(group);

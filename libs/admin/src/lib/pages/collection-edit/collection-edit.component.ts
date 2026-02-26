@@ -1,6 +1,6 @@
 import { Component, inject, signal, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { VertexClientService } from '../../services/vertex-client.service';
 import { FieldRendererComponent } from '../../components/form/field-renderer.component';
@@ -210,9 +210,9 @@ export class CollectionEditComponent {
     const group: any = {};
     
     col.fields.forEach(field => {
-      if (field.type === 'blocks') {
+      if (field.type === 'blocks' || field.type === 'repeater') {
         // Initialize as an empty array. 
-        // The BlocksFieldComponent's ngOnInit will handle population 
+        // Component's ngOnInit or our rebuildFormArrays will handle population 
         // when the data arrives via patchValue/input binding.
         group[field.name] = this.fb.array([]);
       } else if (field.localized) {
@@ -329,42 +329,21 @@ export class CollectionEditComponent {
     if (!col) return;
 
     col.fields.forEach(field => {
-      // Handle blocks fields (FormArrays)
-      if (field.type === 'blocks' && Array.isArray(data[field.name])) {
-        // We found a block field with data!
-        const formArray = this.form.get(field.name) as any; // Cast to FormArray
-        formArray.clear(); // Clear initial empty state
-
-        // For each item in data, push a new FormGroup
-        data[field.name].forEach((item: any) => {
-          // Find the block definition to know its fields
-          const blockMeta = (field.blocks as BlockMetadata[])?.find(b=> {return b.slug === item.blockType});
-          if (blockMeta) {
-             // Create the group (We duplicate the logic from BlocksFieldComponent here? 
-             // Ideally we shouldn't duplicate logic.
-             // But for now, let's keep it simple: Just push a group with the right controls)
-             
-             const group: any = { blockType: [item.blockType] };
-             blockMeta.fields.forEach(f => {
-               group[f.name] = [''];  // We don't need value here, patchValue will fill it
-             });
-             formArray.push(this.fb.group(group));
-          }
-        });
+      if (field.type === 'blocks' || field.type === 'repeater') {
+        const formArray = this.form.get(field.name) as FormArray;
+        if (formArray) {
+          this.syncFormArrayWithData(formArray, field, data);
+        }
       }
-      
-      // Handle localized fields (FormGroups with locale keys)
+
+      // Handle localized fields
       if (field.localized && data[field.name] && typeof data[field.name] === 'object') {
         const localeGroup = this.form.get(field.name) as FormGroup;
-        
         if (localeGroup) {
-          // Patch each locale control individually
           const localeData = data[field.name];
           Object.keys(localeData).forEach(locale => {
             const control = localeGroup.get(locale);
-            if (control) {
-              control.setValue(localeData[locale] || '');
-            }
+            if (control) control.setValue(localeData[locale] || '');
           });
         }
       }
@@ -372,11 +351,60 @@ export class CollectionEditComponent {
   }
 
   /**
+   * Recursively ensures a FormArray matches the data structure.
+   * Also sanitizes 'data' so that patchValue doesn't crash on stale string types.
+   */
+  private syncFormArrayWithData(formArray: FormArray, field: any, parentData: any) {
+    const fieldName = field.name;
+    let dataValue = parentData[fieldName];
+
+    // CRITICAL: If data is a string (stale data from RichText), force it to an empty array
+    // so FormArray.patchValue won't crash with "value.forEach is not a function".
+    if (!Array.isArray(dataValue)) {
+      parentData[fieldName] = [];
+      dataValue = [];
+    }
+
+    formArray.clear();
+
+    dataValue.forEach((item: any) => {
+      if (field.type === 'blocks') {
+        const blockMeta = (field.blocks as BlockMetadata[])?.find(b => b.slug === item.blockType);
+        if (blockMeta) {
+          const group = this.createGroupForMetadata(blockMeta.fields, item);
+          group.addControl('blockType', this.fb.control(item.blockType));
+          formArray.push(group);
+        }
+      } else if (field.type === 'repeater') {
+        const fields = field.repeaterFields?.fields || [];
+        const group = this.createGroupForMetadata(fields, item);
+        formArray.push(group);
+      }
+    });
+  }
+
+  /**
+   * Creates a FormGroup based on an array of field metadata, 
+   * recursively handling nested arrays.
+   */
+  private createGroupForMetadata(fields: any[], data: any): FormGroup {
+    const group: any = {};
+    fields.forEach(f => {
+      if (f.type === 'blocks' || f.type === 'repeater') {
+        const nestedArray = this.fb.array([]);
+        // Recurse to fill the nested array before adding it to the group
+        this.syncFormArrayWithData(nestedArray, f, data);
+        group[f.name] = nestedArray;
+      } else {
+        const validators = f.required ? [Validators.required] : [];
+        group[f.name] = [data[f.name] ?? '', validators];
+      }
+    });
+    return this.fb.group(group);
+  }
+
+  /**
    * Inverse of normalizeRelationshipData().
-   * Strips relationship fields back to plain ID strings / arrays of IDs
-   * before posting to the server — because the form control holds the full
-   * AutocompleteItem object ({id, displayName, ...}) when the user hasn't
-   * re-touched the field after it was pre-populated via writeValue.
    */
   private serializeFormValue(value: any): any {
     const col = this.collection();

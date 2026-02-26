@@ -13,16 +13,7 @@ export class SafeHtmlPipe implements PipeTransform {
   }
 }
 
-/** Parses a pricing block's plans JSON safely */
-function parsePlans(raw: string): any[] {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
+
 
 @Component({
   selector: 'app-pages-demo-page',
@@ -105,14 +96,14 @@ function parsePlans(raw: string): any[] {
                 }
 
                 <div class="pricing-cards">
-                  @for (plan of parsePlans(block.plans); track plan.planName) {
+                  @for (plan of block.plans; track plan.planName) {
                     <div class="pricing-card v-card" [class.pricing-card--featured]="plan.featured">
                       @if (plan.featured) {
                         <div class="pricing-featured-badge font-mono">// Featured</div>
                       }
                       <div class="pricing-plan-name">{{ plan.planName }}</div>
                       <div class="pricing-price font-mono">
-                        @if (plan.price === 'Free' || plan.price === 0) {
+                        @if (plan.price === 'Free' || plan.price === '0' || plan.price === 0) {
                           <span class="pricing-amount">Free</span>
                         } @else {
                           <span class="pricing-currency">$</span>
@@ -120,25 +111,20 @@ function parsePlans(raw: string): any[] {
                           <span class="pricing-period">/mo</span>
                         }
                       </div>
-                      @if (plan.features?.length) {
-                        <ul class="pricing-features">
-                          @for (feat of plan.features; track feat) {
-                            <li class="pricing-feature">
-                              <span class="pricing-check">✓</span>
-                              {{ feat }}
-                            </li>
-                          }
-                        </ul>
+                      
+                      @if (plan.features) {
+                        <div class="pricing-features-html" [innerHTML]="plan.features | safeHtml"></div>
                       }
+                      
                       <a href="#" class="v-btn pricing-cta" [class.primary]="plan.featured">
                         {{ plan.featured ? 'Get Started' : 'Choose Plan' }}
                       </a>
                     </div>
                   }
 
-                  @if (parsePlans(block.plans).length === 0) {
+                  @if (!block.plans || block.plans.length === 0) {
                     <div class="pricing-no-plans font-mono v-card">
-                      // No plans defined yet. Add plans JSON to this block in admin.
+                      // No plans defined yet. Add rows in the admin panel.
                     </div>
                   }
                 </div>
@@ -297,6 +283,16 @@ function parsePlans(raw: string): any[] {
       margin-top: 0.1em;
     }
     .pricing-cta { width: 100%; justify-content: center; }
+    .pricing-features-html {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      flex: 1;
+      ::ng-deep {
+        ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+        li { position: relative; padding-left: 1.5rem; }
+        li::before { content: '✓'; position: absolute; left: 0; color: var(--primary); font-weight: 700; font-family: var(--font-mono); }
+      }
+    }
     .pricing-no-plans { padding: 1.5rem; font-size: 0.8rem; color: var(--text-muted); }
     /* ── Image ─────────────────────────────────────────────────────────── */
     .block-image-wrap { border-top: 1px solid var(--border-dim); border-bottom: 1px solid var(--border-dim); }
@@ -335,9 +331,6 @@ export class PagesDemoPageComponent {
   slug = this.route.snapshot.paramMap.get('slug') ?? '';
   page = signal<Page | null>(null);
   loading = signal(true);
-
-  /** Exposed to template for parsing pricing plans JSON */
-  parsePlans = parsePlans;
 
   constructor() {
     this.api.getPage(this.slug).subscribe({

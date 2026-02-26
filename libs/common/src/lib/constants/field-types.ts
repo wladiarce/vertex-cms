@@ -13,7 +13,8 @@ export enum FieldType {
   // Complex
   Select = 'select',
   Relationship = 'relationship',
-  Blocks = 'blocks'
+  Blocks = 'blocks',
+  Repeater = 'repeater'
 }
 
 // Helper to check if a type needs a frontend distinct component

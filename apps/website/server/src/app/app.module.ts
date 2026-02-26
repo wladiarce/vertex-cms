@@ -38,9 +38,7 @@ import { ProjectGalleryBlock } from './blocks/project-gallery.block';
       }),
       entities: [
         User, DocPage, BlogPost, BlogCategory, Product, ProductCategory, 
-        Project, ProjectCategory, Page,
-        HeroBlock, TextBlock, ImageBlock, CodeBlock, FeatureGridBlock, 
-        PricingBlock, ProductCardBlock, ProjectGalleryBlock
+        Project, ProjectCategory, Page
       ],
       storage: StorageLocalPlugin({
         uploadDir: join(process.cwd(), 'uploads')
