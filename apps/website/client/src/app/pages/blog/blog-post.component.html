@@ -1,0 +1,74 @@
+<div class="post-wrap">
+  <div class="page-topbar">
+    <nav class="v-breadcrumb min-w-0">
+      <a routerLink="/blog" class="flex-shrink-0">Blog</a>
+      <span class="flex-shrink-0">/</span>
+      <span class="v-breadcrumb-current truncate">{{ slug }}</span>
+    </nav>
+    <a routerLink="/blog" class="v-btn sm flex-shrink-0">← All Posts</a>
+  </div>
+
+  @if (loading()) {
+    <div class="page-article">
+      <div class="flex flex-col gap-4">
+        <div class="skeleton-line" style="width:15%"></div>
+        <div class="skeleton-line" style="width:75%; height:36px"></div>
+        <div class="skeleton-line" style="width:55%"></div>
+        <div class="skeleton-line mt-4"></div>
+        <div class="skeleton-line" style="width:90%"></div>
+        <div class="skeleton-line" style="width:80%"></div>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && !post()) {
+    <div class="page-article">
+      <div class="cms-empty v-card">
+        <div class="font-mono">// Post not found</div>
+        <p>No published blog post with slug <code class="code-snippet font-mono">{{ slug }}</code> found.</p>
+        <a routerLink="/blog" class="v-btn sm" style="margin-top:0.5rem;width:fit-content">← Back to Blog</a>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && post(); as p) {
+    <article class="page-article">
+      <header class="post-header">
+        <div class="flex items-center gap-3 flex-wrap">
+          @if (p.categories?.[0]) {
+            <span class="v-badge">{{ p.categories?.[0]?.name }}</span>
+          }
+          <span class="font-mono post-read-time">
+            {{ p.publishedAt ? (p.publishedAt | date:'MMM d, yyyy') : '' }}
+          </span>
+        </div>
+        <h1 class="post-title">{{ p.title }}</h1>
+        @if (p.excerpt) {
+          <p class="post-lead">{{ p.excerpt }}</p>
+        }
+        @if (p.author) {
+          <div class="flex items-center gap-3">
+            <div class="byline-avatar">{{ p.author.email.charAt(0).toUpperCase() }}</div>
+            <div>
+              <div class="byline-name">{{ p.author.email }}</div>
+              <div class="byline-role font-mono">// Author</div>
+            </div>
+          </div>
+        }
+      </header>
+
+      <div class="post-divider"></div>
+
+      <div class="post-content">
+        <!-- Render rich text content as HTML -->
+        @if (p.content) {
+          <div class="rich-text" [innerHTML]="p.content | safeHtml"></div>
+        } @else {
+          <div class="cms-empty v-card">
+            <p>This post has no content yet. Add a <strong>content</strong> field in the admin panel.</p>
+          </div>
+        }
+      </div>
+    </article>
+  }
+</div>

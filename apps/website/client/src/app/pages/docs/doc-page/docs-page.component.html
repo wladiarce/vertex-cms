@@ -1,0 +1,68 @@
+<div class="doc-page">
+  <!-- Topbar -->
+  <div class="page-topbar">
+    <nav class="v-breadcrumb min-w-0">
+      <a routerLink="/docs" class="flex-shrink-0">Docs</a>
+      <span class="flex-shrink-0">/</span>
+      <span class="v-breadcrumb-current font-mono flex-shrink-0">{{ category() }}</span>
+      <span class="flex-shrink-0">/</span>
+      <span class="v-breadcrumb-current truncate">{{ slug() | titleCase }}</span>
+    </nav>
+    <span class="v-badge">{{ category() }}</span>
+  </div>
+
+  @if (loading()) {
+    <div class="page-article">
+      <div class="flex flex-col gap-4">
+        <div class="skeleton-line" style="width:15%"></div>
+        <div class="skeleton-line" style="width:65%;height:36px"></div>
+        <div class="skeleton-line" style="width:80%"></div>
+        <div class="skeleton-line mt-4"></div>
+        <div class="skeleton-line" style="width:90%"></div>
+        <div class="skeleton-line" style="width:75%"></div>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && !page() && !error()) {
+    <div class="page-article">
+      <div class="doc-not-found v-card">
+        <div class="font-mono">// Page not found in DB</div>
+        <p>No doc page with slug <code class="code-snippet font-mono">{{ slug() }}</code> in category <code class="code-snippet font-mono">{{ category() }}</code>.</p>
+        <p class="text-xs">Create it in the admin panel under the <strong>Doc Pages</strong> collection.</p>
+        <a routerLink="/docs" class="v-btn" style="width:fit-content;margin-top:0.5rem">← Docs Home</a>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && page(); as p) {
+    <article class="page-article">
+      <header class="doc-article-header">
+        <div class="doc-label font-mono">// {{ p.category }}</div>
+        <h1 class="doc-title">{{ p.title }}</h1>
+        @if (p.description) {
+          <p class="doc-description">{{ p.description }}</p>
+        }
+      </header>
+
+      <div class="doc-body">
+        @if (p.content) {
+          <div class="rich-text" [innerHTML]="p.content | safeHtml"></div>
+        }
+      </div>
+    </article>
+
+    <div class="page-nav-footer">
+      <a routerLink="/docs" class="v-btn">← Back to Docs</a>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="page-article">
+      <div class="doc-not-found v-card">
+        <div class="font-mono">// Error loading page</div>
+        <p>{{ error() }}</p>
+      </div>
+    </div>
+  }
+</div>

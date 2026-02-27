@@ -1,0 +1,135 @@
+<div class="page-wrap">
+  <!-- Topbar -->
+  <div class="page-topbar">
+    <nav class="v-breadcrumb min-w-0">
+      <a routerLink="/demo/pages" class="flex-shrink-0">Pages</a>
+      <span class="flex-shrink-0">/</span>
+      <span class="v-breadcrumb-current truncate">{{ slug }}</span>
+    </nav>
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <span class="v-badge">{{ page()?.content?.length ?? 0 }} blocks</span>
+      <a routerLink="/demo/pages" class="v-btn sm">← Pages</a>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="p-8 flex flex-col gap-4 max-w-xl">
+      <div class="skeleton-line" style="width:65%;height:32px"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line" style="width:85%"></div>
+    </div>
+  }
+
+  @if (!loading() && !page()) {
+    <div class="p-8 max-w-xl">
+      <div class="cms-empty v-card">
+        <div class="font-mono">// Page not found</div>
+        <p>No published page with slug <code class="code-snippet font-mono">{{ slug }}</code>.</p>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && page(); as p) {
+    <!-- Render blocks -->
+    @for (block of p.content; track $index) {
+      @switch (block.blockType) {
+
+        <!-- ── Hero ─────────────────────────────────────────────────── -->
+        @case ('hero') {
+          <section class="block-hero bg-grid-pattern">
+            <h1 class="hero-headline">{{ block.headline }}</h1>
+            @if (block.subheadline) { <p class="hero-sub">{{ block.subheadline }}</p> }
+            @if (block.ctaText) {
+              <a [href]="block.ctaLink ?? '#'" class="v-btn primary lg">{{ block.ctaText }}</a>
+            }
+          </section>
+        }
+
+        <!-- ── Text (rich-text) ──────────────────────────────────────── -->
+        @case ('text') {
+          <section class="block-text">
+            <div class="rich-text" [innerHTML]="block.content | safeHtml"></div>
+          </section>
+        }
+
+        <!-- ── Code Block ────────────────────────────────────────────── -->
+        @case ('code-block') {
+          <section class="block-code v-card">
+            <div class="code-lang-bar font-mono">{{ block.language ?? 'code' }}</div>
+            <!-- whitespace:pre on <pre> means \n is honoured; no pipe needed -->
+            <pre class="font-mono code-body">{{ block.code }}</pre>
+          </section>
+        }
+
+        <!-- ── Pricing ───────────────────────────────────────────────── -->
+        @case ('pricing') {
+          <section class="block-pricing-wrap">
+            @if (block.headline) {
+              <div class="pricing-header">
+                <h2 class="pricing-headline">{{ block.headline }}</h2>
+                @if (block.subheadline) {
+                  <p class="pricing-sub">{{ block.subheadline }}</p>
+                }
+              </div>
+            }
+
+            <div class="pricing-cards">
+              @for (plan of block.plans; track plan.planName) {
+                <div class="pricing-card v-card" [class.pricing-card--featured]="plan.featured">
+                  @if (plan.featured) {
+                    <div class="pricing-featured-badge font-mono">// Featured</div>
+                  }
+                  <div class="pricing-plan-name">{{ plan.planName }}</div>
+                  <div class="pricing-price font-mono">
+                    @if (plan.price === 'Free' || plan.price === '0' || plan.price === 0) {
+                      <span class="pricing-amount">Free</span>
+                    } @else {
+                      <span class="pricing-currency">$</span>
+                      <span class="pricing-amount">{{ plan.price }}</span>
+                      <span class="pricing-period">/mo</span>
+                    }
+                  </div>
+                  
+                  @if (plan.features) {
+                    <div class="pricing-features-html" [innerHTML]="plan.features | safeHtml"></div>
+                  }
+                  
+                  <a href="#" class="v-btn pricing-cta" [class.primary]="plan.featured">
+                    {{ plan.featured ? 'Get Started' : 'Choose Plan' }}
+                  </a>
+                </div>
+              }
+
+              @if (!block.plans || block.plans.length === 0) {
+                <div class="pricing-no-plans font-mono v-card">
+                  // No plans defined yet. Add rows in the admin panel.
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- ── Image ─────────────────────────────────────────────────── -->
+        @case ('image') {
+          <section class="block-image-wrap">
+            <div class="image-placeholder font-mono">IMAGE // BLOCK</div>
+          </section>
+        }
+
+        <!-- ── Unknown ───────────────────────────────────────────────── -->
+        @default {
+          <div class="block-unknown font-mono">// {{ block.blockType }}</div>
+        }
+      }
+    }
+
+    @if (!p.content || p.content.length === 0) {
+      <div class="p-8 max-w-xl">
+        <div class="cms-empty v-card">
+          <div class="font-mono">// Empty page</div>
+          <p>This page has no blocks yet. Add blocks in the admin panel.</p>
+        </div>
+      </div>
+    }
+  }
+</div>

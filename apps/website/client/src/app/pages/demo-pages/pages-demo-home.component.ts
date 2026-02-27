@@ -98,8 +98,8 @@ import { CmsApiService, Page } from '../../services/cms-api.service';
   `,
   styles: [`
     .pages-wrap { font-family: var(--font-ui); }
-    .pages-hero { border-bottom: 2px solid var(--border); padding: 3rem 1.5rem; }
-    .pages-hero-inner { max-width: 680px; display: flex; flex-direction: column; gap: 1rem; }
+    .pages-hero { display: flex; justify-content: center; border-bottom: 2px solid var(--border); padding: 3rem 1.5rem; }
+    .pages-hero-inner { max-width: 1280px; width: 100%; padding: 0 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
     .pages-title { font-size: clamp(2rem, 6vw, 4rem); font-weight: 700; letter-spacing: -0.035em; margin: 0; }
     .pages-desc { font-size: 0.95rem; color: var(--text-muted); line-height: 1.65; margin: 0; }
     .pages-body { padding: 2.5rem 1.5rem; max-width: 1280px; margin: 0 auto; }

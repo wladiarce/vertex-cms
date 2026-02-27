@@ -120,17 +120,17 @@ export class ResetPasswordComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.refreshIcons();
+    // this.refreshIcons();
   }
 
   refreshIcons() {
-    if (typeof lucide !== 'undefined') {
-      try {
-        lucide.createIcons({ nameAttr: 'data-lucide' });
-      } catch (e) {
-        console.warn('Lucide icons not initialized:', e);
-      }
-    }
+    // if (typeof lucide !== 'undefined') {
+    //   try {
+    //     lucide.createIcons({ nameAttr: 'data-lucide' });
+    //   } catch (e) {
+    //     console.warn('Lucide icons not initialized:', e);
+    //   }
+    // }
   }
 
   passwordMatchValidator(g: any) {

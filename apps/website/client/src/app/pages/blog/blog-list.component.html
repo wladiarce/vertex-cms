@@ -1,0 +1,85 @@
+<div class="blog-wrap">
+  <div class="blog-header bg-grid-pattern">
+    <div class="blog-header-inner">
+      <span class="v-badge">Blog</span>
+      <h1 class="blog-title">VertexCMS Blog</h1>
+      <p class="blog-sub">News, tutorials, and engineering updates from the VertexCMS team.</p>
+    </div>
+  </div>
+
+  <div class="blog-body">
+    <div class="v-section-label" style="margin-bottom:2rem">
+      <div class="v-section-num">Latest</div>
+      <span>All Articles</span>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        @for (_ of [1,2,3]; track _) {
+          <div class="post-card v-card skeleton-card">
+            <div class="skeleton-img"></div>
+            <div class="p-5 flex flex-col gap-3">
+              <div class="skeleton-line" style="width:40%"></div>
+              <div class="skeleton-line" style="width:85%"></div>
+              <div class="skeleton-line" style="width:65%"></div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Error -->
+    @if (error()) {
+      <div class="cms-error v-card">
+        <span class="font-mono">// API Error</span>
+        <p>{{ error() }}</p>
+        <p class="font-mono text-xs">Make sure the server is running and the <code>blog-posts</code> collection has published documents.</p>
+      </div>
+    }
+
+    <!-- Posts -->
+    @if (!loading() && !error()) {
+      @if (posts().length === 0) {
+        <div class="cms-empty v-card">
+          <div class="font-mono">// No posts yet</div>
+          <p>Create some <strong>blog-posts</strong> in the admin panel and publish them.</p>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          @for (post of posts(); track post._id) {
+            <article class="post-card v-card">
+              <div class="post-image-placeholder">
+                <div class="post-image-num font-mono">
+                  {{ (post.categories?.[0]?.name ?? 'POST').substring(0, 3).toUpperCase() }}
+                </div>
+              </div>
+              <div class="post-body">
+                <div class="flex justify-between items-center flex-wrap gap-1">
+                  @if (post.categories?.[0]) {
+                    <span class="post-category font-mono">{{ post.categories?.[0]?.name }}</span>
+                  } @else {
+                    <span class="post-category font-mono">General</span>
+                  }
+                  <span class="post-time font-mono">
+                    {{ post.publishedAt ? (post.publishedAt | date:'MMM d, yyyy') : '' }}
+                  </span>
+                </div>
+                <h2 class="post-title">
+                  <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
+                </h2>
+                <p class="post-excerpt">{{ post.excerpt }}</p>
+                <div class="post-author font-mono">
+                  <div class="author-avatar">
+                    {{ (post.author?.email ?? 'A').charAt(0).toUpperCase() }}
+                  </div>
+                  <span>{{ post.author?.email ?? 'Author' }}</span>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    }
+  </div>
+</div>

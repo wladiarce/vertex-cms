@@ -10,7 +10,8 @@ import { CmsApiService, Product } from '../../services/cms-api.service';
   template: `
     <div class="shop-wrap">
       <!-- Hero Banner -->
-      <div class="shop-hero bg-grid-pattern">
+      <div class="shop-hero-wrapper bg-grid-pattern">
+        <div class="shop-hero">
         <div class="shop-hero-content">
           <div class="flex items-center gap-3 flex-wrap">
             <span class="v-badge">Demo // E-Commerce</span>
@@ -19,6 +20,7 @@ import { CmsApiService, Product } from '../../services/cms-api.service';
           <h1 class="shop-title">Vertex Store</h1>
           <p class="shop-desc">Products and categories are managed from the VertexCMS admin panel and served via the REST API.</p>
         </div>
+        
         <div class="shop-stats hidden sm:flex">
           <div class="stat v-card">
             <div class="stat-num font-mono">{{ products().length }}</div>
@@ -29,6 +31,7 @@ import { CmsApiService, Product } from '../../services/cms-api.service';
             <div class="stat-label font-mono">Powered</div>
           </div>
         </div>
+      </div>
       </div>
 
       <!-- Products Grid -->
@@ -98,7 +101,8 @@ import { CmsApiService, Product } from '../../services/cms-api.service';
   `,
   styles: [`
     .shop-wrap { font-family: var(--font-ui); }
-    .shop-hero { border-bottom: 2px solid var(--border); padding: 3rem 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; flex-wrap: wrap; }
+    .shop-hero-wrapper { width: 100%; display: flex; justify-content: center; border-bottom: 2px solid var(--border); }
+    .shop-hero { max-width: 1280px; width: 100%;  display: flex; justify-content: space-between; align-items: flex-end;padding: 3rem 1.5rem; gap: 2rem; flex-wrap: wrap; }
     .shop-hero-content { max-width: 560px; display: flex; flex-direction: column; gap: 1rem; }
     .shop-title { font-size: clamp(2.25rem, 6vw, 4rem); font-weight: 700; letter-spacing: -0.035em; margin: 0; }
     .shop-desc { font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; margin: 0; }

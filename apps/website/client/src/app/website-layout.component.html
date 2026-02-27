@@ -1,0 +1,50 @@
+<header class="site-header">
+  <div class="site-header-inner">
+    <a routerLink="/" class="site-logo">
+      <vertex-logo [size]="'sm'"></vertex-logo>
+    </a>
+
+    <nav class="site-nav">
+      <app-cms-menu handle="main-nav"></app-cms-menu>
+    </nav>
+  </div>
+</header>
+
+<main class="page-content">
+  <router-outlet></router-outlet>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <div class="logo-mark">VX</div>
+        <span>VertexCMS</span>
+      </div>
+      <p>// Headless CMS for developers</p>
+    </div>
+
+    <div class="footer-links">
+      <div class="link-group">
+        <h4>Product</h4>
+        <ul>
+          <li><a routerLink="/docs">Documentation</a></li>
+          <li><a routerLink="/blog">Blog</a></li>
+          <li><a [routerLink]="['/admin']">Admin Panel</a></li>
+        </ul>
+      </div>
+      <div class="link-group">
+        <h4>Demos</h4>
+        <ul>
+          <li><a routerLink="/blog">Blog</a></li>
+          <li><a routerLink="/demo/ecommerce">E-Commerce</a></li>
+          <li><a routerLink="/demo/portfolio">Portfolio</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-copyright">
+    <span>© 2026 VertexCMS</span>
+    <span>Built with Angular + NestJS // <span>Open Source</span></span>
+  </div>
+</footer>

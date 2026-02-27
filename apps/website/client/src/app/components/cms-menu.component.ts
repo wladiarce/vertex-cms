@@ -27,9 +27,9 @@ import { LocaleService } from '../services/locale.service';
                 [class.menu-item--button]="item.button">
               
               <a 
-                [routerLink]="item.url" 
+                [routerLink]="item.url != '' ? item.url : null" 
                 [attr.target]="item.openInNewTab ? '_blank' : null"
-                class="menu-link"
+                [class.menu-link]="!item.button"
                 [class]="item.class || ''"
                 [class.v-btn]="item.button"
                 [class.primary]="item.button"
@@ -83,6 +83,7 @@ import { LocaleService } from '../services/locale.service';
 
     .menu-item {
       position: relative;
+      cursor: pointer;
     }
 
     .menu-link {
@@ -118,6 +119,13 @@ import { LocaleService } from '../services/locale.service';
       opacity: 0.7;
     }
 
+    // TODO: HANDLE MENU RESPONSIVENESS (hide menu, add toggle to nav to open a dropdown)
+    // @media (max-width: 640px) {
+    //   .nav-text-links {
+    //     display: none;
+    //   }
+    // }
+
     /* ── Dropdown (Horizontal) ─────────────────────────────────────────── */
     .submenu {
       display: none;
@@ -132,7 +140,7 @@ import { LocaleService } from '../services/locale.service';
       border-radius: var(--radius);
       list-style: none;
       padding: 0;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .menu-item:hover .submenu {

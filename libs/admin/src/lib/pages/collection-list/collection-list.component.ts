@@ -138,13 +138,13 @@ export class CollectionListComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    if (typeof lucide !== 'undefined') {
-      try {
-        lucide.createIcons({ nameAttr: 'data-lucide' });
-      } catch (e) {
-        console.warn('Lucide icons not initialized:', e);
-      }
-    }
+    // if (typeof lucide !== 'undefined') {
+    //   try {
+    //     lucide.createIcons({ nameAttr: 'data-lucide' });
+    //   } catch (e) {
+    //     console.warn('Lucide icons not initialized:', e);
+    //   }
+    // }
   }
   
   loadData() {

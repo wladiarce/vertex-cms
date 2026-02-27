@@ -1,5 +1,6 @@
 import { Route } from '@angular/router';
 import { adminRoutes } from '@vertex-cms/admin';
+import { WebsiteLayoutComponent } from './website-layout.component';
 
 export const appRoutes: Route[] = [
   // ─── Admin Panel (CSR-only, NO website header/footer) ─────────────────────
@@ -11,8 +12,9 @@ export const appRoutes: Route[] = [
   // ─── Public Website (wrapped in header + footer layout) ───────────────────
   {
     path: '',
-    loadComponent: () =>
-      import('./website-layout.component').then(c => c.WebsiteLayoutComponent),
+    component: WebsiteLayoutComponent,
+    // loadComponent: () =>
+    //   import('./website-layout.component').then(c => c.WebsiteLayoutComponent),
     children: [
       // Landing
       {
@@ -35,7 +37,7 @@ export const appRoutes: Route[] = [
           {
             path: ':category/:slug',
             loadComponent: () =>
-              import('./pages/docs/docs-page.component').then(c => c.DocsPageComponent),
+              import('./pages/docs/doc-page/docs-page.component').then(c => c.DocsPageComponent),
           },
         ],
       },

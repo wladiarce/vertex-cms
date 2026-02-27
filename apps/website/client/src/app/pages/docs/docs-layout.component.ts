@@ -1,31 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-
-const NAV = [
-  { label: 'Getting Started', items: [
-    { label: 'Installation', link: '/docs/getting-started/installation' },
-    { label: 'First Project', link: '/docs/getting-started/first-project' },
-    { label: 'Project Structure', link: '/docs/getting-started/project-structure' },
-  ]},
-  { label: 'Core Concepts', items: [
-    { label: 'Collections', link: '/docs/core-concepts/collections' },
-    { label: 'Fields', link: '/docs/core-concepts/fields' },
-    { label: 'Blocks', link: '/docs/core-concepts/blocks' },
-    { label: 'Relationships', link: '/docs/core-concepts/relationships' },
-    { label: 'Drafts & Versions', link: '/docs/core-concepts/drafts' },
-  ]},
-  { label: 'Guides', items: [
-    { label: 'Auth & Users', link: '/docs/guides/auth' },
-    { label: 'Media & Uploads', link: '/docs/guides/media' },
-    { label: 'Plugins', link: '/docs/guides/plugins' },
-    { label: 'Webhooks', link: '/docs/guides/webhooks' },
-  ]},
-  { label: 'API Reference', items: [
-    { label: 'REST API', link: '/docs/api-reference/rest' },
-    { label: 'Config Options', link: '/docs/api-reference/config' },
-  ]},
-];
+import { CmsApiService, MenuItem } from '../../services/cms-api.service';
+import { LocaleService } from '../../services/locale.service';
 
 @Component({
   selector: 'app-docs-layout',
@@ -45,7 +22,7 @@ const NAV = [
       <aside class="docs-sidebar" [class.open]="sidebarOpen">
         <div class="docs-sidebar-inner">
           <div class="docs-logo-row">
-            <a routerLink="/" class="back-home font-mono">← vertex.dev</a>
+            <a routerLink="/" class="back-home font-mono">← vertex-cms.com</a>
             <div class="docs-title">
               <div class="docs-icon">VX</div>
               <span>Docs</span>
@@ -53,17 +30,21 @@ const NAV = [
           </div>
 
           <nav class="docs-nav">
-            <div *ngFor="let group of navGroups" class="nav-group">
-              <div class="nav-group-label font-mono">{{ group.label }}</div>
-              <ul>
-                <li *ngFor="let item of group.items">
-                  <a [routerLink]="item.link" routerLinkActive="active" class="nav-link"
-                     (click)="sidebarOpen = false">
-                    {{ item.label }}
-                  </a>
-                </li>
-              </ul>
-            </div>
+            @for(group of docsMenu(); track group.label) {
+              <div class="nav-group">
+                <div class="nav-group-label font-mono">{{ localeService.translate(group.label) }}</div>
+                <ul>
+                  @for(item of group.children; track item.label) {
+                    <li>
+                      <a [routerLink]="item.url" routerLinkActive="active" class="nav-link"
+                        (click)="sidebarOpen = false">
+                        {{ localeService.translate(item.label) }}
+                      </a>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
           </nav>
 
           <div class="docs-sidebar-footer">
@@ -96,7 +77,8 @@ const NAV = [
       background: var(--bg-surface);
       position: sticky;
       top: 60px;
-      z-index: 50;
+      height: 60px;
+      z-index: 30;
     }
     .docs-mobile-toggle {
       font-size: 0.75rem;
@@ -113,6 +95,7 @@ const NAV = [
 
     @media (max-width: 768px) {
       .docs-mobile-nav { display: flex; }
+      .docs-shell {flex-direction: column;}
     }
 
     /* Sidebar */
@@ -134,7 +117,7 @@ const NAV = [
         top: 60px;
         left: 0;
         height: calc(100vh - 60px);
-        z-index: 40;
+        z-index: 60;
         transform: translateX(-100%);
         box-shadow: none;
 
@@ -161,7 +144,22 @@ const NAV = [
     .v-badge { display: inline-flex; align-items: center; padding: 0.15rem 0.5rem; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600; border-radius: 2px; border: 1px solid var(--border-dim); background: var(--bg-subtle); color: var(--text-muted); }
   `]
 })
-export class DocsLayoutComponent {
-  navGroups = NAV;
+export class DocsLayoutComponent implements OnInit {
   sidebarOpen = false;
+
+  docsMenu = signal<MenuItem[]>([]);
+
+  private cmsFetchService = inject(CmsApiService);
+  localeService = inject(LocaleService);
+
+  ngOnInit(): void {
+    this.cmsFetchService.getMenu('docs-menu') .subscribe({
+      next: (menu) => {
+        this.docsMenu.set(menu?.items || [])
+      },
+      error: (error) => {
+        console.error(error);
+      }
+    });
+  }
 }

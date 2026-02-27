@@ -38,12 +38,12 @@ export class VertexCardComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     // Initialize Lucide icons after view init
-    if (typeof lucide !== 'undefined') {
-      try {
-        lucide.createIcons({ nameAttr: 'data-lucide' });
-      } catch (e) {
-        console.warn('Lucide icons not initialized:', e);
-      }
-    }
+  //   if (typeof lucide !== 'undefined') {
+  //     try {
+  //       lucide.createIcons({ nameAttr: 'data-lucide' });
+  //     } catch (e) {
+  //       console.warn('Lucide icons not initialized:', e);
+  //     }
+  //   }
   }
 }
