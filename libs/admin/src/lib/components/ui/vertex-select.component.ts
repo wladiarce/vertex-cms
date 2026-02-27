@@ -1,11 +1,12 @@
 import { Component, input, forwardRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { LucideAngularModule, ChevronDown } from 'lucide-angular';
 
 @Component({
   selector: 'vertex-select',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -38,7 +39,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule, FormsModu
             <ng-content></ng-content>
           }
         </select>
-        <i data-lucide="chevron-down" class="v-select-icon"></i>
+        <i-lucide [img]="ChevronDown" class="v-select-icon"></i-lucide>
       </div>
     </div>
   `,
@@ -114,6 +115,9 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule, FormsModu
   `]
 })
 export class VertexSelectComponent implements ControlValueAccessor {
+
+  readonly ChevronDown = ChevronDown;
+  
   label = input<string>('');
   placeholder = input<string>('');
   disabled = input<boolean>(false);

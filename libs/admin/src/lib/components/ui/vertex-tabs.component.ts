@@ -1,9 +1,6 @@
 import { Component, input, output, OnInit, signal, effect, AfterViewInit, inject, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-// Declare lucide globally
-declare const lucide: any;
-
 export interface VertexTab {
   id: string;
   label: string;
@@ -50,7 +47,7 @@ export interface VertexTab {
     }
   `]
 })
-export class VertexTabsComponent implements AfterViewInit {
+export class VertexTabsComponent {
   private elementRef = inject(ElementRef);
 
   tabs = input.required<VertexTab[]>();
@@ -75,17 +72,6 @@ export class VertexTabsComponent implements AfterViewInit {
         }
       }
     });
-  }
-
-  ngAfterViewInit() {
-    // Initialize Lucide icons after view init
-    // if (typeof lucide !== 'undefined') {
-    //   try {
-    //     lucide.createIcons({ nameAttr: 'data-lucide' });
-    //   } catch (e) {
-    //     console.warn('Lucide icons not initialized:', e);
-    //   }
-    // }
   }
 
   selectTab(tabId: string) {

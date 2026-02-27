@@ -2,11 +2,12 @@ import { Component, Input, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { FieldOptions } from '@vertex-cms/common';
+import { LucideAngularModule, AlertCircle } from 'lucide-angular';
 
 @Component({
   selector: 'vertex-select-field',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
   template: `
     <div class="mb-6">
       <div class="v-input-group">
@@ -93,7 +94,7 @@ import { FieldOptions } from '@vertex-cms/common';
       <!-- Validation error -->
       @if (isInvalid) {
         <p class="mt-2 font-mono text-xs text-[var(--primary)] flex items-center gap-1">
-          <i data-lucide="alert-circle" class="w-3 h-3"></i>
+          <i-lucide [img]="AlertCircle" class="w-3 h-3"></i-lucide>
           This field is required
         </p>
       }
@@ -231,6 +232,8 @@ import { FieldOptions } from '@vertex-cms/common';
   `]
 })
 export class SelectFieldComponent {
+  readonly AlertCircle = AlertCircle;
+
   @Input({ required: true }) field!: FieldOptions & { name: string };
   @Input({ required: true }) group!: FormGroup;
 

@@ -6,19 +6,25 @@ import { VertexLogoComponent } from '../ui/vertex-logo.component';
 import { AuthService } from '../../services/auth.service';
 import { VertexThemeToggleComponent } from '../ui/vertex-theme-toggle.component';
 import { VertexBreadcrumbComponent } from '../ui/vertex-breadcrumb.component';
-
-declare const lucide: any;
+import { LucideAngularModule, Layout, Image, Settings, Key, Webhook, LogOut } from 'lucide-angular';
 
 @Component({
   selector: 'vertex-admin-layout',
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, VertexLogoComponent, VertexThemeToggleComponent,
-    VertexBreadcrumbComponent
+    VertexBreadcrumbComponent, LucideAngularModule
   ],
   templateUrl: './admin-layout.component.html',
   styleUrls: ['./admin-layout.component.scss']
 })
-export class AdminLayoutComponent implements AfterViewInit {
+export class AdminLayoutComponent {
+  readonly Layout = Layout;
+  readonly Image = Image;
+  readonly Settings = Settings;
+  readonly Key = Key;
+  readonly Webhook = Webhook;
+  readonly LogOut = LogOut;
+
   cms = inject(VertexClientService);
   auth = inject(AuthService);
 
@@ -45,17 +51,6 @@ export class AdminLayoutComponent implements AfterViewInit {
       .toUpperCase()
       .slice(0, 2);
   });
-
-  ngAfterViewInit() {
-    // Initialize Lucide icons
-    // if (typeof lucide !== 'undefined') {
-    //   try {
-    //     lucide.createIcons({ nameAttr: 'data-lucide' });
-    //   } catch (e) {
-    //     console.warn('Lucide icons not initialized:', e);
-    //   }
-    // }
-  }
 
   logout() {
     this.auth.logout();

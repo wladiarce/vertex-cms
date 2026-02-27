@@ -7,8 +7,7 @@ import { VertexCardComponent } from '../../components/ui/vertex-card.component';
 import { VertexLogoComponent } from '../../components/ui/vertex-logo.component';
 import { VertexInputComponent } from '../../components/ui/vertex-input.component';
 import { VertexButtonComponent } from '../../components/ui/vertex-button.component';
-
-declare const lucide: any;
+import { LucideAngularModule, AlertCircle, CheckCircle } from 'lucide-angular';
 
 @Component({
   selector: 'vertex-reset-password',
@@ -20,7 +19,8 @@ declare const lucide: any;
     VertexCardComponent,
     VertexLogoComponent,
     VertexInputComponent,
-    VertexButtonComponent
+    VertexButtonComponent,
+    LucideAngularModule
   ],
   template: `
     <div class="min-h-screen bg-[var(--bg-app)] bg-grid-pattern flex items-center justify-center p-4">
@@ -67,7 +67,7 @@ declare const lucide: any;
           } @else {
             <div class="text-center space-y-4">
               <div class="p-3 bg-green-500/10 border border-green-500/20 rounded flex items-center justify-center gap-2 text-sm text-green-500 mb-6">
-                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <i-lucide [img]="CheckCircle" class="w-4 h-4"></i-lucide>
                 <span class="font-mono text-xs">Password reset successfully!</span>
               </div>
               
@@ -84,7 +84,7 @@ declare const lucide: any;
 
           @if (error()) {
             <div class="mt-6 p-3 bg-red-500/10 border border-red-500/20 rounded flex items-center gap-2 text-sm text-[var(--primary)]">
-              <i data-lucide="alert-circle" class="w-4 h-4"></i>
+              <i-lucide [img]="AlertCircle" class="w-4 h-4"></i-lucide>
               <span class="font-mono text-xs">{{ error() }}</span>
             </div>
           }
@@ -96,7 +96,10 @@ declare const lucide: any;
     :host { display: block; }
   `]
 })
-export class ResetPasswordComponent implements OnInit, AfterViewInit {
+export class ResetPasswordComponent implements OnInit {
+  readonly AlertCircle = AlertCircle;
+  readonly CheckCircle = CheckCircle;
+
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -119,20 +122,6 @@ export class ResetPasswordComponent implements OnInit, AfterViewInit {
     }
   }
 
-  ngAfterViewInit() {
-    // this.refreshIcons();
-  }
-
-  refreshIcons() {
-    // if (typeof lucide !== 'undefined') {
-    //   try {
-    //     lucide.createIcons({ nameAttr: 'data-lucide' });
-    //   } catch (e) {
-    //     console.warn('Lucide icons not initialized:', e);
-    //   }
-    // }
-  }
-
   passwordMatchValidator(g: any) {
     return g.get('password').value === g.get('confirmPassword').value
        ? null : { mismatch: true };
@@ -148,7 +137,6 @@ export class ResetPasswordComponent implements OnInit, AfterViewInit {
       next: () => {
         this.loading.set(false);
         this.success.set(true);
-        setTimeout(() => this.refreshIcons(), 0);
       },
       error: (err) => {
         this.loading.set(false);

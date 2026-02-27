@@ -8,8 +8,7 @@ import { VertexButtonComponent } from '../../components/ui/vertex-button.compone
 import { VertexBadgeComponent } from '../../components/ui/vertex-badge.component';
 import { VertexCardComponent } from '../../components/ui/vertex-card.component';
 import { VertexSelectComponent } from '../../components/ui/vertex-select.component';
-
-declare const lucide: any;
+import { Plus } from 'lucide-angular';
 
 @Component({
   selector: 'vertex-collection-list',
@@ -32,7 +31,7 @@ declare const lucide: any;
         @if (!cms.readOnly()) {
           <vertex-button 
             [variant]="'primary'" 
-            [icon]="'plus'" 
+            [icon]="Plus" 
             [routerLink]="['create']">
             New {{ collection()?.singularName }}
           </vertex-button>
@@ -106,9 +105,11 @@ declare const lucide: any;
     </div>
   `
 })
-export class CollectionListComponent implements AfterViewInit {
+export class CollectionListComponent {
   private route = inject(ActivatedRoute);
   protected cms = inject(VertexClientService);
+
+  readonly Plus = Plus;
   
   slug = signal('');
   documents = signal<any[]>([]);
@@ -135,16 +136,6 @@ export class CollectionListComponent implements AfterViewInit {
         this.loadData();
       }
     });
-  }
-
-  ngAfterViewInit() {
-    // if (typeof lucide !== 'undefined') {
-    //   try {
-    //     lucide.createIcons({ nameAttr: 'data-lucide' });
-    //   } catch (e) {
-    //     console.warn('Lucide icons not initialized:', e);
-    //   }
-    // }
   }
   
   loadData() {

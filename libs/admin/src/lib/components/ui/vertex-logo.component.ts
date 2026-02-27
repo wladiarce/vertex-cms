@@ -1,16 +1,17 @@
 import { Component, input, AfterViewInit, inject, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { LucideAngularModule, BoxIcon } from 'lucide-angular';
 
 declare const lucide: any;
 
 @Component({
   selector: 'vertex-logo',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   template: `
     <div [class]="logoClasses()">
       <div [class]="iconBoxClasses()">
-        <i data-lucide="box" class="text-white"></i>
+        <i-lucide class="text-white" [img]="BoxIcon"></i-lucide>
       </div>
       <div [class]="titleClasses()">
         Vertex <span class="text-[var(--primary)]">CMS</span>
@@ -74,8 +75,9 @@ declare const lucide: any;
     }
   `]
 })
-export class VertexLogoComponent implements AfterViewInit {
-  private elementRef = inject(ElementRef);
+export class VertexLogoComponent {
+  readonly BoxIcon = BoxIcon;
+  
   
   size = input<'sm' | 'md' | 'lg'>('md');
 
@@ -89,15 +91,5 @@ export class VertexLogoComponent implements AfterViewInit {
 
   titleClasses() {
     return `logo-title ${this.size()}`;
-  }
-
-  ngAfterViewInit() {
-    if (typeof lucide !== 'undefined') {
-      try {
-        lucide.createIcons({ nameAttr: 'data-lucide' });
-      } catch (e) {
-        console.warn('Lucide icons not initialized:', e);
-      }
-    }
   }
 }

@@ -4,11 +4,12 @@ import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder, Validators } fr
 import { FieldOptions, BlockMetadata } from '@vertex-cms/common';
 import { FieldRendererComponent } from '../form/field-renderer.component'; // Recursive import!
 import { LocaleService } from '../../services/locale.service';
+import { LucideAngularModule, GripVertical, ChevronUp, ChevronDown, Plus } from 'lucide-angular';
 
 @Component({
   selector: 'vertex-blocks-field',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FieldRendererComponent],
+  imports: [CommonModule, ReactiveFormsModule, FieldRendererComponent, LucideAngularModule],
   template: `
     <div class="mb-6">
       <div class="v-input-group mb-4">
@@ -28,7 +29,7 @@ import { LocaleService } from '../../services/locale.service';
               <!-- Block Header -->
               <div class="v-block-header" (click)="toggleBlock(i)">
                 <div class="flex items-center gap-3">
-                  <i data-lucide="grip-vertical" class="w-4 h-4 text-[var(--text-muted)]"></i>
+                  <i-lucide [img]="GripVertical" class="w-4 h-4 text-[var(--text-muted)]"></i-lucide>
                   <span class="font-bold text-sm uppercase">{{ getBlockLabel(i) }}</span>
                   <span class="font-mono text-[10px] text-[var(--text-muted)] bg-[var(--border-dim)] px-1.5 py-0.5 rounded-sm">
                     #{{ i }}
@@ -52,8 +53,7 @@ import { LocaleService } from '../../services/locale.service';
                           title="Remove">
                     Remove
                   </button>
-                  <i [attr.data-lucide]="isBlockExpanded(i) ? 'chevron-up' : 'chevron-down'" 
-                     class="w-4 h-4 text-[var(--text-muted)]"></i>
+                  <i-lucide [img]="isBlockExpanded(i) ? ChevronUp : ChevronDown" class="w-4 h-4 text-[var(--text-muted)]"></i-lucide>
                 </div>
               </div>
 
@@ -81,7 +81,7 @@ import { LocaleService } from '../../services/locale.service';
             <button type="button" 
                     (click)="addBlock(block)"
                     class="v-btn text-xs">
-              <i data-lucide="plus" class="w-3 h-3"></i>
+              <i-lucide [img]="Plus" class="w-3 h-3"></i-lucide>
               {{ block.label }}
             </button>
           }
@@ -91,6 +91,11 @@ import { LocaleService } from '../../services/locale.service';
   `
 })
 export class BlocksFieldComponent implements OnInit {
+  readonly GripVertical = GripVertical;
+  readonly ChevronUp = ChevronUp;
+  readonly ChevronDown = ChevronDown;
+  readonly Plus = Plus;
+  
   @Input({ required: true }) field!: FieldOptions & { name: string; blocks?: BlockMetadata[] };
   @Input({ required: true }) group!: FormGroup;
 

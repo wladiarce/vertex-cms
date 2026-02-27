@@ -10,6 +10,7 @@ import { LocalizedFieldComponent } from '../fields/localized-field.component';
 import { RelationshipFieldComponent } from '../fields/relationship-field.component';
 import { SelectFieldComponent } from '../fields/select-field.component';
 import { BooleanFieldComponent } from '../fields/boolean-field.component';
+import { LucideAngularModule, AlertCircle } from 'lucide-angular';
 
 @Component({
   selector: 'vertex-field-renderer',
@@ -24,7 +25,8 @@ import { BooleanFieldComponent } from '../fields/boolean-field.component';
     LocalizedFieldComponent,
     RelationshipFieldComponent,
     SelectFieldComponent,
-    BooleanFieldComponent
+    BooleanFieldComponent,
+    LucideAngularModule
   ],
   template: `
     @switch (field.type) {
@@ -56,7 +58,7 @@ import { BooleanFieldComponent } from '../fields/boolean-field.component';
           <vertex-upload-field [field]="field" [group]="group" />
         } @else {
           <div class="v-card border-dashed p-4 flex items-center gap-3 text-[var(--text-muted)] bg-[var(--bg-subtle)]">
-            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+            <i-lucide [img]="AlertCircle" class="w-5 h-5"></i-lucide>
             <div>
               <p class="text-sm font-medium">Upload feature is disabled</p>
               <p class="text-xs">No storage plugin is registered. Please contact your administrator.</p>
@@ -89,7 +91,10 @@ import { BooleanFieldComponent } from '../fields/boolean-field.component';
   `
 })
 export class FieldRendererComponent implements OnInit {
+  readonly AlertCircle = AlertCircle;
+
   cms = inject(VertexClientService);
+
   @Input({ required: true }) field!: FieldOptions & { name: string; blocks?: BlockMetadata[] | undefined; repeaterFields?: RepeaterMetadata | undefined; };
   @Input({ required: true }) group!: FormGroup;
 

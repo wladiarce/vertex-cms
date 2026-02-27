@@ -16,8 +16,9 @@
   top: 0;
   z-index: 100;
   background: var(--bg-surface);
-  border-bottom: var(--border-width) solid var(--border);
-  box-shadow: 0 2px 0 var(--border);
+  border-bottom: solid 1px var(--border);
+  // border-bottom: var(--border-width) solid var(--border);
+  // box-shadow: 0 2px 0 var(--border);
 }
 
 .site-header-inner {

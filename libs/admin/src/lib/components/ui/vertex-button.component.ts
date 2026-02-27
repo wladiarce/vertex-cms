@@ -1,10 +1,11 @@
 import { booleanAttribute, Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { LucideAngularComponent, LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'vertex-button',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   template: `
     <button
       [type]="type()"
@@ -12,7 +13,7 @@ import { CommonModule } from '@angular/common';
       [class]="buttonClasses()"
     >
       @if (icon()) {
-        <i [attr.data-lucide]="icon()"></i>
+        <i-lucide [img]="icon()" class="w-4 h-4"></i-lucide>
       }
       <ng-content></ng-content>
     </button>
@@ -27,7 +28,7 @@ export class VertexButtonComponent {
   variant = input<'default' | 'primary' | 'danger'>('default');
   size = input<'sm' | 'md' | 'lg'>('md');
   disabled = input<boolean>(false);
-  icon = input<string>('');
+  icon = input<any>();
   type = input<'button' | 'submit' | 'reset'>('button');
   fluid = input(false, {transform: booleanAttribute});
 

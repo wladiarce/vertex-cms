@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { FieldOptions, Upload } from '@vertex-cms/common';
 import { VertexClientService } from '../../services/vertex-client.service';
 import { VertexMediaPickerComponent } from '../ui/vertex-media-picker.component';
+import { LucideAngularModule, UploadCloud, Image, Loader } from 'lucide-angular';
 
 @Component({
   selector: 'vertex-upload-field',
@@ -11,7 +12,8 @@ import { VertexMediaPickerComponent } from '../ui/vertex-media-picker.component'
   imports: [
     CommonModule, 
     ReactiveFormsModule, 
-    VertexMediaPickerComponent
+    VertexMediaPickerComponent,
+    LucideAngularModule,
   ],
   template: `
     <div [formGroup]="group" class="mb-6">
@@ -41,7 +43,7 @@ import { VertexMediaPickerComponent } from '../ui/vertex-media-picker.component'
           <div class="flex items-center justify-center">
             <label class="flex flex-col items-center justify-center p-6 h-32 border border-[var(--border)] bg-[var(--bg-surface)] cursor-pointer shadow-[var(--shadow-depth)] transition-all hover:shadow-[var(--shadow-hover)] hover:bg-[var(--bg-subtle)]">
               <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                <i data-lucide="upload-cloud" class="w-8 h-8 mb-4 text-[var(--text-muted)]"></i>
+                <i-lucide [img]="UploadCloud" class="w-8 h-8 mb-4 text-[var(--text-muted)]"></i-lucide>
                 <p class="mb-2 font-mono text-xs text-[var(--text-muted)] uppercase">
                   <span class="font-semibold">Click to upload</span>
                 </p>
@@ -57,7 +59,7 @@ import { VertexMediaPickerComponent } from '../ui/vertex-media-picker.component'
               (click)="openMediaPicker()"
               class="flex flex-col items-center justify-center px-6 border border-[var(--border)] bg-[var(--bg-surface)] cursor-pointer shadow-[var(--shadow-depth)] transition-all hover:shadow-[var(--shadow-hover)] hover:bg-[var(--bg-subtle)]"
             >
-              <i data-lucide="image" class="w-8 h-8 mb-4 text-[var(--text-muted)]"></i>
+              <i-lucide [img]="Image" class="w-8 h-8 mb-4 text-[var(--text-muted)]"></i-lucide>
               <p class="mb-2 font-mono text-xs text-[var(--text-muted)] uppercase">
                 <span class="font-semibold">Choose from Library</span>
               </p>
@@ -68,7 +70,7 @@ import { VertexMediaPickerComponent } from '../ui/vertex-media-picker.component'
 
       @if (uploading()) {
         <p class="font-mono text-xs text-[var(--primary)] mt-2 flex items-center gap-1">
-          <i data-lucide="loader" class="w-3 h-3 animate-spin"></i>
+          <i-lucide [img]="Loader" class="w-3 h-3 animate-spin"></i-lucide>
           Uploading...
         </p>
       }
@@ -86,6 +88,10 @@ import { VertexMediaPickerComponent } from '../ui/vertex-media-picker.component'
   `
 })
 export class UploadFieldComponent {
+  readonly UploadCloud = UploadCloud;
+  readonly Image = Image;
+  readonly Loader = Loader;
+
   @Input({ required: true }) field!: FieldOptions & { name: string };
   @Input({ required: true }) group!: FormGroup;
 

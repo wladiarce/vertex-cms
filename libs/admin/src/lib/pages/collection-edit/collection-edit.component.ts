@@ -9,11 +9,16 @@ import { LocaleService } from '../../services/locale.service';
 import { VertexCardComponent } from '../../components/ui/vertex-card.component';
 import { VertexButtonComponent } from '../../components/ui/vertex-button.component';
 import { VertexBadgeComponent } from '../../components/ui/vertex-badge.component';
+import { LucideAngularModule, X, History, Save, CheckCircle, RotateCcw } from 'lucide-angular';
 
 @Component({
   selector: 'vertex-collection-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, FieldRendererComponent, VertexCardComponent, VertexButtonComponent, VertexBadgeComponent],
+  imports: [
+    CommonModule, ReactiveFormsModule, RouterLink, 
+    FieldRendererComponent, VertexCardComponent, VertexButtonComponent, VertexBadgeComponent,
+    LucideAngularModule
+  ],
   template: `
     <div class="max-w-5xl mx-auto">
       <vertex-card>
@@ -44,32 +49,32 @@ import { VertexBadgeComponent } from '../../components/ui/vertex-badge.component
                 <vertex-badge [status]="'archived'">👁 You are viewing this in read-only demo mode.</vertex-badge>
               }
               <a [routerLink]="['../']">
-                <vertex-button [icon]="'x'">{{ cms.readOnly() ? 'Back' : 'Cancel' }}</vertex-button>
+                <vertex-button [icon]="X">{{ cms.readOnly() ? 'Back' : 'Cancel' }}</vertex-button>
               </a>
               
               @if (!cms.readOnly()) {
                 @if (draftsEnabled() && !isNew()) {
-                  <vertex-button [icon]="'history'" (click)="toggleVersionHistory()">
+                  <vertex-button [icon]="History" (click)="toggleVersionHistory()">
                     History
                   </vertex-button>
                 }
                 @if (draftsEnabled()) {
                   <vertex-button (click)="saveAsDraft()" 
                                  [disabled]="form.invalid || loading()"
-                                 [icon]="'save'">
+                                 [icon]="Save">
                     {{ loading() && saveAction() === 'draft' ? 'Saving...' : 'Save as Draft' }}
                   </vertex-button>
                   <vertex-button (click)="publishDocument()" 
                                  [disabled]="form.invalid || loading()"
                                  [variant]="'primary'"
-                                 [icon]="'check-circle'">
+                                 [icon]="CheckCircle">
                     {{ loading() && saveAction() === 'publish' ? 'Publishing...' : 'Publish' }}
                   </vertex-button>
                 } @else {
                   <vertex-button (click)="save()" 
                                  [disabled]="form.invalid || loading()"
                                  [variant]="'primary'"
-                                 [icon]="'save'">
+                                 [icon]="Save">
                     {{ loading() ? 'Saving...' : 'Save' }}
                   </vertex-button>
                 }
@@ -94,7 +99,7 @@ import { VertexBadgeComponent } from '../../components/ui/vertex-badge.component
         <div class="p-4 border-b-2 border-[var(--border)] bg-[var(--bg-subtle)] flex justify-between items-center">
           <h2 class="font-bold text-sm uppercase tracking-wide">Version History</h2>
           <button (click)="toggleVersionHistory()" class="text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
-            <i data-lucide="x" class="w-4 h-4"></i>
+            <i-lucide [img]="X" class="w-4 h-4"></i-lucide>
           </button>
         </div>
 
@@ -121,7 +126,7 @@ import { VertexBadgeComponent } from '../../components/ui/vertex-badge.component
                     (click)="restoreVersion(version.id)"
                     [size]="'sm'"
                     [variant]="'primary'"
-                    [icon]="'rotate-ccw'">
+                    [icon]="RotateCcw">
                     Restore
                   </vertex-button>
                 </div>
@@ -137,6 +142,12 @@ import { VertexBadgeComponent } from '../../components/ui/vertex-badge.component
   `
 })
 export class CollectionEditComponent {
+  readonly X = X;
+  readonly History = History;
+  readonly Save = Save;
+  readonly CheckCircle = CheckCircle;
+  readonly RotateCcw = RotateCcw;
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);

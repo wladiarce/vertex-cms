@@ -1,4 +1,4 @@
-import { Component, inject, signal, AfterViewInit } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
@@ -7,8 +7,7 @@ import { VertexCardComponent } from '../../components/ui/vertex-card.component';
 import { VertexLogoComponent } from '../../components/ui/vertex-logo.component';
 import { VertexInputComponent } from '../../components/ui/vertex-input.component';
 import { VertexButtonComponent } from '../../components/ui/vertex-button.component';
-
-declare const lucide: any;
+import { LucideAngularModule, AlertCircle, CheckCircle } from 'lucide-angular';
 
 @Component({
   selector: 'vertex-login',
@@ -19,12 +18,16 @@ declare const lucide: any;
     VertexCardComponent,
     VertexLogoComponent,
     VertexInputComponent,
-    VertexButtonComponent
+    VertexButtonComponent,
+    LucideAngularModule
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements AfterViewInit {
+export class LoginComponent {
+  readonly AlertCircle = AlertCircle;
+  readonly CheckCircle = CheckCircle;
+
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   public vertex = inject(VertexClientService);
@@ -44,25 +47,10 @@ export class LoginComponent implements AfterViewInit {
     email: ['', [Validators.required, Validators.email]]
   });
 
-  ngAfterViewInit() {
-    this.refreshIcons();
-  }
-
-  refreshIcons() {
-    // if (typeof lucide !== 'undefined') {
-    //   try {
-    //     lucide.createIcons({ nameAttr: 'data-lucide' });
-    //   } catch (e) {
-    //     console.warn('Lucide icons not initialized:', e);
-    //   }
-    // }
-  }
-
   toggleForgot() {
     this.showForgot.set(!this.showForgot());
     this.error.set('');
     this.successMessage.set('');
-    setTimeout(() => this.refreshIcons(), 0);
   }
 
   submit() {
